@@ -1,0 +1,23 @@
+{
+  "name": "algorithmvisualizer",
+  "version": "1.0.0",
+  "description": "React Application for visualizing algorithms.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacquelineadean/AlgorithmVisualizer.git"
+  },
+  "author": "Jacqueline Dean",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacquelineadean/AlgorithmVisualizer/issues"
+  },
+  "homepage": "https://github.com/jacquelineadean/AlgorithmVisualizer#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
