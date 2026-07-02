@@ -10,16 +10,15 @@ export function nodeClassName({ isStart, isFinish, isWall }) {
     return 'node';
 }
 
-function Node({ row, col, isStart, isFinish, isWall, onMouseDown, onMouseEnter }) {
+// Pointer handling is delegated to the grid container (see Visualizer), so a
+// cell only renders its identity and state.
+function Node({ row, col, isStart, isFinish, isWall }) {
     return (
         <div
             id={nodeElementId(row, col)}
+            data-row={row}
+            data-col={col}
             className={nodeClassName({ isStart, isFinish, isWall })}
-            onMouseDown={(event) => {
-                event.preventDefault();
-                onMouseDown(row, col);
-            }}
-            onMouseEnter={() => onMouseEnter(row, col)}
         />
     );
 }

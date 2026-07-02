@@ -1,26 +1,123 @@
-.visualizer {
-    padding: 24px 0;
-}
-
 .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
     align-items: center;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.algorithm-description {
-    color: #555;
-    margin: 0 0 16px;
+.control-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.control-label {
+    color: var(--term-dim);
+}
+
+.controls select {
+    background: var(--term-bg);
+    color: var(--term-text);
+    border: 1px solid var(--term-border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 0.85rem;
+}
+
+.controls button {
+    background: transparent;
+    color: var(--term-text);
+    border: 1px solid var(--term-border);
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.controls button:hover:not(:disabled),
+.controls button:focus-visible {
+    border-color: var(--term-green);
+    color: var(--term-green);
+}
+
+.controls .btn-run {
+    color: var(--term-green);
+    border-color: var(--term-green);
+}
+
+.controls .btn-run:hover:not(:disabled) {
+    background: var(--term-green);
+    color: var(--term-bg);
+}
+
+.controls button:disabled,
+.controls select:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.status-line {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    color: var(--term-dim);
+}
+
+.status-marker {
+    color: var(--term-amber);
+}
+
+.grid-area {
+    display: flex;
+    justify-content: center;
 }
 
 .grid {
     display: inline-block;
-    margin-top: 16px;
+    border: 1px solid var(--term-border);
+    /* let pointer drags draw walls instead of scrolling the page on touch */
+    touch-action: none;
 }
 
 .grid-row {
     display: flex;
+}
+
+.legend {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: var(--term-dim);
+    text-align: center;
+}
+
+.legend-start {
+    color: var(--term-green);
+}
+
+.legend-finish {
+    color: var(--term-red);
+}
+
+.legend-wall {
+    color: var(--wall-fill);
+}
+
+.legend-visited {
+    color: var(--term-cyan);
+}
+
+.legend-path {
+    color: var(--term-amber);
+}
+
+@media (max-width: 600px) {
+    .controls {
+        gap: 8px;
+    }
+
+    .controls button,
+    .controls select {
+        padding: 8px 10px;
+    }
 }

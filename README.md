@@ -1,11 +1,17 @@
 # Algorithm Visualizer
 
-An interactive, grid-based visualizer for pathfinding algorithms, built with
-[React](https://react.dev/) and [Vite](https://vitejs.dev/).
+An interactive, terminal-styled, grid-based visualizer for pathfinding
+algorithms, built with [React](https://react.dev/) and
+[Vite](https://vitejs.dev/).
 
-Draw walls by clicking and dragging on the grid, pick an algorithm, and hit
-**Visualize** to watch the search sweep the grid and trace the shortest path
-from the start node (green) to the finish node (red).
+Draw walls by clicking/tapping and dragging on the grid, pick an algorithm,
+and hit **./run** to watch the search sweep the grid and trace the shortest
+path from the start node (▸) to the target (◎).
+
+The grid sizes itself to the device: it fills a desktop monitor, fits a phone
+without overflowing, and reflows on resize/rotation (walls that remain in
+bounds are preserved). Input uses pointer events, so wall drawing works with
+both mouse and touch.
 
 ## Getting Started
 
