@@ -1,68 +1,74 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Algorithm Visualizer
 
-## Available Scripts
+An interactive, grid-based visualizer for pathfinding algorithms, built with
+[React](https://react.dev/) and [Vite](https://vitejs.dev/).
 
-In the project directory, you can run:
+Draw walls by clicking and dragging on the grid, pick an algorithm, and hit
+**Visualize** to watch the search sweep the grid and trace the shortest path
+from the start node (green) to the finish node (red).
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+npm install
+npm start          # dev server at http://localhost:5173
+```
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+### Scripts
 
-### `npm test`
+| Script            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `npm start` / `npm run dev` | Run the Vite dev server            |
+| `npm run build`   | Production build into `dist/`                |
+| `npm run preview` | Serve the production build locally           |
+| `npm test`        | Run the test suite (Vitest) in watch mode    |
+| `npm run test:run`| Run the test suite once                      |
+| `npm run deploy`  | Build and publish `dist/` to GitHub Pages    |
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Architecture
 
-### `npm run build`
+The app is split into a reusable visualization engine and pluggable
+algorithms, so new algorithms can be added without touching the UI.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+src/
+├── engine/            # Reusable, UI-agnostic engine
+│   ├── grid.js        # Grid model: creation, walls, neighbors, path reconstruction
+│   ├── run.js         # Runs an algorithm against a snapshot of the grid
+│   └── animator.js    # Schedules/cancels the two-phase animation
+├── algorithms/        # Pluggable algorithms
+│   ├── index.js       # Registry: registerAlgorithm / getAlgorithm / listAlgorithms
+│   └── dijkstra.js    # Dijkstra's algorithm
+└── components/
+    ├── Visualizer/    # Controls + grid, wired to the engine
+    └── Node/          # A single memoized grid cell
+```
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+### Adding an algorithm
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Create `src/algorithms/<name>.js` exporting an object with the algorithm
+   interface:
 
-### `npm run eject`
+   ```js
+   export default {
+       id: 'astar',
+       name: 'A* Search',
+       description: 'Optional one-liner shown in the UI.',
+       // May mutate the given grid freely (it is a working copy).
+       // Return the visited nodes in visit order, and link each reached
+       // node to its predecessor via node.previousNode so the engine can
+       // reconstruct the shortest path.
+       run(grid, startNode, finishNode) {
+           /* ... */
+       },
+   };
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+2. Register it in `src/algorithms/index.js`:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   ```js
+   import astar from './astar';
+   registerAlgorithm(astar);
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+It will automatically appear in the algorithm dropdown.
