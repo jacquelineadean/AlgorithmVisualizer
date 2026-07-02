@@ -1,0 +1,26 @@
+.visualizer {
+    padding: 24px 0;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.algorithm-description {
+    color: #555;
+    margin: 0 0 16px;
+}
+
+.grid {
+    display: inline-block;
+    margin-top: 16px;
+}
+
+.grid-row {
+    display: flex;
+}

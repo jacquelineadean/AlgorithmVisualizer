@@ -1,36 +1,27 @@
-import React, {Component} from 'react';
+import { memo } from 'react';
+import { nodeElementId } from '../../engine/grid';
 
 import './Node.css';
 
-export default class Node extends Component {
-    // constructor(props) {
-    //     super(props);
-    //     this.state = {};
-    // }
-
-    render() {
-        const {col, isFinish, isStart, isWall, onMouseDown, onMouseEnter, onMouseUp, row} = this.props;
-        const extraClassName = isFinish
-            ? 'node-finish'
-            : isStart
-            ? 'node-start'
-            : isWall
-            ? 'node-wall'
-            : '';
-
-        return (
-            <div 
-                id={`node-${row}-${col}`}
-                className={`node ${extraClassName}`} 
-                onMouseDown={() => onMouseDown(row, col)}
-                onMouseEnter={() => onMouseEnter(row, col)}
-                onMouseUp={() => onMouseUp()}
-            />
-        )
-    }
+export function nodeClassName({ isStart, isFinish, isWall }) {
+    if (isStart) return 'node node-start';
+    if (isFinish) return 'node node-finish';
+    if (isWall) return 'node node-wall';
+    return 'node';
 }
 
-export const DEFAULT_NODE = {
-    row: 0,
-    col: 0,
-};
+function Node({ row, col, isStart, isFinish, isWall, onMouseDown, onMouseEnter }) {
+    return (
+        <div
+            id={nodeElementId(row, col)}
+            className={nodeClassName({ isStart, isFinish, isWall })}
+            onMouseDown={(event) => {
+                event.preventDefault();
+                onMouseDown(row, col);
+            }}
+            onMouseEnter={() => onMouseEnter(row, col)}
+        />
+    );
+}
+
+export default memo(Node);
