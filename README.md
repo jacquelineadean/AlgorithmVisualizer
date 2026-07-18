@@ -1,11 +1,20 @@
 # Algorithm Visualizer
 
-An interactive, grid-based visualizer for pathfinding algorithms, built with
+Interactive, **evidence-cited** visualizations of famous algorithms — built with
 [React](https://react.dev/) and [Vite](https://vitejs.dev/).
 
-Draw walls by clicking and dragging on the grid, pick an algorithm, and hit
-**Visualize** to watch the search sweep the grid and trace the shortest path
-from the start node (green) to the finish node (red).
+Pick an algorithm, feed it your own inputs, and step through a rendering in which
+**every step cites its source** — the original paper, the underlying theorem, or the
+modern standard — with labeled provenance whenever the visualization simplifies for
+teaching. See [ROADMAP.md](ROADMAP.md) for the multi-phase plan.
+
+**Live now**
+
+- **RSA Encryption** (`#/visualizer/rsa`) — key generation, encryption, and decryption
+  on your own message and primes, with square-and-multiply and extended-Euclid worked
+  in full, cited to Rivest–Shamir–Adleman (1978), Euler (1763), RFC 8017, and more.
+- **Dijkstra's Algorithm** (`#/visualizer/pathfinding`) — draw walls on a grid and watch
+  the search sweep to the shortest path.
 
 ## Getting Started
 
@@ -27,48 +36,36 @@ npm start          # dev server at http://localhost:5173
 
 ## Architecture
 
-The app is split into a reusable visualization engine and pluggable
-algorithms, so new algorithms can be added without touching the UI.
-
 ```
 src/
-├── engine/            # Reusable, UI-agnostic engine
-│   ├── grid.js        # Grid model: creation, walls, neighbors, path reconstruction
-│   ├── run.js         # Runs an algorithm against a snapshot of the grid
-│   └── animator.js    # Schedules/cancels the two-phase animation
-├── algorithms/        # Pluggable algorithms
-│   ├── index.js       # Registry: registerAlgorithm / getAlgorithm / listAlgorithms
-│   └── dijkstra.js    # Dijkstra's algorithm
-└── components/
-    ├── Visualizer/    # Controls + grid, wired to the engine
-    └── Node/          # A single memoized grid cell
+├── styles/theme.css       # Design tokens (paper/ink palette, type, provenance colors)
+├── routes.jsx             # Route table (hash routing for GitHub Pages)
+├── App.jsx                # Layout shell: floating nav + outlet + footer
+├── site/                  # Home, Blog, FloatingNav, Footer
+├── catalog/               # Site-level registry of visualizations by domain
+├── pages/                 # One page per route (catalog index, pathfinding, RSA)
+├── visualizations/
+│   └── rsa/
+│       ├── math.js        # Pure BigInt number theory (unit tested)
+│       ├── sources.js     # Citation database + provenance classes
+│       ├── trace.js       # buildRsaTrace(inputs) → steps with citations
+│       ├── RsaVisualizer  # Step player, protocol lane diagram, references
+│       └── *.test.js      # Math tests + the evidence gate
+├── engine/                # Reusable grid engine (grid model, runner, animator)
+├── algorithms/            # Pluggable grid algorithms (Dijkstra; registry)
+└── components/            # Grid visualizer + node cell
 ```
 
-### Adding an algorithm
+### The evidence gate
 
-1. Create `src/algorithms/<name>.js` exporting an object with the algorithm
-   interface:
+Adapted from evidence-based reconstruction projects: a visualization's trace steps must
+each resolve at least one citation in its sources file, or the test suite fails
+(`src/visualizations/rsa/trace.test.js`). Provenance classes — `paper`, `theorem`,
+`modern`, `pedagogical` — are rendered in the UI, not just stored.
 
-   ```js
-   export default {
-       id: 'astar',
-       name: 'A* Search',
-       description: 'Optional one-liner shown in the UI.',
-       // May mutate the given grid freely (it is a working copy).
-       // Return the visited nodes in visit order, and link each reached
-       // node to its predecessor via node.previousNode so the engine can
-       // reconstruct the shortest path.
-       run(grid, startNode, finishNode) {
-           /* ... */
-       },
-   };
-   ```
+### Adding a grid algorithm
 
-2. Register it in `src/algorithms/index.js`:
-
-   ```js
-   import astar from './astar';
-   registerAlgorithm(astar);
-   ```
-
-It will automatically appear in the algorithm dropdown.
+Create `src/algorithms/<name>.js` exporting `{ id, name, description, run(grid, start,
+finish) }` and register it in `src/algorithms/index.js`; it appears in the pathfinding
+dropdown automatically. (Phase 2 unifies this registry with the site catalog — see the
+roadmap.)

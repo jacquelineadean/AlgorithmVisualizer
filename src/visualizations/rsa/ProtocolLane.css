@@ -1,0 +1,131 @@
+.protocol-lane {
+    width: 100%;
+    display: block;
+    font-family: var(--font-mono);
+}
+
+.channel-line {
+    stroke: var(--ink-faint);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 5;
+}
+
+.lane-caption {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    fill: var(--ink-faint);
+    font-family: var(--font-sans);
+}
+
+/* Panels */
+
+.panel-box {
+    fill: var(--paper-raised);
+    stroke: var(--hairline);
+    stroke-width: 1.2;
+    transition: stroke 0.3s ease;
+}
+
+.lane-panel.current .panel-box {
+    stroke: var(--ink);
+}
+
+.panel-name {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    fill: var(--ink);
+}
+
+.panel-role {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    fill: var(--ink-faint);
+}
+
+.panel-row {
+    font-size: 11px;
+    fill: var(--ink-soft);
+}
+
+.panel-row.secret {
+    fill: var(--vermilion);
+}
+
+/* Eve */
+
+.eve ellipse {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.2;
+}
+
+.eve circle {
+    fill: var(--ink-soft);
+}
+
+.eve-name {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    fill: var(--ink-soft);
+}
+
+.eve-sees {
+    font-size: 10px;
+    fill: var(--ink-faint);
+}
+
+.eve-tap {
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+}
+
+/* Tokens */
+
+.token {
+    transition: transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+
+.token text {
+    font-size: 10.5px;
+}
+
+.pub-token rect {
+    fill: var(--cobalt);
+}
+
+.pub-token text {
+    fill: #ffffff;
+}
+
+.priv-token rect {
+    fill: var(--vermilion-soft);
+    stroke: var(--vermilion);
+    stroke-width: 1;
+}
+
+.priv-token text {
+    fill: var(--vermilion);
+    font-size: 10px;
+}
+
+.msg-token rect {
+    transition: fill 0.4s ease;
+}
+
+.msg-token.plain rect {
+    fill: var(--green);
+}
+
+.msg-token.cipher rect {
+    fill: var(--ink);
+}
+
+.msg-token text {
+    fill: #ffffff;
+}
