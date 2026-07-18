@@ -1,9 +1,11 @@
-.App {
-    text-align: center;
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.App h1 {
-    margin: 24px 0 0;
-    font-size: 1.6rem;
-    color: #0c3547;
+.app-main {
+    flex: 1;
+    /* Clear the floating nav. */
+    padding-top: calc(var(--nav-height) + 40px);
 }

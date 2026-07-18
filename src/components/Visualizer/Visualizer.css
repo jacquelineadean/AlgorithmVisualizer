@@ -1,5 +1,8 @@
 .visualizer {
-    padding: 24px 0;
+    padding: 8px 0 24px;
+    /* The grid is wider than small viewports; scroll it inside the page
+       rather than letting the whole body scroll sideways. */
+    overflow-x: auto;
 }
 
 .controls {
@@ -11,14 +14,59 @@
     margin-bottom: 8px;
 }
 
+.controls label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.controls select {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-left: 6px;
+}
+
+.controls button {
+    padding: 8px 18px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.controls button:hover:enabled {
+    border-color: var(--ink);
+}
+
+.controls button:first-of-type {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.controls button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
 .algorithm-description {
-    color: #555;
-    margin: 0 0 16px;
+    color: var(--ink-faint);
+    font-size: 0.88rem;
+    margin: 6px 0 16px;
 }
 
 .grid {
     display: inline-block;
     margin-top: 16px;
+    border: 1px solid var(--hairline);
 }
 
 .grid-row {
