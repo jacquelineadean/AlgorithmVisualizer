@@ -1,0 +1,76 @@
+.population-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.population-grid {
+    width: 100%;
+    display: block;
+}
+
+.pdot {
+    fill: var(--paper-sunken);
+    stroke: transparent;
+    stroke-width: 2;
+    transition: fill 0.45s ease, stroke 0.45s ease, opacity 0.45s ease;
+}
+
+.pdot.sick {
+    fill: var(--vermilion);
+}
+
+.pdot.flagged {
+    stroke: var(--cobalt);
+}
+
+.pdot.dim {
+    opacity: 0.14;
+}
+
+.population-caption {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+.pkey {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.pswatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper-sunken);
+    display: inline-block;
+}
+
+.pswatch.sick {
+    background: var(--vermilion);
+}
+
+.pswatch.flagged {
+    background: var(--paper-raised);
+    border: 2px solid var(--cobalt);
+}
+
+.pswatch.dim {
+    opacity: 0.25;
+}
+
+.population-readout {
+    margin-left: auto;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    color: var(--ink);
+}
+
+.population-readout strong {
+    font-size: 1.25rem;
+}

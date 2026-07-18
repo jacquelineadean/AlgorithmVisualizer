@@ -1,71 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PRIMES, randomPrimePair, validPublicExponents } from './math';
 import { ACTS, buildRsaTrace, suggestPublicExponent } from './trace';
-import { PROVENANCE, SOURCES, sourceList } from './sources';
+import { SOURCES } from './sources';
+import { Caveat, EvidenceRow, EvidenceSection } from '../evidence/Evidence';
 import ProtocolLane from './ProtocolLane';
 import './RsaVisualizer.css';
 
 const fmt = (v) => String(v);
-
-function ProvenanceChip({ provenance }) {
-    const meta = PROVENANCE[provenance];
-    return (
-        <span className={`prov-chip prov-${provenance}`} title={meta.description}>
-            <span className="prov-dot" aria-hidden="true" />
-            {meta.label}
-        </span>
-    );
-}
-
-function SourceChips({ refs }) {
-    const jump = (key) => {
-        const el = document.getElementById(`ref-${key}`);
-        if (!el) return;
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.remove('flash');
-        // Restart the highlight animation on repeat clicks.
-        void el.offsetWidth;
-        el.classList.add('flash');
-    };
-    return (
-        <>
-            {refs.map((ref) => (
-                <button
-                    key={`${ref.key}-${ref.detail ?? ''}`}
-                    type="button"
-                    className="source-chip"
-                    onClick={() => jump(ref.key)}
-                    title={SOURCES[ref.key].title}
-                >
-                    {ref.key}
-                    {ref.detail ? ` ${ref.detail}` : ''}
-                </button>
-            ))}
-        </>
-    );
-}
 
 function StepDetail({ step }) {
     return (
         <div className="step-detail">
             <div className="step-detail-head">
                 <h3>{step.title}</h3>
-                <div className="evidence-row">
-                    <ProvenanceChip provenance={step.provenance} />
-                    <SourceChips refs={step.sourceRefs} />
-                </div>
+                <EvidenceRow
+                    provenance={step.provenance}
+                    refs={step.sourceRefs}
+                    sources={SOURCES}
+                />
             </div>
             <p className="step-explanation">{step.explanation}</p>
             <StepData step={step} />
-            {step.caveat && (
-                <div className={`caveat prov-bg-${step.caveat.provenance}`}>
-                    <div className="evidence-row">
-                        <ProvenanceChip provenance={step.caveat.provenance} />
-                        <SourceChips refs={step.caveat.sourceRefs} />
-                    </div>
-                    <p>{step.caveat.text}</p>
-                </div>
-            )}
+            <Caveat caveat={step.caveat} sources={SOURCES} />
         </div>
     );
 }
@@ -400,35 +356,10 @@ export default function RsaVisualizer() {
             )}
 
             {/* Evidence legend + references */}
-            <section className="references">
-                <h2>Evidence</h2>
-                <p className="references-sub">
-                    Every step above cites at least one of these sources — the suite fails
-                    otherwise. Provenance classes:
-                </p>
-                <div className="legend">
-                    {Object.entries(PROVENANCE).map(([key, meta]) => (
-                        <div key={key} className="legend-item">
-                            <ProvenanceChip provenance={key} />
-                            <span className="legend-desc">{meta.description}</span>
-                        </div>
-                    ))}
-                </div>
-                <ol className="reference-list">
-                    {sourceList().map((source) => (
-                        <li key={source.key} id={`ref-${source.key}`}>
-                            <span className="ref-key">{source.key}</span>
-                            <span>
-                                {source.authors} ({source.year}).{' '}
-                                <a href={source.url} target="_blank" rel="noreferrer">
-                                    {source.title}
-                                </a>
-                                . <em>{source.venue}</em>.
-                            </span>
-                        </li>
-                    ))}
-                </ol>
-            </section>
+            <EvidenceSection
+                sources={SOURCES}
+                intro="Every step above cites at least one of these sources — the suite fails otherwise. Provenance classes:"
+            />
         </div>
     );
 }
