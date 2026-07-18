@@ -18,7 +18,7 @@ export const POSTS = [
             'The toy parameters are labeled too. Encrypting character-by-character under a modulus this small is flagrantly insecure, and the visualization says so on the step where it matters, citing the key-size and padding recommendations real deployments follow.',
             { h: 'Enforced by tests' },
             'The rule is not a style guide; it is a test. Every step a visualization emits must resolve at least one citation in its sources file, or the suite fails. Tekton fails its build when geometry verification fails; we fail ours when evidence is missing.',
-            'One algorithm is live today. The roadmap adds Diffie–Hellman, sorting, statistics, machine learning, and distributed consensus — each under the same rule.',
+            'Three visualizations are live today: RSA, Dijkstra’s algorithm, and Bayes’ rule — the last of which also runs the home page, where the hero graphic is the algorithm itself rather than decoration. The roadmap adds Diffie–Hellman, sorting, the transformer serving stack as a clickable architecture map, and distributed consensus — each under the same rule.',
         ],
     },
 ];

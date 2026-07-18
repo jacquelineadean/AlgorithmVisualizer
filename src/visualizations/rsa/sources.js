@@ -1,31 +1,8 @@
 // Citation database for the RSA visualization. Every trace step must
 // reference at least one of these keys — enforced by the evidence gate test.
-//
-// Provenance classes, adapted from Tekton's measured / rule-derived /
-// reconstruction / conjecture layers:
-//   paper        — taken directly from the primary source
-//   theorem      — the mathematical bedrock the step rests on
-//   modern       — how standards bodies say it is done today
-//   pedagogical  — a simplification made for teaching, always labeled
+// Provenance classes are shared site-wide (see ../provenance.js).
 
-export const PROVENANCE = {
-    paper: {
-        label: 'From the paper',
-        description: 'Follows the primary source directly.',
-    },
-    theorem: {
-        label: 'Theorem',
-        description: 'Rests on a proved mathematical result.',
-    },
-    modern: {
-        label: 'Modern practice',
-        description: 'Reflects current standards, which refine the paper.',
-    },
-    pedagogical: {
-        label: 'Teaching simplification',
-        description: 'Simplified for the visualization; real deployments differ.',
-    },
-};
+export { PROVENANCE } from '../provenance';
 
 export const SOURCES = {
     RSA78: {

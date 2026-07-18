@@ -1,63 +1,44 @@
 import { Link } from 'react-router-dom';
 import { CATALOG, DOMAINS, entriesByDomain, liveEntries } from '../catalog';
+import { SOURCES as RSA_SOURCES } from '../visualizations/rsa/sources';
+import { SOURCES as BAYES_SOURCES } from '../visualizations/bayes/sources';
+import { SOURCES as PATHFINDING_SOURCES } from '../visualizations/pathfinding/sources';
 import { GITHUB_URL } from './FloatingNav';
+import HeroBayes from './HeroBayes';
 import './Home.css';
-
-// Abstract organic composition in the hero, echoing the reference site's
-// blob-and-primaries motif. Decorative only.
-function HeroShapes() {
-    return (
-        <svg
-            className="hero-shapes"
-            viewBox="0 0 520 300"
-            role="img"
-            aria-label="Abstract composition of organic shapes"
-        >
-            <path
-                className="shape-blob"
-                d="M196 22c46-14 96 2 118 34 20 29 10 60 34 88 26 31 26 74-4 98-33 27-77 8-118 18-45 11-93 26-127-2-36-30-24-77-16-118 7-38-3-73 22-95 22-20 57-14 91-23z"
-                fill="var(--ink)"
-            />
-            <circle className="shape-cobalt" cx="415" cy="66" r="38" fill="var(--cobalt)" />
-            <circle className="shape-green" cx="238" cy="170" r="30" fill="var(--green)" />
-            <ellipse
-                className="shape-vermilion"
-                cx="432"
-                cy="208"
-                rx="46"
-                ry="42"
-                fill="var(--vermilion)"
-            />
-        </svg>
-    );
-}
 
 export default function Home() {
     const live = liveEntries();
-    const sourcesCited = 7; // RSA sources today; grows with the catalog.
+    const sourcesCited = new Set([
+        ...Object.keys(RSA_SOURCES),
+        ...Object.keys(BAYES_SOURCES),
+        ...Object.keys(PATHFINDING_SOURCES),
+    ]).size;
 
     return (
         <div className="home">
             <section className="content hero">
-                <HeroShapes />
-                <div className="eyebrow">Interactive · Evidence-cited</div>
-                <h1 className="hero-title">See how the classics compute</h1>
-                <p className="hero-subtitle">
-                    Interactive visualizations of famous algorithms across cryptography,
-                    mathematics, statistics, and machine learning — where every step cites
-                    the paper it came from.
-                </p>
-                <div className="hero-actions">
-                    <Link to="/visualizer/rsa" className="pill-button">
-                        Visualize RSA
-                    </Link>
-                    <Link to="/visualizer" className="text-link">
-                        Browse the catalog <span className="chev">›</span>
-                    </Link>
-                    <Link to="/blog" className="text-link">
-                        Read the blog <span className="chev">›</span>
-                    </Link>
+                <div className="hero-copy">
+                    <div className="eyebrow">Interactive · Evidence-cited</div>
+                    <h1 className="hero-title">See how the classics compute</h1>
+                    <p className="hero-subtitle">
+                        Interactive visualizations of famous algorithms across cryptography,
+                        mathematics, statistics, and machine learning — where every step
+                        cites the paper it came from.
+                    </p>
+                    <div className="hero-actions">
+                        <Link to="/visualizer" className="pill-button">
+                            Explore the catalog
+                        </Link>
+                        <Link to="/visualizer/rsa" className="text-link">
+                            RSA encryption <span className="chev">›</span>
+                        </Link>
+                        <Link to="/blog" className="text-link">
+                            Read the blog <span className="chev">›</span>
+                        </Link>
+                    </div>
                 </div>
+                <HeroBayes />
             </section>
 
             <section className="content stat-row">

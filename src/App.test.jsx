@@ -40,6 +40,20 @@ describe('pathfinding page', () => {
         expect(screen.getByRole('combobox')).toHaveValue('dijkstra');
         expect(document.getElementById('node-10-15')).toHaveClass('node-start');
         expect(document.getElementById('node-10-35')).toHaveClass('node-finish');
+        // The grid tool now cites its evidence too.
+        expect(document.getElementById('ref-DIJKSTRA59')).not.toBeNull();
+    });
+});
+
+describe('bayes page', () => {
+    it('renders the population, sliders, and the classic posterior', () => {
+        renderAt('/visualizer/bayes');
+        expect(screen.getByRole('heading', { name: /bayes[’'] rule/i })).toBeInTheDocument();
+        expect(screen.getAllByRole('slider')).toHaveLength(3);
+        expect(screen.getByText(/step 1 \/ 7/i)).toBeInTheDocument();
+        // Classic example sources are in the references.
+        expect(document.getElementById('ref-BAYES1763')).not.toBeNull();
+        expect(document.getElementById('ref-GH1995')).not.toBeNull();
     });
 });
 

@@ -1,0 +1,200 @@
+.bayes {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+}
+
+/* --- Controls ------------------------------------------------------------- */
+
+.bayes-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 22px;
+}
+
+.slider {
+    display: grid;
+    grid-template-columns: auto 150px auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.slider input[type='range'] {
+    accent-color: var(--cobalt);
+}
+
+.slider-value {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    min-width: 52px;
+    color: var(--ink);
+}
+
+/* --- Stage + player -------------------------------------------------------- */
+
+.bayes-stage {
+    padding: 20px 22px;
+}
+
+.bayes-player {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bayes-count {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin: 0 auto 0 4px;
+}
+
+/* --- Step list + detail ---------------------------------------------------- */
+
+.bayes-columns {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.bayes-list-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+}
+
+.bayes-step-list ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bstep-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.bstep-item:hover {
+    background: var(--paper-sunken);
+    color: var(--ink);
+}
+
+.bstep-item.current {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.bstep-item.done {
+    color: var(--ink-faint);
+}
+
+.bstep-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.7;
+    min-width: 16px;
+}
+
+.bayes-detail {
+    padding: 26px 28px;
+    min-height: 280px;
+}
+
+.bayes-detail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.bayes-detail h3 {
+    font-size: 1.4rem;
+}
+
+.bayes-explanation {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+}
+
+/* Value tiles + math lines (same look as the RSA views). */
+
+.bayes .value-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0 0;
+}
+
+.bayes .value-item {
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    padding: 10px 16px;
+}
+
+.bayes .value-item dt {
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+}
+
+.bayes .value-item dd {
+    margin: 4px 0 0;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+}
+
+.bayes .math-block {
+    margin-top: 18px;
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    padding: 14px 18px;
+    overflow-x: auto;
+}
+
+.bayes .math-line {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 2px 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .bayes-columns {
+        grid-template-columns: 1fr;
+    }
+    .slider {
+        grid-template-columns: auto 1fr auto;
+        width: 100%;
+    }
+}

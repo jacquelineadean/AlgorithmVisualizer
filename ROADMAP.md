@@ -92,6 +92,21 @@ Deliverables:
 Acceptance: all tests pass; home, catalog, pathfinding, RSA, and blog pages verified in the
 browser; RSA round-trip correct for arbitrary printable-ASCII messages and valid prime pairs.
 
+**Differentiation update (shipped in-phase):** the site now leads with its own subject
+matter instead of borrowed visual language.
+
+- The hero's reference-derived shape composition was replaced with a live Bayes-rule
+  animation (population → prior → test → posterior on a dot grid) that links to the full
+  visualization; the hero moved to an asymmetric two-column layout.
+- **Bayes' rule shipped early** (pulled forward from Phase 4's statistics track):
+  natural-frequency population grid, prevalence/sensitivity/false-positive sliders, 7-step
+  cited trace (Bayes 1763, Laplace 1774, Kolmogorov 1933, Gigerenzer–Hoffrage 1995,
+  Eddy 1982), with its own evidence gate test.
+- Shared evidence components extracted (`visualizations/evidence/`, `provenance.js`) — an
+  early down-payment on the Phase 2 component kit.
+- The Dijkstra page gained a cited evidence section (Dijkstra 1959; CLRS §22.3), with the
+  grid's simplifications labeled `pedagogical`.
+
 ### Phase 2 — Visualization platform
 
 Goal: turn the RSA page's patterns into contracts every future visualization implements.
@@ -126,12 +141,30 @@ Tekton-style construction scrubbing and orbit/walk cameras.
 
 ### Phase 4 — Domain build-out: AI/ML, statistics, distributed architectures
 
-Goal: breadth. Each entry ships on the Phase-2 contracts (2D) or Phase-3 renderer (3D).
+Goal: breadth — and a third renderer tier for systems that are architectures, not
+step sequences. Each entry ships on the Phase-2 contracts (2D), the Phase-3 renderer
+(3D), or the drill-down diagram contract introduced here.
 
+- **AI architecture explorer (drill-down diagrams)** — whole-system architecture maps
+  where every component is clickable and opens its own process breakdown, recursively,
+  under the same cited-evidence rule (each component and each sub-process carries
+  sources and provenance):
+  - *Transformer architecture map* (Vaswani et al. 2017): tokens → embeddings →
+    attention blocks (→ heads → Q/K/V → softmax weighting) → MLPs → residual stream →
+    unembedding → logits.
+  - *LLM inference pipeline*: tokenization → **prefill** (parallel attention over the
+    prompt, KV-cache build) → **decode** (autoregressive, one token per step against
+    the cache) → sampling (temperature, top-p); zooming out to serving components —
+    continuous batching, paged KV cache, speculative decoding (Pope et al. 2022;
+    Kwon et al. 2023).
+  - *Training loop*: data pipeline → forward pass → loss → backward pass → optimizer
+    step, with the parallelism axes (data/tensor/pipeline) as an overlay.
+  - Contract: a `DrilldownDiagram` renderer — nodes with `children` breakdowns, breadcrumb
+    zoom, per-node evidence panel; the evidence gate applies per node, not just per step.
 - AI/ML: transformer attention (heads as interactive matrices), backpropagation,
   k-means, decision trees / random forests, perceptron → MLP evolution.
-- Statistics: central limit theorem sampler, Bayes' theorem updater, Markov chains,
-  Monte Carlo estimation (π by darts), regression as projection.
+- Statistics: central limit theorem sampler, Markov chains, Monte Carlo estimation
+  (π by darts), regression as projection — joining Bayes' rule, which shipped in Phase 1.
 - Numbers & primes: sieve of Eratosthenes, Euclid's algorithm (standalone), Miller–Rabin.
 - Distributed systems & architectures: Raft consensus (leader election + log replication),
   MapReduce, consistent hashing, CAP trade-off explorer, load-balancer strategies.
@@ -157,8 +190,8 @@ Goal: breadth. Each entry ships on the Phase-2 contracts (2D) or Phase-3 rendere
 | Graphs & pathfinding | Dijkstra | A*, BFS/DFS | Bellman–Ford, max-flow, MST |
 | Sorting & order | — | Quicksort, merge sort | Heapsort, radix, sorting networks (3D) |
 | Numbers & primes | — | Euclid, sieve of Eratosthenes | Miller–Rabin, Karatsuba, FFT multiply |
-| Statistics & probability | — | CLT, Monte Carlo π | Bayes updater, Markov chains, regression |
-| AI & machine learning | — | k-means, perceptron | Attention, backprop, decision trees |
+| Statistics & probability | Bayes' rule | CLT, Monte Carlo π | Markov chains, regression |
+| AI & machine learning | — | Transformer architecture map, LLM inference pipeline | Attention internals, backprop, k-means, decision trees |
 | Distributed & architectures | — | Raft, consistent hashing | MapReduce, CAP explorer, load balancing |
 | Methodologies | — | Huffman, PageRank | Fourier epicycles, simplex, RSA signatures |
 

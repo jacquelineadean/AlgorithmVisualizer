@@ -30,7 +30,7 @@ export const DOMAINS = [
     {
         id: 'ml',
         name: 'AI & Machine Learning',
-        blurb: 'From the perceptron to attention — how machines fit functions to data.',
+        blurb: 'From the perceptron to the transformer stack — how modern AI fits, and serves, its functions.',
         accent: 'cobalt',
     },
     {
@@ -63,6 +63,17 @@ export const CATALOG = [
             'Draw walls on a grid and watch the search sweep outward, always expanding the cheapest frontier first.',
         status: 'live',
         route: '/visualizer/pathfinding',
+    },
+    {
+        id: 'bayes',
+        name: "Bayes' Rule",
+        domain: 'statistics',
+        year: 1763,
+        authors: 'T. Bayes · P.-S. Laplace',
+        summary:
+            'Send 1,000 people through a screening test and see what a positive result really means — the base rate does the heavy lifting.',
+        status: 'live',
+        route: '/visualizer/bayes',
     },
     {
         id: 'diffie-hellman',
@@ -134,6 +145,26 @@ export const CATALOG = [
         year: 2017,
         authors: 'Vaswani et al.',
         summary: 'Queries, keys, and values — attention weights as a living matrix.',
+        status: 'planned',
+    },
+    {
+        id: 'transformer-arch',
+        name: 'Transformer Architecture Map',
+        domain: 'ml',
+        year: 2017,
+        authors: 'Vaswani et al.',
+        summary:
+            'The whole stack as a clickable map — embeddings, attention blocks, MLPs, the residual stream — each component opening its own breakdown.',
+        status: 'planned',
+    },
+    {
+        id: 'llm-inference',
+        name: 'LLM Inference Pipeline',
+        domain: 'ml',
+        year: 2022,
+        authors: 'Pope et al. · Kwon et al.',
+        summary:
+            'Tokenize → prefill → KV cache → decode → sample. Click any stage to zoom into how a model actually serves a request.',
         status: 'planned',
     },
     {

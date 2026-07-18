@@ -13,8 +13,12 @@ teaching. See [ROADMAP.md](ROADMAP.md) for the multi-phase plan.
 - **RSA Encryption** (`#/visualizer/rsa`) — key generation, encryption, and decryption
   on your own message and primes, with square-and-multiply and extended-Euclid worked
   in full, cited to Rivest–Shamir–Adleman (1978), Euler (1763), RFC 8017, and more.
+- **Bayes' Rule** (`#/visualizer/bayes`) — a population of 1,000 flows through a
+  screening test; sliders for prevalence, sensitivity, and false positives, cited to
+  Bayes (1763), Laplace (1774), and Gigerenzer–Hoffrage (1995). Also powers the home
+  page hero animation.
 - **Dijkstra's Algorithm** (`#/visualizer/pathfinding`) — draw walls on a grid and watch
-  the search sweep to the shortest path.
+  the search sweep to the shortest path, cited to Dijkstra (1959).
 
 ## Getting Started
 
@@ -43,14 +47,18 @@ src/
 ├── App.jsx                # Layout shell: floating nav + outlet + footer
 ├── site/                  # Home, Blog, FloatingNav, Footer
 ├── catalog/               # Site-level registry of visualizations by domain
-├── pages/                 # One page per route (catalog index, pathfinding, RSA)
+├── pages/                 # One page per route (catalog index, pathfinding, RSA, Bayes)
 ├── visualizations/
-│   └── rsa/
-│       ├── math.js        # Pure BigInt number theory (unit tested)
-│       ├── sources.js     # Citation database + provenance classes
-│       ├── trace.js       # buildRsaTrace(inputs) → steps with citations
-│       ├── RsaVisualizer  # Step player, protocol lane diagram, references
-│       └── *.test.js      # Math tests + the evidence gate
+│   ├── provenance.js      # Shared provenance classes (paper/theorem/modern/pedagogical)
+│   ├── evidence/          # Shared chips, caveats, and references components
+│   ├── rsa/
+│   │   ├── math.js        # Pure BigInt number theory (unit tested)
+│   │   ├── sources.js     # Citation database
+│   │   ├── trace.js       # buildRsaTrace(inputs) → steps with citations
+│   │   ├── RsaVisualizer  # Step player, protocol lane diagram, references
+│   │   └── *.test.js      # Math tests + the evidence gate
+│   ├── bayes/             # Population-grid Bayes' rule (same pattern)
+│   └── pathfinding/       # Sources for the grid tool (trace model in Phase 2)
 ├── engine/                # Reusable grid engine (grid model, runner, animator)
 ├── algorithms/            # Pluggable grid algorithms (Dijkstra; registry)
 └── components/            # Grid visualizer + node cell

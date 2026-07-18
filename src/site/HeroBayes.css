@@ -1,0 +1,63 @@
+.hero-bayes {
+    display: block;
+    text-decoration: none;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-card);
+    padding: 22px 22px 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hero-bayes:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-float);
+}
+
+.hero-bayes-grid {
+    width: 100%;
+    display: block;
+}
+
+.hdot {
+    fill: var(--paper-sunken);
+    stroke: transparent;
+    stroke-width: 2.4;
+    transition: fill 0.6s ease, stroke 0.6s ease, opacity 0.6s ease;
+}
+
+.hdot.sick {
+    fill: var(--vermilion);
+}
+
+.hdot.flagged {
+    stroke: var(--cobalt);
+}
+
+.hdot.dim {
+    opacity: 0.13;
+}
+
+.hero-bayes-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 14px;
+    min-height: 1.4em;
+}
+
+.hero-bayes-label {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    color: var(--ink);
+}
+
+.hero-bayes-open {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+}
+
+.hero-bayes:hover .hero-bayes-open {
+    color: var(--ink);
+}

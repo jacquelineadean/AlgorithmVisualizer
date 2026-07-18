@@ -1,0 +1,173 @@
+/* Shared evidence UI: chips, caveats, legend, references. */
+
+.evidence-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.prov-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.prov-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.prov-paper {
+    color: var(--prov-paper);
+    background: var(--prov-paper-soft);
+}
+
+.prov-theorem {
+    color: var(--prov-theorem);
+    background: var(--prov-theorem-soft);
+}
+
+.prov-modern {
+    color: var(--prov-modern);
+    background: var(--prov-modern-soft);
+}
+
+.prov-pedagogical {
+    color: var(--prov-pedagogical);
+    background: var(--prov-pedagogical-soft);
+}
+
+.source-chip {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+.source-chip:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+}
+
+.caveat {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+}
+
+.caveat p {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.prov-bg-pedagogical {
+    background: var(--prov-pedagogical-soft);
+}
+
+.prov-bg-modern {
+    background: var(--prov-modern-soft);
+}
+
+.prov-bg-paper {
+    background: var(--prov-paper-soft);
+}
+
+.prov-bg-theorem {
+    background: var(--prov-theorem-soft);
+}
+
+.references {
+    margin-top: 30px;
+}
+
+.references h2 {
+    font-size: 1.6rem;
+}
+
+.references-sub {
+    margin-top: 8px;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+}
+
+.legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 16px 0 26px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-desc {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+
+.reference-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reference-list li {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background 0.4s ease;
+}
+
+.reference-list li.flash {
+    animation: ref-flash 1.6s ease;
+}
+
+@keyframes ref-flash {
+    0%,
+    40% {
+        background: var(--cobalt-soft);
+    }
+    100% {
+        background: transparent;
+    }
+}
+
+.ref-key {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    min-width: 84px;
+}
+
+.reference-list a {
+    color: var(--ink);
+}
+
+@media (max-width: 900px) {
+    .legend {
+        grid-template-columns: 1fr;
+    }
+}
