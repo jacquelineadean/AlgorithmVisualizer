@@ -57,6 +57,23 @@ describe('bayes page', () => {
     });
 });
 
+describe('diffie–hellman page', () => {
+    it('renders through the generic visualizer route with the worked example', () => {
+        renderAt('/visualizer/dh');
+        expect(
+            screen.getByRole('heading', { name: /diffie–hellman key exchange/i })
+        ).toBeInTheDocument();
+        expect(screen.getByText(/step 1 \/ 10/i)).toBeInTheDocument();
+        expect(document.getElementById('ref-DH76')).not.toBeNull();
+        expect(document.getElementById('ref-RFC3526')).not.toBeNull();
+    });
+
+    it('shows a not-found card for unknown ids', () => {
+        renderAt('/visualizer/nonsense');
+        expect(screen.getByRole('heading', { name: /not in the atlas/i })).toBeInTheDocument();
+    });
+});
+
 describe('rsa page', () => {
     it('renders the step player on the classic example and steps through', async () => {
         renderAt('/visualizer/rsa');

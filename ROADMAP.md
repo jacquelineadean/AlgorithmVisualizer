@@ -86,7 +86,7 @@ utility that runs automatically for every registered visualization.
 | Phase | Theme | Status | Exit condition |
 | --- | --- | --- | --- |
 | 1 | MVP, identity, first three cited visualizations | ✅ Shipped 2026-07-18 (PRs #2, #3) | RSA + Bayes + Dijkstra live under the evidence rule |
-| 2 | Platform contracts & 2D breadth | Next | A new 2D visualization is a content-only PR; 8+ live |
+| 2 | Platform contracts & 2D breadth | In progress — 2a ✅ (2026-07-18) | A new 2D visualization is a content-only PR; 8+ live |
 | 3 | 3D renderer tier | Planned | 3D pages ship under the same trace + evidence contract |
 | 4 | Domain build-out + AI architecture explorer | Planned | Every domain ≥ 2 live; drill-down maps live; 20+ live |
 | 5 | Polish, performance, community | Planned | External contribution lands without maintainer surgery |
@@ -134,7 +134,14 @@ Shipped:
 component kit, so that a new 2D visualization is *content* — a trace, a sources file, and a
 stage — rather than an app. Prove it by shipping five new entries on the contracts.
 
-### 2a. Contracts & component kit (M)
+> **Progress (2026-07-18):** 2a shipped — `docs/CONTRACTS.md`, `<TraceInstrument>` with
+> built-in detail kinds, `<ProtocolStage>`, `defineVisualization` registry, the generic
+> `/visualizer/:id` page, the central evidence-gate suite, and the shared modular-math lib;
+> RSA and Bayes migrated with no visible change. **Diffie–Hellman shipped from 2d as the
+> contract proof** — its diff touches only `src/visualizations/dh/` plus one catalog entry.
+> Remaining: 2b (streams + pathfinding migration), 2c (deep links), rest of 2d, 2e.
+
+### 2a. Contracts & component kit (M) ✅
 
 - Write `docs/CONTRACTS.md` specifying, with examples from RSA/Bayes:
   - `Step` = `{id, act?, title, provenance, sourceRefs[], explanation, caveat?, kind, data}`
@@ -383,7 +390,7 @@ Phase tags mark where each entry is scheduled; unmarked "later" items are unsche
 
 | Domain | Live | Next up | Later |
 | --- | --- | --- | --- |
-| Cryptography | RSA | Diffie–Hellman (P2), Vigenère (P2), SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
+| Cryptography | RSA, Diffie–Hellman | Vigenère (P2), SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
 | Graphs & pathfinding | Dijkstra | A*, BFS/DFS (P2) | Bellman–Ford, max-flow, MST |
 | Sorting & order | — | Quicksort, merge sort (P2) | Heapsort, radix, sorting networks (P3) |
 | Numbers & primes | — | Sieve of Eratosthenes (P2), Euclid (P4) | Miller–Rabin, Karatsuba, FFT multiply |

@@ -51,7 +51,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 text: 'In practice priors come from measured base rates (epidemiology, logs, historical data) — the step most famously skipped by intuition.',
                 sourceRefs: [{ key: 'EDDY1982' }],
             },
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [{ label: 'prior P(D)', value: asPercent(prior) }],
             },
@@ -66,7 +66,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 `individuals, about ${sick} have the condition and ${healthy} do not. Gigerenzer and ` +
                 'Hoffrage showed that this "natural frequency" format is how the same math becomes ' +
                 'intuitive — the visualization leans on their result. Counts are rounded to whole people.',
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [
                     { label: 'have it', value: sick },
@@ -87,7 +87,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 `sensitivity). Of the ${sick} people who have the condition, about ` +
                 `${truePositives} test positive and ${falseNegatives} are missed. This is the ` +
                 'product rule: P(D and +) = P(D) · P(+ | D).',
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [
                     { label: 'true positives', value: truePositives },
@@ -108,7 +108,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 `Of the ${healthy} without the condition, about ${falsePositives} still test ` +
                 `positive — often more people than the true positives, because the healthy group ` +
                 'is so much larger.',
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [
                     { label: 'false positives', value: falsePositives },
@@ -128,7 +128,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 `A positive result arrives. Everyone who tested negative leaves the picture — ` +
                 `conditioning restricts the world to the ${positives} people with a positive test: ` +
                 `${truePositives} sick and ${falsePositives} healthy.`,
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [
                     { label: 'positive tests', value: positives },
@@ -170,7 +170,7 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
                 'a name: base-rate neglect. When a condition is rare, even a good test spends most ' +
                 'of its positives on false alarms. Drag the prevalence slider and watch the ' +
                 'posterior chase the base rate.',
-            kind: 'stat',
+            kind: 'values',
             data: {
                 values: [
                     { label: 'test sensitivity', value: asPercent(sensitivity) },

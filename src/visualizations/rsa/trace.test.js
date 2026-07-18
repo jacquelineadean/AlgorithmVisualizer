@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { buildRsaTrace, suggestPublicExponent, ACTS } from './trace';
-import { PROVENANCE, SOURCES } from './sources';
 import { PRIMES } from './math';
 
 const CLASSIC = { message: 'HELLO', p: 61n, q: 53n, e: 17n };
@@ -53,41 +52,8 @@ describe('buildRsaTrace', () => {
     });
 });
 
-// The evidence gate — the CI translation of Tekton's "nothing renders
-// without a cited source." A step with no resolvable citation fails the
-// build, and so does an undeclared provenance class.
-describe('evidence gate', () => {
-    const { steps } = buildRsaTrace(CLASSIC);
-
-    it('every step carries at least one citation that resolves', () => {
-        for (const step of steps) {
-            expect(step.sourceRefs.length, `step "${step.id}" has no sources`).toBeGreaterThan(0);
-            for (const ref of step.sourceRefs) {
-                expect(SOURCES[ref.key], `step "${step.id}" cites unknown source "${ref.key}"`).toBeDefined();
-            }
-        }
-    });
-
-    it('every step declares a known provenance class', () => {
-        for (const step of steps) {
-            expect(
-                PROVENANCE[step.provenance],
-                `step "${step.id}" has unknown provenance "${step.provenance}"`
-            ).toBeDefined();
-        }
-    });
-
-    it('caveats cite sources too', () => {
-        for (const step of steps) {
-            if (!step.caveat) continue;
-            expect(step.caveat.sourceRefs.length).toBeGreaterThan(0);
-            for (const ref of step.caveat.sourceRefs) {
-                expect(SOURCES[ref.key]).toBeDefined();
-            }
-            expect(PROVENANCE[step.caveat.provenance]).toBeDefined();
-        }
-    });
-});
+// The evidence gate for RSA now runs in the central suite
+// (src/visualizations/evidence-gate.test.js) over the registry.
 
 describe('suggestPublicExponent', () => {
     it('prefers 17, then 65537, then the smallest valid option', () => {

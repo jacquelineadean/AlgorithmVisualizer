@@ -50,6 +50,8 @@ export const CATALOG = [
         authors: 'Rivest · Shamir · Adleman',
         summary:
             'Generate a key pair from two primes, encrypt with modular exponentiation, and see why only the private key can undo it.',
+        intro:
+            'Type a message, pick two primes, and step through the whole protocol — key generation, encryption, decryption, and the theorem that makes it work. Every step cites its source; simplifications are labeled.',
         status: 'live',
         route: '/visualizer/rsa',
     },
@@ -72,17 +74,23 @@ export const CATALOG = [
         authors: 'T. Bayes · P.-S. Laplace',
         summary:
             'Send 1,000 people through a screening test and see what a positive result really means — the base rate does the heavy lifting.',
+        intro:
+            'A population of 1,000 people, a screening test, and one question: when the test says positive, what are the odds it’s right? Drag the sliders, step through the update, and watch the base rate do the heavy lifting. Every step cites its source.',
         status: 'live',
         route: '/visualizer/bayes',
     },
     {
-        id: 'diffie-hellman',
+        id: 'dh',
         name: 'Diffie–Hellman Key Exchange',
         domain: 'cryptography',
         year: 1976,
         authors: 'Diffie · Hellman',
-        summary: 'Two parties agree on a shared secret over a public channel.',
-        status: 'planned',
+        summary:
+            'Two parties agree on a shared secret over a channel an eavesdropper reads in full — the paper that invented public-key cryptography.',
+        intro:
+            'Pick a safe prime and a generator, give Alice and Bob their secret exponents, and watch two public values cross an open channel — then land on the same shared secret. Eve sees everything and still cannot follow. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/dh',
     },
     {
         id: 'sha-256',
