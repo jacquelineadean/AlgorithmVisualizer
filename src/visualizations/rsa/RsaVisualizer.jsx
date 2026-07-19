@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PRIMES, randomPrimePair, validPublicExponents } from './math';
+
+// Phase 3: the 3D helix (and with it all of three.js) loads only when the
+// user asks for it — 2D routes ship no 3D bytes.
+const RsaHelixScene = lazy(() => import('./RsaHelixScene'));
 import { ACTS, buildRsaTrace, suggestPublicExponent } from './trace';
 import { SOURCES } from './sources';
 import TraceInstrument from '../player/TraceInstrument';
@@ -50,6 +54,7 @@ export default function RsaVisualizer() {
     const [pStr, setPStr] = useState(initial.p);
     const [qStr, setQStr] = useState(initial.q);
     const [eStr, setEStr] = useState(initial.e);
+    const [show3d, setShow3d] = useState(false);
 
     const p = BigInt(pStr);
     const q = BigInt(qStr);
@@ -123,6 +128,13 @@ export default function RsaVisualizer() {
             <button type="button" className="pill-button secondary" onClick={randomize}>
                 Surprise me
             </button>
+            <button
+                type="button"
+                className="pill-button secondary"
+                onClick={() => setShow3d((prev) => !prev)}
+            >
+                {show3d ? 'Hide 3D helix' : '3D helix'}
+            </button>
         </>
     );
 
@@ -133,7 +145,21 @@ export default function RsaVisualizer() {
             sources={SOURCES}
             acts={ACTS}
             controls={controls}
-            renderStage={(ctx) => <RsaLane {...ctx} />}
+            renderStage={(ctx) => (
+                <>
+                    <RsaLane {...ctx} />
+                    {show3d && (
+                        <Suspense
+                            fallback={<div className="helix-loading">Loading the 3D helix…</div>}
+                        >
+                            <RsaHelixScene
+                                step={ctx.steps[ctx.stepIndex]}
+                                artifacts={ctx.artifacts}
+                            />
+                        </Suspense>
+                    )}
+                </>
+            )}
             detailKinds={{ egcd: EgcdView }}
             urlParams={{ m: message, p: pStr, q: qStr, e: eStr }}
             playIntervalMs={3000}

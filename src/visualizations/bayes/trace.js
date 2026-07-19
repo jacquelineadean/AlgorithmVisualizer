@@ -152,7 +152,9 @@ export function buildBayesTrace({ prior, sensitivity, falsePositiveRate }) {
             kind: 'formula',
             data: {
                 lines: [
-                    'P(D | +) = P(+ | D)·P(D) / [ P(+ | D)·P(D) + P(+ | ¬D)·P(¬D) ]',
+                    {
+                        tex: 'P(D \\mid +) = \\dfrac{P(+ \\mid D)\\,P(D)}{P(+ \\mid D)\\,P(D) + P(+ \\mid \\neg D)\\,P(\\neg D)}',
+                    },
                     `= (${sensitivity.toFixed(3)} × ${prior.toFixed(3)}) / (${sensitivity.toFixed(3)} × ${prior.toFixed(3)} + ${falsePositiveRate.toFixed(3)} × ${(1 - prior).toFixed(3)})`,
                     `= ${asPercent(exact, 2)}   (exact)`,
                     `≈ ${truePositives} / (${truePositives} + ${falsePositives}) = ${truePositives}/${positives} = ${asPercent(posteriorNatural)}   (whole people)`,

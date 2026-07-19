@@ -59,13 +59,16 @@ visualizations/
     trace.js              buildTrace(inputs) → { steps[], artifacts }; each step:
                           {id, title, provenance, sourceRefs[], explanation, caveat?, kind, data}
     Visualizer            React component: step player + stage diagrams, driven only by the trace
-engine/                   Grid engine (grid model, runner, animator) — pathfinding only, for now
+  player/                 Shared TraceInstrument (steps, streams, deep links, KaTeX lines)
+  protocol/ · sorting/    Shared stages (multi-actor lane; bar arrays)
+  scene3d/                Phase 3 shell + pure scene geometry (lazy-loaded with three.js)
+  registry.js · index.js  defineVisualization + central registration
 ```
 
-**The evidence gate:** a unit test asserts every trace step resolves at least one valid
-`sourceRef` and a declared provenance class — the CI translation of Tekton's "the build fails
-if verification fails." RSA and Bayes each enforce it today; Phase 2 turns it into a shared
-utility that runs automatically for every registered visualization.
+**The evidence gate:** one suite iterates the registry and builds every visualization's
+gate fixtures — any step or caveat without a resolvable citation and a declared provenance
+class fails the build. The CI translation of Tekton's "the build fails if verification
+fails"; registering a visualization *is* opting in.
 
 ## How this roadmap ships
 
@@ -86,8 +89,8 @@ utility that runs automatically for every registered visualization.
 | Phase | Theme | Status | Exit condition |
 | --- | --- | --- | --- |
 | 1 | MVP, identity, first three cited visualizations | ✅ Shipped 2026-07-18 (PRs #2, #3) | RSA + Bayes + Dijkstra live under the evidence rule |
-| 2 | Platform contracts & 2D breadth | In progress — 2a ✅, 2c ✅, 2b streams ✅ (2026-07-19) | A new 2D visualization is a content-only PR; 8+ live |
-| 3 | 3D renderer tier | Planned | 3D pages ship under the same trace + evidence contract |
+| 2 | Platform contracts & 2D breadth | ✅ Complete (2026-07-19) — exit met: 8 live, one shared player, zero per-page boilerplate | A new 2D visualization is a content-only PR; 8+ live |
+| 3 | 3D renderer tier | Started (2026-07-19) — 3a shell + RSA helix | 3D pages ship under the same trace + evidence contract |
 | 4 | Domain build-out + AI architecture explorer | Planned | Every domain ≥ 2 live; drill-down maps live; 20+ live |
 | 5 | Polish, performance, community | Planned | External contribution lands without maintainer surgery |
 
@@ -145,8 +148,20 @@ stage — rather than an app. Prove it by shipping five new entries on the contr
 > tested. **2b's stream channel shipped and was prototyped on sorting as planned** —
 > `step.stream {events, tick, batch}`, stage folds via `applyEvents`, Next completes a
 > running stream, autoplay waits; **quicksort and merge sort shipped from 2d** on the shared
-> `BarsStage` (6 live total). Remaining: 2b pathfinding migration onto macro-steps + streams,
-> 2d Vigenère + sieve + KaTeX + MDX, 2e mobile/a11y pass.
+> `BarsStage` (6 live total).
+>
+> **Phase 2 complete (2026-07-19):** 2b finished — the grid engine and `algorithms/`
+> registry were replaced by `visualizations/pathfinding/` (event-recording Dijkstra, A*,
+> and BFS with per-algorithm cited traces, wall painting on the stage, scatter/clear
+> controls); the old `engine/`, `algorithms/`, and `components/` trees are deleted and
+> every visualization renders through the shared instrument. 2d finished — Vigenère
+> (classic ATTACK AT DAWN / LEMON example; Vigenère 1586, Shannon 1949, Katz–Lindell) and
+> the sieve of Eratosthenes (Horsley 1772, O'Neill 2009) are live; KaTeX renders TeX
+> formula lines lazily (Bayes' posterior is the first consumer); the blog runs on MDX with
+> a "how RSA was sourced" post. 2e shipped — focus-visible states, coarse-pointer touch
+> targets, player wrap at 375 px, and reduced-motion users get streamed steps' final state
+> immediately. **Exit criteria met: 8 live visualizations, one shared player, zero
+> per-page boilerplate; adding an entry touches only its directory + a catalog card.**
 
 ### 2a. Contracts & component kit (M) ✅
 
@@ -230,6 +245,15 @@ Each ships as a content-only PR on the 2a contracts — that is the acceptance t
 **Objective:** add a 3D renderer tier — React Three Fiber + drei, Zustand for viewer state —
 with Tekton-style construction scrubbing, used *only* where space genuinely adds insight, and
 governed by the same trace + evidence contract as 2D.
+
+> **Progress (2026-07-19):** 3a shipped in first form — `Scene3D` shell (R3F + drei orbit
+> camera, paper-world lighting, error-boundary fallback for WebGL-less browsers) and the
+> **RSA mod-n helix**: square-and-multiply rendered as clock arithmetic on a spiral, with a
+> provenance overlay (hops = `paper`, the clock ring = `pedagogical`). All of three.js is
+> code-split behind the "3D helix" toggle — 2D routes ship zero 3D bytes — and the helix
+> geometry is recomputed from trace rows in unit tests (positions at angle 2π·v/n, one
+> pitch per iteration). Remaining in 3a: scrub-timeline binding and walk mode; 3b's
+> dedicated scenes and 3c's Playwright screenshots are untouched.
 
 ### 3a. Scene shell (M)
 
@@ -397,10 +421,10 @@ Phase tags mark where each entry is scheduled; unmarked "later" items are unsche
 
 | Domain | Live | Next up | Later |
 | --- | --- | --- | --- |
-| Cryptography | RSA, Diffie–Hellman | Vigenère (P2), SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
-| Graphs & pathfinding | Dijkstra | A*, BFS/DFS (P2) | Bellman–Ford, max-flow, MST |
+| Cryptography | RSA, Diffie–Hellman, Vigenère | SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
+| Graphs & pathfinding | Dijkstra, A*, BFS | — | Bellman–Ford, max-flow, MST, weighted terrain |
 | Sorting & order | Quicksort, merge sort | — | Heapsort, radix, sorting networks (P3) |
-| Numbers & primes | — | Sieve of Eratosthenes (P2), Euclid (P4) | Miller–Rabin, Karatsuba, FFT multiply |
+| Numbers & primes | Sieve of Eratosthenes | Euclid (P4) | Miller–Rabin, Karatsuba, FFT multiply |
 | Statistics & probability | Bayes' rule | CLT, Monte Carlo π (P4) | Markov chains (P4), regression (P4) |
 | AI & machine learning | — | Transformer architecture map, LLM inference pipeline (P4) | Attention internals, backprop, k-means, decision trees (P4); gradient descent (P3) |
 | Distributed & architectures | — | Raft, consistent hashing (P4) | MapReduce, CAP explorer, load balancing |

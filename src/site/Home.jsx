@@ -1,19 +1,16 @@
 import { Link } from 'react-router-dom';
 import { CATALOG, DOMAINS, entriesByDomain, liveEntries } from '../catalog';
 import { listVisualizations } from '../visualizations';
-import { SOURCES as PATHFINDING_SOURCES } from '../visualizations/pathfinding/sources';
 import { GITHUB_URL } from './FloatingNav';
 import HeroBayes from './HeroBayes';
 import './Home.css';
 
 export default function Home() {
     const live = liveEntries();
-    // Unique citation keys across every registered visualization plus the
-    // pathfinding page (which joins the registry in Phase 2b).
-    const sourcesCited = new Set([
-        ...listVisualizations().flatMap((viz) => Object.keys(viz.sources)),
-        ...Object.keys(PATHFINDING_SOURCES),
-    ]).size;
+    // Unique citation keys across every registered visualization.
+    const sourcesCited = new Set(
+        listVisualizations().flatMap((viz) => Object.keys(viz.sources))
+    ).size;
 
     return (
         <div className="home">

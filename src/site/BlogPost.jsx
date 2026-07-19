@@ -19,6 +19,7 @@ export default function BlogPost() {
         );
     }
 
+    const Body = post.Component;
     return (
         <article className="content blog-post">
             <div className="post-date">
@@ -26,13 +27,7 @@ export default function BlogPost() {
             </div>
             <h1 className="page-title">{post.title}</h1>
             <div className="post-body">
-                {post.body.map((block, index) =>
-                    typeof block === 'string' ? (
-                        <p key={index}>{block}</p>
-                    ) : (
-                        <h2 key={index}>{block.h}</h2>
-                    )
-                )}
+                <Body />
             </div>
             <Link to="/blog" className="text-link">
                 ← All posts
