@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PRIMES, randomPrimePair, validPublicExponents } from './math';
 import { ACTS, buildRsaTrace, suggestPublicExponent } from './trace';
 import { SOURCES } from './sources';
@@ -28,11 +29,27 @@ function EgcdView({ data }) {
     );
 }
 
+// Deep-link params, validated with graceful fallback to the defaults.
+const readInitial = (sp) => {
+    const m = sp.get('m');
+    const digits = (key) => (/^\d{1,6}$/.test(sp.get(key) ?? '') ? sp.get(key) : null);
+    const prime = (key) =>
+        digits(key) && PRIMES.includes(BigInt(sp.get(key))) ? sp.get(key) : null;
+    return {
+        m: m && /^[\x20-\x7E]{1,16}$/.test(m) ? m : 'HELLO',
+        p: prime('p') ?? '61',
+        q: prime('q') ?? '53',
+        e: digits('e') ?? '17',
+    };
+};
+
 export default function RsaVisualizer() {
-    const [message, setMessage] = useState('HELLO');
-    const [pStr, setPStr] = useState('61');
-    const [qStr, setQStr] = useState('53');
-    const [eStr, setEStr] = useState('17');
+    const [searchParams] = useSearchParams();
+    const [initial] = useState(() => readInitial(searchParams));
+    const [message, setMessage] = useState(initial.m);
+    const [pStr, setPStr] = useState(initial.p);
+    const [qStr, setQStr] = useState(initial.q);
+    const [eStr, setEStr] = useState(initial.e);
 
     const p = BigInt(pStr);
     const q = BigInt(qStr);
@@ -118,6 +135,7 @@ export default function RsaVisualizer() {
             controls={controls}
             renderStage={(ctx) => <RsaLane {...ctx} />}
             detailKinds={{ egcd: EgcdView }}
+            urlParams={{ m: message, p: pStr, q: qStr, e: eStr }}
             playIntervalMs={3000}
         />
     );

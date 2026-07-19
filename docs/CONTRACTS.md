@@ -63,6 +63,52 @@ A visualization may pass `detailKinds={{ myKind: MyView }}` to
 `egcd` is the example). A custom kind gets promoted to built-in when a second
 visualization needs it — that's how `sqmul` earned its place (RSA, then DH).
 
+## Streams (Phase 2b)
+
+For work that is hundreds of micro-events rather than a readable sentence —
+a partition's pointer walk, a merge pass — a step may carry a stream:
+
+```js
+{
+  id: 'divide-and-conquer',
+  …,
+  stream: {
+    events: […],   // any shapes the stage understands
+    tick: 24,      // ms per batch (default 40)
+    batch: 3,      // events applied per tick (default 1)
+  },
+}
+```
+
+Behavior, owned by `<TraceInstrument>`:
+- Arriving at a streamed step replays its stream from the start.
+- `renderStage` receives `streamIndex` and `streamDone`; the stage derives
+  its picture by folding events `0 … streamIndex` (see `sorting/model.js`
+  `applyEvents` for the reference fold).
+- **Next / → complete a running stream first**, then advance on the second
+  press. Autoplay waits for `streamDone` before moving on.
+- The step list stays a handful of cited macro-steps; streams carry the
+  animation, never the citations.
+
+Sorting convention: the trace stores the full event array in
+`artifacts.events`, each step notes `data.eventBase` (events already applied
+when the step is entered), and streamed steps slice their own range —
+tested by asserting the slices concatenate back to `artifacts.events`.
+
+## Deep links (Phase 2c)
+
+Inputs and the current step serialize into the hash query
+(`#/visualizer/rsa?m=HI&p=11&q=13&e=7&s=2`):
+
+- The visualizer passes `urlParams={{ m, p, q, e }}` (stringable values) to
+  `<TraceInstrument>`, which owns the single write point (inputs + 1-based
+  `s`), using replace-style navigation so history stays clean.
+- The visualizer reads its initial state once, in a `readInitial(searchParams)`
+  helper with per-field validation and graceful fallback to defaults —
+  never trust a pasted URL.
+- The player's **Copy link** button copies the current URL, which restores
+  inputs and step exactly.
+
 ## TraceInstrument
 
 ```jsx

@@ -4,5 +4,7 @@
 import './rsa';
 import './bayes';
 import './dh';
+import './quicksort';
+import './mergesort';
 
 export { getVisualization, listVisualizations } from './registry';

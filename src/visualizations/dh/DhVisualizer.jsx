@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SAFE_PRIMES, generatorOptions, randomExponent } from './math';
 import { ACTS, buildDhTrace } from './trace';
 import { SOURCES } from './sources';
@@ -7,11 +8,25 @@ import DhLane from './DhLane';
 
 const fmt = (v) => String(v);
 
+// Deep-link params, validated with graceful fallback to the defaults.
+const readInitial = (sp) => {
+    const digits = (key) => (/^\d{1,6}$/.test(sp.get(key) ?? '') ? sp.get(key) : null);
+    const safePrime = digits('p') && SAFE_PRIMES.includes(BigInt(sp.get('p'))) ? sp.get('p') : null;
+    return {
+        p: safePrime ?? '83',
+        g: digits('g') ?? '2',
+        a: digits('a') ?? '9',
+        b: digits('b') ?? '21',
+    };
+};
+
 export default function DhVisualizer() {
-    const [pStr, setPStr] = useState('83');
-    const [gStr, setGStr] = useState('2');
-    const [aStr, setAStr] = useState('9');
-    const [bStr, setBStr] = useState('21');
+    const [searchParams] = useSearchParams();
+    const [initial] = useState(() => readInitial(searchParams));
+    const [pStr, setPStr] = useState(initial.p);
+    const [gStr, setGStr] = useState(initial.g);
+    const [aStr, setAStr] = useState(initial.a);
+    const [bStr, setBStr] = useState(initial.b);
 
     const p = BigInt(pStr);
     const gOptions = useMemo(() => generatorOptions(p), [p]);
@@ -94,6 +109,7 @@ export default function DhVisualizer() {
             acts={ACTS}
             controls={controls}
             renderStage={(ctx) => <DhLane {...ctx} />}
+            urlParams={{ p: pStr, g: gStr, a: aStr, b: bStr }}
             playIntervalMs={3000}
         />
     );

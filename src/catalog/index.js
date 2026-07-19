@@ -116,8 +116,25 @@ export const CATALOG = [
         domain: 'sorting',
         year: 1961,
         authors: 'C. A. R. Hoare',
-        summary: 'Partition around a pivot, recurse, and race the other sorts.',
-        status: 'planned',
+        summary:
+            'Partition around a pivot and recurse — watch Hoare’s pointers converge, streamed comparison by comparison.',
+        intro:
+            'Pick a starting order and watch Hoare’s partition walk its two pointers inward, swap the misfits, and recurse until every bar settles. The gold line is the pivot; the counters keep score. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/quicksort',
+    },
+    {
+        id: 'mergesort',
+        name: 'Merge Sort',
+        domain: 'sorting',
+        year: 1945,
+        authors: 'J. von Neumann (per Knuth §5.2.4)',
+        summary:
+            'Runs double until one remains — the sort with a guaranteed n log n, as old as stored-program computing.',
+        intro:
+            'Merge sort never looks at the whole array — it only merges sorted runs, starting from single bars. Watch passes of doubling width assemble the staircase, and see why the n log n bound cannot be broken. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/mergesort',
     },
     {
         id: 'clt',

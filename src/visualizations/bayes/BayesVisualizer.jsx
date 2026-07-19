@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { buildBayesTrace } from './trace';
 import { SOURCES } from './sources';
 import TraceInstrument from '../player/TraceInstrument';
@@ -15,8 +16,22 @@ const SLIDERS = [
 // The classic mammography defaults (Eddy 1982): 1% / 80% / 9.6%.
 const DEFAULTS = { prior: 1.0, sensitivity: 80, falsePositiveRate: 9.6 };
 
+// Deep-link params (percent units), validated against the slider ranges.
+const readInitial = (sp) => {
+    const read = (key, min, max, fallback) => {
+        const value = Number.parseFloat(sp.get(key) ?? '');
+        return Number.isFinite(value) && value >= min && value <= max ? value : fallback;
+    };
+    return {
+        prior: read('prior', 0.1, 20, DEFAULTS.prior),
+        sensitivity: read('sens', 50, 100, DEFAULTS.sensitivity),
+        falsePositiveRate: read('fpr', 0, 30, DEFAULTS.falsePositiveRate),
+    };
+};
+
 export default function BayesVisualizer() {
-    const [params, setParams] = useState(DEFAULTS);
+    const [searchParams] = useSearchParams();
+    const [params, setParams] = useState(() => readInitial(searchParams));
 
     const trace = useMemo(
         () =>
@@ -66,6 +81,11 @@ export default function BayesVisualizer() {
             listLabel="The update, step by step"
             controls={controls}
             renderStage={(ctx) => <PopulationGrid {...ctx} />}
+            urlParams={{
+                prior: params.prior,
+                sens: params.sensitivity,
+                fpr: params.falsePositiveRate,
+            }}
             playIntervalMs={2600}
         />
     );
