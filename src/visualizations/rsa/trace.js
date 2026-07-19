@@ -217,7 +217,7 @@ export function buildRsaTrace({ message, p, q, e }) {
             data: {
                 mapping: encrypted.map(({ char, m, c }) => ({ char, from: m, to: c })),
                 focus: {
-                    label: `m = ${encrypted[0].m} (“${encrypted[0].char}”), exponent e = ${e} = ${encrypted[0].work.bits}₂`,
+                    caption: `Square-and-multiply, m = ${encrypted[0].m} (“${encrypted[0].char}”), exponent e = ${e} = ${encrypted[0].work.bits}₂ (first block):`,
                     rows: encrypted[0].work.rows,
                     result: encrypted[0].c,
                 },
@@ -258,7 +258,7 @@ export function buildRsaTrace({ message, p, q, e }) {
                     to: m,
                 })),
                 focus: {
-                    label: `c = ${decrypted[0].c}, exponent d = ${d} = ${decrypted[0].work.bits}₂`,
+                    caption: `Square-and-multiply, c = ${decrypted[0].c}, exponent d = ${d} = ${decrypted[0].work.bits}₂ (first block):`,
                     rows: decrypted[0].work.rows,
                     result: decrypted[0].m,
                 },
@@ -292,7 +292,7 @@ export function buildRsaTrace({ message, p, q, e }) {
                 'Decryption computes (mᵉ)ᵈ = m^(e·d). Because d inverts e modulo φ(n), the exponent ' +
                 'e·d is one more than a multiple of φ(n) — and Euler proved that m^φ(n) ≡ 1 (mod n) ' +
                 'whenever gcd(m, n) = 1. The paper (§VI) extends the argument to every m.',
-            kind: 'proof',
+            kind: 'formula',
             data: {
                 lines: [
                     `e·d = ${e} × ${d} = ${e * d} = ${k}·φ(n) + 1`,

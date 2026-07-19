@@ -1,0 +1,307 @@
+/* Shared trace-instrument layout: controls, stage, player, step list,
+   detail card, and the built-in step-kind views. Ported verbatim from the
+   RSA/Bayes implementations during the Phase 2a extraction — visual parity
+   with Phase 1 is intentional. */
+
+.ti {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+}
+
+.ti-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 20px 22px;
+}
+
+.ti-error {
+    padding: 18px 22px;
+    border-color: var(--vermilion);
+    background: var(--vermilion-soft);
+    color: var(--vermilion);
+    font-size: 0.92rem;
+}
+
+.ti-stage {
+    padding: 18px;
+    overflow-x: auto;
+}
+
+/* --- Player --------------------------------------------------------------- */
+
+.ti-player {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.player-progress {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-count {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+}
+
+.player-rail {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--hairline);
+    overflow: hidden;
+}
+
+.player-fill {
+    height: 100%;
+    background: var(--ink);
+    transition: width 0.3s ease;
+}
+
+/* --- Step list + detail --------------------------------------------------- */
+
+.ti-columns {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.act-group {
+    margin-bottom: 18px;
+}
+
+.act-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+}
+
+.act-actor {
+    color: var(--ink-faint);
+    font-weight: 400;
+}
+
+.step-list ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.step-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.step-item:hover {
+    background: var(--paper-sunken);
+    color: var(--ink);
+}
+
+.step-item.current {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.step-item.done {
+    color: var(--ink-faint);
+}
+
+.step-item.done:hover {
+    color: var(--ink);
+}
+
+.step-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.7;
+    min-width: 16px;
+}
+
+.ti-detail {
+    padding: 26px 28px;
+    min-height: 320px;
+}
+
+.step-detail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.step-detail h3 {
+    font-size: 1.4rem;
+}
+
+.step-explanation {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+}
+
+/* --- Built-in kind views --------------------------------------------------- */
+
+.value-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0 0;
+}
+
+.value-item {
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    padding: 10px 16px;
+}
+
+.value-item dt {
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+}
+
+.value-item dd {
+    margin: 4px 0 0;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    word-break: break-all;
+}
+
+.math-block {
+    margin-top: 18px;
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    padding: 14px 18px;
+    overflow-x: auto;
+}
+
+.math-caption {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+}
+
+.math-line {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    padding: 2px 0;
+    white-space: nowrap;
+}
+
+.math-line.result {
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--cobalt);
+}
+
+.block-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.block-chip {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--green-soft);
+    color: var(--ink);
+}
+
+.block-chip.masked {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.sqmul-table {
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+}
+
+.sqmul-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 4px 18px 4px 0;
+}
+
+.sqmul-table td {
+    padding: 3px 18px 3px 0;
+    border-top: 1px solid var(--hairline);
+}
+
+/* --- Shared control primitives -------------------------------------------- */
+
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.control-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+.control input,
+.control select {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 90px;
+}
+
+.control input:focus,
+.control select:focus {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 1px;
+}
+
+/* --- Responsive ----------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .ti-columns {
+        grid-template-columns: 1fr;
+    }
+}

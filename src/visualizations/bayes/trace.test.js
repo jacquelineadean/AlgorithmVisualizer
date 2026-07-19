@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { buildBayesTrace, POPULATION } from './trace';
-import { PROVENANCE, SOURCES } from './sources';
 
 const CLASSIC = { prior: 0.01, sensitivity: 0.8, falsePositiveRate: 0.096 };
 
@@ -31,37 +30,5 @@ describe('buildBayesTrace', () => {
     });
 });
 
-// The evidence gate — same rule as RSA: no step renders without a
-// resolvable citation and a declared provenance class.
-describe('evidence gate', () => {
-    const { steps } = buildBayesTrace(CLASSIC);
-
-    it('every step carries at least one citation that resolves', () => {
-        for (const step of steps) {
-            expect(step.sourceRefs.length, `step "${step.id}" has no sources`).toBeGreaterThan(0);
-            for (const ref of step.sourceRefs) {
-                expect(SOURCES[ref.key], `step "${step.id}" cites unknown source "${ref.key}"`).toBeDefined();
-            }
-        }
-    });
-
-    it('every step declares a known provenance class', () => {
-        for (const step of steps) {
-            expect(
-                PROVENANCE[step.provenance],
-                `step "${step.id}" has unknown provenance "${step.provenance}"`
-            ).toBeDefined();
-        }
-    });
-
-    it('caveats cite sources too', () => {
-        for (const step of steps) {
-            if (!step.caveat) continue;
-            expect(step.caveat.sourceRefs.length).toBeGreaterThan(0);
-            for (const ref of step.caveat.sourceRefs) {
-                expect(SOURCES[ref.key]).toBeDefined();
-            }
-            expect(PROVENANCE[step.caveat.provenance]).toBeDefined();
-        }
-    });
-});
+// The evidence gate for Bayes now runs in the central suite
+// (src/visualizations/evidence-gate.test.js) over the registry.

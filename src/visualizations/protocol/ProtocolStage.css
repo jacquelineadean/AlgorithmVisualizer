@@ -1,6 +1,7 @@
-.protocol-lane {
+.protocol-stage {
     width: 100%;
     display: block;
+    min-width: 640px;
     font-family: var(--font-mono);
 }
 
@@ -54,6 +55,10 @@
     fill: var(--vermilion);
 }
 
+.panel-row.shared {
+    fill: var(--green);
+}
+
 /* Eve */
 
 .eve ellipse {
@@ -95,11 +100,11 @@
     font-size: 10.5px;
 }
 
-.pub-token rect {
+.public-token rect {
     fill: var(--cobalt);
 }
 
-.pub-token text {
+.public-token text {
     fill: #ffffff;
 }
 
@@ -114,18 +119,20 @@
     font-size: 10px;
 }
 
-.msg-token rect {
+.plain-token rect,
+.cipher-token rect {
     transition: fill 0.4s ease;
 }
 
-.msg-token.plain rect {
+.plain-token rect {
     fill: var(--green);
 }
 
-.msg-token.cipher rect {
+.cipher-token rect {
     fill: var(--ink);
 }
 
-.msg-token text {
+.plain-token text,
+.cipher-token text {
     fill: #ffffff;
 }
