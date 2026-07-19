@@ -57,12 +57,14 @@ export const CATALOG = [
     },
     {
         id: 'pathfinding',
-        name: "Dijkstra's Algorithm",
+        name: 'Shortest Paths: Dijkstra · A* · BFS',
         domain: 'graphs',
         year: 1959,
-        authors: 'Edsger W. Dijkstra',
+        authors: 'Dijkstra · Hart, Nilsson & Raphael · Moore',
         summary:
-            'Draw walls on a grid and watch the search sweep outward, always expanding the cheapest frontier first.',
+            'Draw a maze, pick a search, and watch the frontier move — Dijkstra’s diamond, A*’s guided wedge, BFS’s ripple.',
+        intro:
+            'Draw walls directly on the grid, then compare three classic searches over the same maze: Dijkstra settles the cheapest square, A* adds a compass, BFS sweeps in layers. The frontier streams live; the walk-back traces a provably shortest path. Every step cites its source.',
         status: 'live',
         route: '/visualizer/pathfinding',
     },
@@ -93,21 +95,38 @@ export const CATALOG = [
         route: '/visualizer/dh',
     },
     {
+        id: 'vigenere',
+        name: 'Vigenère Cipher',
+        domain: 'cryptography',
+        year: 1586,
+        authors: 'B. de Vigenère',
+        summary:
+            'The keyword repeats, the alphabets rotate, and for three centuries nobody could read it — then Kasiski counted.',
+        intro:
+            'Type a message and a keyword, watch the key cycle beneath the plaintext, and encipher letter by letter with c = (p + k) mod 26. Then see why the repetition that powers the cipher is exactly what broke it. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/vigenere',
+    },
+    {
+        id: 'sieve',
+        name: 'Sieve of Eratosthenes',
+        domain: 'cryptography',
+        year: 'c. 240 BC',
+        authors: 'Eratosthenes · Horsley’s 1772 account',
+        summary:
+            'Keep the first survivor, cross out its multiples, repeat — the ancient machine that mints the primes RSA runs on.',
+        intro:
+            'Every prime you keep crosses out its multiples, starting at p² — and what survives is prime by construction. Slide the board size, stream the crossings, and see why the sieve stops at √N. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/sieve',
+    },
+    {
         id: 'sha-256',
         name: 'SHA-256',
         domain: 'cryptography',
         year: 2001,
         authors: 'NSA / NIST FIPS 180',
         summary: 'Message schedule, rounds, and the avalanche effect.',
-        status: 'planned',
-    },
-    {
-        id: 'astar',
-        name: 'A* Search',
-        domain: 'graphs',
-        year: 1968,
-        authors: 'Hart · Nilsson · Raphael',
-        summary: 'Dijkstra plus a heuristic: search that knows where it is going.',
         status: 'planned',
     },
     {

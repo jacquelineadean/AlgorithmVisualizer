@@ -157,6 +157,23 @@ any step (or caveat) lacks a resolvable citation or a declared provenance
 class, or if any source record is incomplete. Registering a visualization
 *is* opting into the gate — there is no way to ship an uncited entry.
 
+## 3D scenes (Phase 3)
+
+A 3D view is an *addition* to a stage, never a replacement, and it obeys two
+hard rules:
+
+- **Lazy or nothing:** the scene module (which imports `scene3d/Scene3D` and,
+  through it, all of three.js) loads via `React.lazy` behind an explicit user
+  toggle — 2D routes ship zero 3D bytes. See `rsa/RsaHelixScene.jsx`.
+- **No decorative geometry:** every position derives from trace artifacts
+  through a pure geometry module with unit tests that recompute the positions
+  from first principles (`scene3d/helix.js` + `helix.test.js` are the
+  reference). If it isn't in the trace, it isn't drawn.
+
+`Scene3D` provides the paper-world canvas, lighting, orbit camera, and a
+WebGL error-boundary fallback. Scenes should offer a provenance overlay
+mapping element colors to the classes they derive from.
+
 ## Rules of thumb
 
 - Trace modules never import UI; visualizer components never compute — they

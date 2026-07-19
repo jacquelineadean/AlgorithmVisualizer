@@ -6,5 +6,8 @@ import './bayes';
 import './dh';
 import './quicksort';
 import './mergesort';
+import './pathfinding';
+import './vigenere';
+import './sieve';
 
 export { getVisualization, listVisualizations } from './registry';

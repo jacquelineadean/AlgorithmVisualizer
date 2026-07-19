@@ -1,0 +1,36 @@
+.lanes-stage {
+    width: 100%;
+    display: block;
+    min-width: 560px;
+    font-family: var(--font-mono);
+}
+
+.lane-label {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    fill: var(--ink-faint);
+}
+
+.lane-cell {
+    fill: var(--paper-sunken);
+    transition: fill 0.2s ease;
+}
+
+.lane-cell.cursor {
+    fill: var(--cobalt-soft);
+}
+
+.lane-char {
+    font-size: 14px;
+    fill: var(--ink);
+}
+
+.lane-char.keych {
+    fill: var(--cobalt);
+}
+
+.lane-char.cipher {
+    fill: var(--vermilion);
+}

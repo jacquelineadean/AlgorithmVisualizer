@@ -1,0 +1,43 @@
+.number-grid {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    display: block;
+    font-family: var(--font-mono);
+}
+
+.ncell {
+    fill: var(--paper-sunken);
+    transition: fill 0.25s ease, opacity 0.25s ease;
+}
+
+.ncell.prime {
+    fill: var(--green-soft);
+    stroke: var(--green);
+    stroke-width: 1.2;
+}
+
+.ncell.crossed {
+    fill: var(--paper);
+    opacity: 0.45;
+}
+
+.ncell.cursor {
+    stroke: var(--cobalt);
+    stroke-width: 2;
+}
+
+.nnum {
+    font-size: 12px;
+    fill: var(--ink-soft);
+}
+
+.nnum.dim {
+    fill: var(--ink-faint);
+    text-decoration: line-through;
+}
+
+.nnum.lit {
+    fill: var(--green);
+    font-weight: 600;
+}
