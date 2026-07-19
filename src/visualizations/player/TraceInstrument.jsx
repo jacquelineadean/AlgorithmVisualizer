@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Caveat, EvidenceRow, EvidenceSection } from '../evidence/Evidence';
 import './StepPlayer.css';
 
@@ -173,38 +174,86 @@ export default function TraceInstrument({
     sources, // citation database for the evidence UI
     acts, // optional [{id, name, actor}] to group the step list
     listLabel, // group label when there are no acts
-    renderStage, // ({ steps, stepIndex, artifacts }) => node
+    renderStage, // ({ steps, stepIndex, artifacts, streamIndex, streamDone }) => node
     controls, // node rendered inside the controls card
     detailKinds, // optional { kind: Component } — merged over built-ins
     error, // string → renders an error card instead of stage/player
+    urlParams, // optional { key: stringable } — inputs serialized to the hash query
     playIntervalMs = 2800,
     evidenceIntro = 'Every step above cites at least one of these sources — the suite fails otherwise. Provenance classes:',
 }) {
     const steps = trace?.steps ?? [];
-    const [stepIndex, setStepIndex] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    // Deep links carry the step as 1-based ?s=N; read once on mount.
+    const [stepIndex, setStepIndex] = useState(() => {
+        const s = Number.parseInt(searchParams.get('s') ?? '', 10);
+        return Number.isFinite(s) && s > 0 ? s - 1 : 0;
+    });
     const [playing, setPlaying] = useState(false);
+    const [copied, setCopied] = useState(false);
     const clampedIndex = Math.min(stepIndex, Math.max(steps.length - 1, 0));
     const currentStep = steps[clampedIndex];
     const kinds = { ...BUILTIN_KINDS, ...detailKinds };
+
+    // Stream channel: events animated *within* the current step. Arriving at
+    // a streamed step replays it from the start; Next (and →) complete a
+    // running stream before advancing.
+    const stream = currentStep?.stream;
+    const streamLength = stream?.events.length ?? 0;
+    const [streamIndex, setStreamIndex] = useState(0);
+    const streamDone = streamIndex >= streamLength;
+
+    useEffect(() => {
+        setStreamIndex(0);
+    }, [clampedIndex, trace]);
+
+    useEffect(() => {
+        if (!stream || streamLength === 0) return undefined;
+        const tick = stream.tick ?? 40;
+        const batch = stream.batch ?? 1;
+        const id = setInterval(() => {
+            setStreamIndex((prev) => {
+                const next = Math.min(prev + batch, streamLength);
+                if (next >= streamLength) clearInterval(id);
+                return next;
+            });
+        }, tick);
+        return () => clearInterval(id);
+    }, [stream, streamLength, clampedIndex, trace]);
 
     const goTo = (index) => {
         setPlaying(false);
         setStepIndex(Math.max(0, Math.min(index, steps.length - 1)));
     };
 
+    const goPrev = () => {
+        setPlaying(false);
+        setStepIndex((i) => Math.max(i - 1, 0));
+    };
+
+    const goNext = () => {
+        setPlaying(false);
+        if (!streamDone) {
+            setStreamIndex(streamLength);
+            return;
+        }
+        setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+    };
+
+    // Autoplay: advance only once the current step's stream has finished.
     useEffect(() => {
-        if (!playing || steps.length === 0) return undefined;
-        const id = setInterval(() => {
-            setStepIndex((index) => {
-                if (index >= steps.length - 1) {
-                    setPlaying(false);
-                    return index;
-                }
-                return index + 1;
-            });
-        }, playIntervalMs);
-        return () => clearInterval(id);
-    }, [playing, steps.length, playIntervalMs]);
+        if (!playing || steps.length === 0 || !streamDone) return undefined;
+        if (clampedIndex >= steps.length - 1) {
+            setPlaying(false);
+            return undefined;
+        }
+        const dwell = stream ? Math.min(playIntervalMs, 1400) : playIntervalMs;
+        const id = setTimeout(
+            () => setStepIndex((i) => Math.min(i + 1, steps.length - 1)),
+            dwell
+        );
+        return () => clearTimeout(id);
+    }, [playing, streamDone, clampedIndex, steps.length, playIntervalMs, stream]);
 
     // Arrow-key navigation; never hijacks form fields or browser shortcuts.
     useEffect(() => {
@@ -212,18 +261,42 @@ export default function TraceInstrument({
             if (event.metaKey || event.ctrlKey || event.altKey) return;
             const tag = event.target.tagName;
             if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-            if (event.key === 'ArrowRight') {
-                setPlaying(false);
-                setStepIndex((i) => Math.min(i + 1, steps.length - 1));
-            }
-            if (event.key === 'ArrowLeft') {
-                setPlaying(false);
-                setStepIndex((i) => Math.max(i - 1, 0));
-            }
+            if (event.key === 'ArrowRight') goNext();
+            if (event.key === 'ArrowLeft') goPrev();
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [steps.length]);
+    });
+
+    // Serialize inputs + step into the hash query. One write point (inputs
+    // arrive via urlParams) so writers never clobber each other; replace
+    // keeps history clean. Reads happen once, in each component's initial
+    // state — pasted links restore inputs and step.
+    const urlJson = JSON.stringify(urlParams ?? {});
+    useEffect(() => {
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev);
+                for (const [key, value] of Object.entries(urlParams ?? {})) {
+                    next.set(key, String(value));
+                }
+                next.set('s', String(clampedIndex + 1));
+                return next;
+            },
+            { replace: true }
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [urlJson, clampedIndex, setSearchParams]);
+
+    const copyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1600);
+        } catch {
+            /* Clipboard unavailable (permissions, non-secure context) — ignore. */
+        }
+    };
 
     return (
         <div className="ti">
@@ -238,6 +311,8 @@ export default function TraceInstrument({
                             steps,
                             stepIndex: clampedIndex,
                             artifacts: trace.artifacts,
+                            streamIndex,
+                            streamDone,
                         })}
                     </div>
 
@@ -245,7 +320,7 @@ export default function TraceInstrument({
                         <button
                             type="button"
                             className="pill-button secondary"
-                            onClick={() => goTo(clampedIndex - 1)}
+                            onClick={goPrev}
                             disabled={clampedIndex === 0}
                         >
                             ‹ Prev
@@ -266,8 +341,8 @@ export default function TraceInstrument({
                         <button
                             type="button"
                             className="pill-button secondary"
-                            onClick={() => goTo(clampedIndex + 1)}
-                            disabled={clampedIndex === steps.length - 1}
+                            onClick={goNext}
+                            disabled={clampedIndex === steps.length - 1 && streamDone}
                         >
                             Next ›
                         </button>
@@ -284,6 +359,14 @@ export default function TraceInstrument({
                             }}
                         >
                             {playing ? 'Pause' : 'Play'}
+                        </button>
+                        <button
+                            type="button"
+                            className="pill-button secondary"
+                            onClick={copyLink}
+                            title="Copy a link that restores these inputs and this step"
+                        >
+                            {copied ? 'Copied ✓' : 'Copy link'}
                         </button>
                     </div>
 

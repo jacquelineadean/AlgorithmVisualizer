@@ -57,6 +57,36 @@ describe('bayes page', () => {
     });
 });
 
+describe('sorting pages', () => {
+    it('renders quicksort with streamed steps and citations', () => {
+        renderAt('/visualizer/quicksort');
+        expect(screen.getByRole('heading', { name: /^quicksort$/i })).toBeInTheDocument();
+        expect(screen.getByText(/step 1 \/ 4/i)).toBeInTheDocument();
+        expect(document.getElementById('ref-HOARE61')).not.toBeNull();
+    });
+
+    it('renders merge sort', () => {
+        renderAt('/visualizer/mergesort');
+        expect(screen.getByRole('heading', { name: /^merge sort$/i })).toBeInTheDocument();
+        expect(document.getElementById('ref-KNUTH98')).not.toBeNull();
+    });
+});
+
+describe('deep links', () => {
+    it('restores inputs and step from the URL', () => {
+        renderAt('/visualizer/rsa?m=HI&p=11&q=13&e=7&s=2');
+        // n = 11 × 13 = 143 appears once keygen reaches the modulus step (s=2).
+        expect(screen.getByText(/step 2 \/ 13/i)).toBeInTheDocument();
+        expect(screen.getByText('143')).toBeInTheDocument();
+    });
+
+    it('falls back to defaults on invalid params', () => {
+        renderAt('/visualizer/rsa?p=999&q=abc&s=notanumber');
+        expect(screen.getByText(/step 1 \/ 13/i)).toBeInTheDocument();
+        expect(screen.getByRole('combobox', { name: /prime p/i })).toHaveValue('61');
+    });
+});
+
 describe('diffie–hellman page', () => {
     it('renders through the generic visualizer route with the worked example', () => {
         renderAt('/visualizer/dh');

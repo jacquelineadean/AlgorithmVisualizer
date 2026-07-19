@@ -1,0 +1,57 @@
+.bars-stage {
+    width: 100%;
+    display: block;
+    min-width: 560px;
+}
+
+.bars-stage .bar {
+    fill: var(--paper-sunken);
+    stroke: var(--hairline);
+    stroke-width: 1;
+    transition: fill 0.15s ease, y 0.12s ease, height 0.12s ease;
+}
+
+.bars-stage .bar.active {
+    fill: var(--cobalt-soft);
+}
+
+.bars-stage .bar.compared {
+    fill: var(--cobalt);
+}
+
+.bars-stage .bar.swapped {
+    fill: var(--vermilion);
+}
+
+.bars-stage .bar.written {
+    fill: var(--green);
+}
+
+.bars-stage .bar.settled {
+    fill: var(--green-soft);
+    stroke: var(--green);
+}
+
+.range-band {
+    fill: var(--paper-sunken);
+    opacity: 0.6;
+}
+
+.pivot-line {
+    stroke: var(--gold);
+    stroke-width: 1.6;
+    stroke-dasharray: 6 4;
+}
+
+.pivot-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--gold);
+}
+
+.bars-counter,
+.bars-pass {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-soft);
+}

@@ -86,7 +86,7 @@ utility that runs automatically for every registered visualization.
 | Phase | Theme | Status | Exit condition |
 | --- | --- | --- | --- |
 | 1 | MVP, identity, first three cited visualizations | ✅ Shipped 2026-07-18 (PRs #2, #3) | RSA + Bayes + Dijkstra live under the evidence rule |
-| 2 | Platform contracts & 2D breadth | In progress — 2a ✅ (2026-07-18) | A new 2D visualization is a content-only PR; 8+ live |
+| 2 | Platform contracts & 2D breadth | In progress — 2a ✅, 2c ✅, 2b streams ✅ (2026-07-19) | A new 2D visualization is a content-only PR; 8+ live |
 | 3 | 3D renderer tier | Planned | 3D pages ship under the same trace + evidence contract |
 | 4 | Domain build-out + AI architecture explorer | Planned | Every domain ≥ 2 live; drill-down maps live; 20+ live |
 | 5 | Polish, performance, community | Planned | External contribution lands without maintainer surgery |
@@ -139,7 +139,14 @@ stage — rather than an app. Prove it by shipping five new entries on the contr
 > `/visualizer/:id` page, the central evidence-gate suite, and the shared modular-math lib;
 > RSA and Bayes migrated with no visible change. **Diffie–Hellman shipped from 2d as the
 > contract proof** — its diff touches only `src/visualizations/dh/` plus one catalog entry.
-> Remaining: 2b (streams + pathfinding migration), 2c (deep links), rest of 2d, 2e.
+>
+> **Progress (2026-07-19):** 2c shipped — inputs + step serialize to the hash query with
+> validated fallback, single write point in the instrument, Copy-link button; restore is
+> tested. **2b's stream channel shipped and was prototyped on sorting as planned** —
+> `step.stream {events, tick, batch}`, stage folds via `applyEvents`, Next completes a
+> running stream, autoplay waits; **quicksort and merge sort shipped from 2d** on the shared
+> `BarsStage` (6 live total). Remaining: 2b pathfinding migration onto macro-steps + streams,
+> 2d Vigenère + sieve + KaTeX + MDX, 2e mobile/a11y pass.
 
 ### 2a. Contracts & component kit (M) ✅
 
@@ -392,7 +399,7 @@ Phase tags mark where each entry is scheduled; unmarked "later" items are unsche
 | --- | --- | --- | --- |
 | Cryptography | RSA, Diffie–Hellman | Vigenère (P2), SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
 | Graphs & pathfinding | Dijkstra | A*, BFS/DFS (P2) | Bellman–Ford, max-flow, MST |
-| Sorting & order | — | Quicksort, merge sort (P2) | Heapsort, radix, sorting networks (P3) |
+| Sorting & order | Quicksort, merge sort | — | Heapsort, radix, sorting networks (P3) |
 | Numbers & primes | — | Sieve of Eratosthenes (P2), Euclid (P4) | Miller–Rabin, Karatsuba, FFT multiply |
 | Statistics & probability | Bayes' rule | CLT, Monte Carlo π (P4) | Markov chains (P4), regression (P4) |
 | AI & machine learning | — | Transformer architecture map, LLM inference pipeline (P4) | Attention internals, backprop, k-means, decision trees (P4); gradient descent (P3) |
