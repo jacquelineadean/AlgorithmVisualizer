@@ -53,3 +53,27 @@
     font-size: 1.4rem;
     margin: 30px 0 12px;
 }
+
+.post-body ul,
+.post-body ol {
+    margin: 0 0 18px;
+    padding-left: 26px;
+}
+
+.post-body li {
+    margin-bottom: 8px;
+    font-size: 1.02rem;
+    line-height: 1.7;
+}
+
+.post-body a {
+    color: var(--cobalt);
+}
+
+.post-body strong {
+    font-weight: 600;
+}
+
+.post-body em {
+    font-style: italic;
+}

@@ -305,3 +305,22 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 560px) {
+    .ti-player {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .player-progress {
+        order: -1;
+        flex-basis: 100%;
+    }
+    .ti-detail {
+        padding: 20px 18px;
+        min-height: 0;
+    }
+    .ti-controls {
+        padding: 16px 16px;
+        gap: 14px;
+    }
+}

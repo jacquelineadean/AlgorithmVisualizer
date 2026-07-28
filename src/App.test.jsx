@@ -34,14 +34,16 @@ describe('site shell', () => {
 });
 
 describe('pathfinding page', () => {
-    it('renders the visualizer with its controls and grid', () => {
+    it('renders the grid with three algorithms, streams, and citations', () => {
         renderAt('/visualizer/pathfinding');
-        expect(screen.getByRole('button', { name: /visualize dijkstra/i })).toBeInTheDocument();
-        expect(screen.getByRole('combobox')).toHaveValue('dijkstra');
-        expect(document.getElementById('node-10-15')).toHaveClass('node-start');
-        expect(document.getElementById('node-10-35')).toHaveClass('node-finish');
-        // The grid tool now cites its evidence too.
+        expect(screen.getByRole('heading', { name: /shortest paths/i })).toBeInTheDocument();
+        const select = screen.getByRole('combobox', { name: /algorithm/i });
+        expect(select).toHaveValue('dijkstra');
+        expect(within(select).getByRole('option', { name: /a\* search/i })).toBeInTheDocument();
+        expect(within(select).getByRole('option', { name: /breadth-first/i })).toBeInTheDocument();
+        expect(screen.getByText(/step 1 \/ 5/i)).toBeInTheDocument();
         expect(document.getElementById('ref-DIJKSTRA59')).not.toBeNull();
+        expect(document.getElementById('ref-HNR68')).not.toBeNull();
     });
 });
 

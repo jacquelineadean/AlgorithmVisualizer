@@ -1,0 +1,53 @@
+export const meta = {
+    slug: 'how-rsa-was-sourced',
+    title: 'How the RSA visualization was sourced',
+    date: '2026-07-19',
+    readingMinutes: 5,
+    summary:
+        'A walk through the seven sources behind the RSA page — what each one contributes, and where the visualization deliberately deviates.',
+};
+
+Every step of the [RSA visualization](#/visualizer/rsa) resolves at least one
+citation, or the test suite fails. This post is the promised companion: what
+each source actually contributes, and where the visualization knowingly
+simplifies.
+
+## The primary source
+
+**Rivest, Shamir & Adleman (1978)**, *A Method for Obtaining Digital Signatures
+and Public-Key Cryptosystems*, is the backbone — eleven of thirteen steps cite
+it. The key-generation act follows §VII: primes, the modulus, the totient, and
+the private exponent derived with Euclid's algorithm. Two details from the paper
+that most retellings drop:
+
+- The paper chooses **d first** and derives e; practice later flipped the order.
+  The "pick the public exponent" step says so rather than pretending the modern
+  convention was always there.
+- §VI proves correctness for **every** message m, not just those coprime to n —
+  the "why decryption inverts encryption" step leans on Euler's theorem for the
+  clean case and points at the paper for the general one.
+
+## The bedrock and the context
+
+**Euler (1763)** supplies the totient theorem the proof stands on, and
+**Diffie & Hellman (1976)** the public-key idea RSA realized — the "publish
+(e, n)" step cites both, because publishing a key *was* the radical act.
+**Knuth's** §4.5.2 and §4.6.3 back the two working algorithms on screen:
+extended Euclid and square-and-multiply.
+
+## The modern layer
+
+**RFC 8017** marks every place practice has moved: λ(n) instead of φ(n),
+e = 65537, and — most importantly — OAEP padding, cited on the encoding step
+where the visualization's character-by-character encryption would otherwise
+look like advice. **NIST SP 800-57** sets the key sizes that make the toy
+primes a labeled teaching device, and **Katz & Lindell** carry the
+textbook-RSA-is-not-a-scheme warning.
+
+## The deliberate deviations
+
+All tagged `pedagogical` in the UI, all with the honest version cited inline:
+two-digit primes, per-character ECB-style blocks, and printable-ASCII encoding
+in place of the paper's two-digits-per-letter scheme. The rule is not that the
+visualization never simplifies — it is that a simplification never passes
+itself off as the algorithm.

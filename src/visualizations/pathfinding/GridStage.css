@@ -1,0 +1,83 @@
+.grid-stage {
+    width: 100%;
+    display: block;
+    min-width: 640px;
+    touch-action: none;
+}
+
+.gcell {
+    fill: var(--paper-raised);
+    stroke: var(--hairline);
+    stroke-width: 0.6;
+    transition: fill 0.15s ease;
+    cursor: crosshair;
+}
+
+.gcell.visited {
+    fill: var(--cobalt-soft);
+}
+
+.gcell.head {
+    fill: var(--cobalt);
+}
+
+.gcell.path {
+    fill: var(--gold);
+}
+
+.gcell.wall {
+    fill: var(--ink);
+}
+
+.gcell.start {
+    fill: var(--green);
+    cursor: default;
+}
+
+.gcell.finish {
+    fill: var(--vermilion);
+    cursor: default;
+}
+
+.grid-caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+.gkey {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.gswatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    display: inline-block;
+    background: var(--paper-sunken);
+}
+
+.gswatch.start {
+    background: var(--green);
+}
+
+.gswatch.finish {
+    background: var(--vermilion);
+}
+
+.gswatch.wall {
+    background: var(--ink);
+}
+
+.gswatch.visited {
+    background: var(--cobalt-soft);
+}
+
+.gswatch.path {
+    background: var(--gold);
+}

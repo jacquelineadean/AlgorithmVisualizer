@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Caveat, EvidenceRow, EvidenceSection } from '../evidence/Evidence';
+import TexLine from './TexLine';
 import './StepPlayer.css';
 
 // The shared instrument every trace-based visualization renders through:
@@ -32,11 +33,15 @@ function FormulaView({ data }) {
     return (
         <div className="math-block">
             {data.caption && <div className="math-caption">{data.caption}</div>}
-            {data.lines.map((line, i) => (
-                <div className="math-line" key={i}>
-                    {line}
-                </div>
-            ))}
+            {data.lines.map((line, i) =>
+                typeof line === 'object' && line.tex ? (
+                    <TexLine key={i} tex={line.tex} />
+                ) : (
+                    <div className="math-line" key={i}>
+                        {line}
+                    </div>
+                )
+            )}
             {data.result != null && <div className="math-line result">{data.result}</div>}
         </div>
     );
@@ -197,17 +202,23 @@ export default function TraceInstrument({
 
     // Stream channel: events animated *within* the current step. Arriving at
     // a streamed step replays it from the start; Next (and →) complete a
-    // running stream before advancing.
+    // running stream before advancing. Reduced-motion users get the final
+    // state immediately (2e) — the step prose carries the full story.
+    const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const stream = currentStep?.stream;
     const streamLength = stream?.events.length ?? 0;
     const [streamIndex, setStreamIndex] = useState(0);
     const streamDone = streamIndex >= streamLength;
 
     useEffect(() => {
-        setStreamIndex(0);
-    }, [clampedIndex, trace]);
+        setStreamIndex(prefersReducedMotion ? Number.MAX_SAFE_INTEGER : 0);
+    }, [clampedIndex, trace, prefersReducedMotion]);
 
     useEffect(() => {
+        if (prefersReducedMotion) return undefined;
         if (!stream || streamLength === 0) return undefined;
         const tick = stream.tick ?? 40;
         const batch = stream.batch ?? 1;
