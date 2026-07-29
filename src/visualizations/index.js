@@ -20,5 +20,9 @@ import './attention';
 import './transformer';
 import './llminference';
 import './trainingloop';
+import './raft';
+import './consistenthashing';
+import './mapreduce';
+import './cap';
 
 export { getVisualization, listVisualizations } from './registry';

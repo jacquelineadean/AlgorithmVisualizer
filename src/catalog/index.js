@@ -304,8 +304,12 @@ export const CATALOG = [
         domain: 'systems',
         year: 2014,
         authors: 'Ongaro · Ousterhout',
-        summary: 'Leader election and log replication in an understandable consensus protocol.',
-        status: 'planned',
+        summary:
+            'Elect a leader, replicate a log, survive a partition — and watch what the protocol refuses to commit.',
+        intro:
+            'Five servers, randomized timeouts, and a majority rule. Split the network and see the old leader keep trying while the larger side elects a new one — then heal it and watch one log win. The simulation follows Raft’s actual rules; the tests assert its safety properties on every frame. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/raft',
     },
     {
         id: 'consistent-hashing',
@@ -313,8 +317,38 @@ export const CATALOG = [
         domain: 'systems',
         year: 1997,
         authors: 'Karger et al.',
-        summary: 'Keys on a ring: add a server, move almost nothing.',
-        status: 'planned',
+        summary:
+            'Keys on a ring: add a server and almost nothing moves — where hash mod N moves nearly everything.',
+        intro:
+            'Hash servers and keys into the same circle, and a key belongs to the first server clockwise. Add a server and only one arc changes hands. Turn up the virtual-node count and watch the load bars flatten — the one knob that made the ring practical. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/consistent-hashing',
+    },
+    {
+        id: 'mapreduce',
+        name: 'MapReduce',
+        domain: 'systems',
+        year: 2004,
+        authors: 'Dean · Ghemawat',
+        summary:
+            'Two functions you write, a thousand machines you do not manage — and the three tricks that make it work.',
+        intro:
+            'A clickable job map: splits, map, combiner, shuffle, reduce — then the systems concerns that are the actual contribution, namely re-execution on failure, scheduling for locality, and backup tasks for stragglers. Job shapes are computed from the input size. Every node cites its source.',
+        status: 'live',
+        route: '/visualizer/mapreduce',
+    },
+    {
+        id: 'cap',
+        name: 'The CAP Theorem',
+        domain: 'systems',
+        year: 2002,
+        authors: 'Brewer · Gilbert & Lynch',
+        summary:
+            'One write, one read, one partition — and a choice between an answer that is wrong and no answer at all.',
+        intro:
+            'Pick a policy and watch the same scenario play out: CP refuses to answer, AP answers with stale data. When the network is healthy, nothing is given up at all — the part most summaries lose. Then tune R, W, and N to see where the dial really lives. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/cap',
     },
 ];
 
