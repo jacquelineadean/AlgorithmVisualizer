@@ -60,8 +60,9 @@ export default function Home() {
             <section className="content domains">
                 <h2 className="section-title">An atlas, one domain at a time</h2>
                 <p className="section-sub">
-                    The catalog grows by phases — cryptography first, then graphs, sorting,
-                    statistics, machine learning, and distributed systems.
+                    The catalog grew by phases — cryptography first, then graphs, sorting and
+                    statistics, and now machine learning, distributed systems, number theory,
+                    and the general-purpose methods that turn up everywhere.
                 </p>
                 <div className="domain-grid">
                     {DOMAINS.map((domain) => {

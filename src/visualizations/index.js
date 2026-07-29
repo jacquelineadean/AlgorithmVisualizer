@@ -28,5 +28,6 @@ import './euclid';
 import './huffman';
 import './pagerank';
 import './sha256';
+import './fourier';
 
 export { getVisualization, listVisualizations } from './registry';

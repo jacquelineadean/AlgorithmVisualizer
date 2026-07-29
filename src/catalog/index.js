@@ -172,6 +172,19 @@ export const CATALOG = [
         route: '/visualizer/huffman',
     },
     {
+        id: 'fourier',
+        name: 'Fourier Epicycles',
+        domain: 'methods',
+        year: 1822,
+        authors: 'J. B. J. Fourier · Cooley & Tukey',
+        summary:
+            'Every closed curve is a stack of rotating circles — and the coefficients tell you exactly which ones.',
+        intro:
+            'Read a drawn path as a complex signal, transform it, and watch the coefficients turn back into rotating arms that redraw the curve. Add circles and the error falls; cut a corner and Gibbs’ ringing appears. Then see why the O(N²) definition on this page is not what anyone runs. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/fourier',
+    },
+    {
         id: 'pagerank',
         name: 'PageRank',
         domain: 'graphs',
