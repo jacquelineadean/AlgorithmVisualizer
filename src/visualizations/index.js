@@ -17,5 +17,8 @@ import './kmeans';
 import './perceptron';
 import './backprop';
 import './attention';
+import './transformer';
+import './llminference';
+import './trainingloop';
 
 export { getVisualization, listVisualizations } from './registry';

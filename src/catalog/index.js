@@ -267,17 +267,36 @@ export const CATALOG = [
         authors: 'Vaswani et al.',
         summary:
             'The whole stack as a clickable map — embeddings, attention blocks, MLPs, the residual stream — each component opening its own breakdown.',
-        status: 'planned',
+        intro:
+            'Zoom from the whole model down to a single attention head computing real weights. Pick a configuration and every number on the page — parameter counts, head dimensions, KV cost per token — is recomputed from it. Every node cites its own paper.',
+        status: 'live',
+        route: '/visualizer/transformer-arch',
     },
     {
         id: 'llm-inference',
         name: 'LLM Inference Pipeline',
         domain: 'ml',
         year: 2022,
-        authors: 'Pope et al. · Kwon et al.',
+        authors: 'Pope et al. · Yu et al. · Kwon et al.',
         summary:
-            'Tokenize → prefill → KV cache → decode → sample. Click any stage to zoom into how a model actually serves a request.',
-        status: 'planned',
+            'Tokenize → prefill → KV cache → decode → sample. Prefill is compute-bound, decode is memory-bound, and everything follows from that.',
+        intro:
+            'What actually happens between a request arriving and the last token leaving. Choose a model and an accelerator, and the timings, cache sizes, and batching gains are computed from published specs — then zoom into continuous batching, paged KV, and speculative decoding. Every node cites its own paper.',
+        status: 'live',
+        route: '/visualizer/llm-inference',
+    },
+    {
+        id: 'training-loop',
+        name: 'Training Loop Map',
+        domain: 'ml',
+        year: 1986,
+        authors: 'Rumelhart et al. · Shoeybi et al. · Hoffmann et al.',
+        summary:
+            'Data, forward, loss, backward, step — and the parallelism, precision, and scaling laws that make it survive a thousand GPUs.',
+        intro:
+            'One optimizer step, and then a hundred thousand of them. Pick a run and a cluster to see FLOPs, wall clock, optimizer state, and how ZeRO, tensor, and pipeline parallelism divide it up — plus whether the run sits at the compute-optimal point. Every node cites its own paper.',
+        status: 'live',
+        route: '/visualizer/training-loop',
     },
     {
         id: 'raft',
