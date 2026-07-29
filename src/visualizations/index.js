@@ -13,5 +13,9 @@ import './clt';
 import './montecarlo';
 import './markov';
 import './regression';
+import './kmeans';
+import './perceptron';
+import './backprop';
+import './attention';
 
 export { getVisualization, listVisualizations } from './registry';

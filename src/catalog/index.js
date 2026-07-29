@@ -212,18 +212,52 @@ export const CATALOG = [
         name: 'k-means Clustering',
         domain: 'ml',
         year: 1957,
-        authors: 'Lloyd',
-        summary: 'Centroids chase their clusters until the assignment settles.',
-        status: 'planned',
+        authors: 'S. Lloyd · J. MacQueen',
+        summary:
+            'Assign, average, repeat — centroids chase their clusters downhill until nothing moves.',
+        intro:
+            'Two half-steps, each provably non-increasing: give every point to its nearest centre, then move every centre to its cluster’s mean. It always terminates, it rarely finds the optimum, and it will happily invent k clusters in noise. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/kmeans',
+    },
+    {
+        id: 'perceptron',
+        name: 'The Perceptron',
+        domain: 'ml',
+        year: 1958,
+        authors: 'F. Rosenblatt',
+        summary:
+            'The first algorithm that learned: one weighted sum, corrected by every mistake it makes.',
+        intro:
+            'Weights start at zero and change only when the machine is wrong. On separable data Novikoff’s bound says it must stop; on XOR it corrects forever — the limit that named an AI winter. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/perceptron',
+    },
+    {
+        id: 'backprop',
+        name: 'Backpropagation',
+        domain: 'ml',
+        year: 1986,
+        authors: 'Rumelhart · Hinton · Williams',
+        summary:
+            'One forward pass, one reverse pass, and every derivative in the network falls out.',
+        intro:
+            'A 2–2–1 network small enough to read: watch the activations flow forward, the deltas flow back through the chain rule, and nine weights descend until XOR is solved. The gradients on this page are checked against finite differences. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/backprop',
     },
     {
         id: 'attention',
         name: 'Transformer Attention',
         domain: 'ml',
         year: 2017,
-        authors: 'Vaswani et al.',
-        summary: 'Queries, keys, and values — attention weights as a living matrix.',
-        status: 'planned',
+        authors: 'Vaswani et al. · Bahdanau et al.',
+        summary:
+            'Queries, keys, and values — one matrix multiply, one softmax, and every token sees every other.',
+        intro:
+            'Four tokens, three projections, and the arithmetic of a single attention head worked all the way through: QKᵀ, the √dₖ scaling, softmax, and the weighted sum of values. Toggle the causal mask to turn an encoder into a decoder. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/attention',
     },
     {
         id: 'transformer-arch',
