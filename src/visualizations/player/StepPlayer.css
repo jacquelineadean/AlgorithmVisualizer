@@ -324,3 +324,11 @@
         gap: 14px;
     }
 }
+
+/* A short note under a preset selector (Markov's chain descriptions). */
+.control-note {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    max-width: 60ch;
+}

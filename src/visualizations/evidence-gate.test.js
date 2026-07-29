@@ -1,17 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { PROVENANCE } from './provenance';
+import { findDuplicateChildIds, walkNodes } from './drilldown/model';
 import { listVisualizations } from './index';
 
 // The evidence gate, applied to every registered visualization — the CI
 // translation of Tekton's "the build fails if verification fails." A step
 // without a resolvable citation, an unknown provenance class, or an uncited
 // caveat fails the suite; so does a visualization registered without gate
-// fixtures.
+// fixtures. Phase 4a extended the same rule to drill-down maps, where it
+// applies per node: an uncited component of an architecture fails CI exactly
+// like an uncited step.
 
 const checkRefs = (owner, refs, sources) => {
     expect(refs?.length, `${owner} has no sources`).toBeGreaterThan(0);
     for (const ref of refs) {
         expect(sources[ref.key], `${owner} cites unknown source "${ref.key}"`).toBeDefined();
+    }
+};
+
+const checkCited = (owner, item, sources) => {
+    checkRefs(owner, item.sourceRefs, sources);
+    expect(
+        PROVENANCE[item.provenance],
+        `${owner} has unknown provenance "${item.provenance}"`
+    ).toBeDefined();
+    if (item.caveat) {
+        checkRefs(`caveat on ${owner}`, item.caveat.sourceRefs, sources);
+        expect(PROVENANCE[item.caveat.provenance]).toBeDefined();
     }
 };
 
@@ -33,25 +48,32 @@ describe('evidence gate (all registered visualizations)', () => {
             });
 
             for (const [index, fixture] of fixtures.entries()) {
-                it(`fixture ${index + 1}: every step cites and declares provenance`, () => {
-                    const { steps } = viz.buildTrace(fixture);
-                    expect(steps.length).toBeGreaterThan(0);
-                    for (const step of steps) {
-                        checkRefs(`step "${step.id}"`, step.sourceRefs, viz.sources);
-                        expect(
-                            PROVENANCE[step.provenance],
-                            `step "${step.id}" has unknown provenance "${step.provenance}"`
-                        ).toBeDefined();
-                        if (step.caveat) {
-                            checkRefs(
-                                `caveat on "${step.id}"`,
-                                step.caveat.sourceRefs,
-                                viz.sources
-                            );
-                            expect(PROVENANCE[step.caveat.provenance]).toBeDefined();
+                if (viz.buildTrace) {
+                    it(`fixture ${index + 1}: every step cites and declares provenance`, () => {
+                        const { steps } = viz.buildTrace(fixture);
+                        expect(steps.length).toBeGreaterThan(0);
+                        for (const step of steps) {
+                            checkCited(`step "${step.id}"`, step, viz.sources);
                         }
-                    }
-                });
+                    });
+                } else {
+                    it(`fixture ${index + 1}: every node cites and declares provenance`, () => {
+                        const { root } = viz.buildMap(fixture);
+                        const nodes = walkNodes(root);
+                        expect(nodes.length).toBeGreaterThan(1);
+                        for (const [node, ancestors] of nodes) {
+                            const path = [...ancestors, node.id].join('.');
+                            checkCited(`node "${path}"`, node, viz.sources);
+                            expect(node.title, `node "${path}" has no title`).toBeTruthy();
+                            expect(node.summary, `node "${path}" has no summary`).toBeTruthy();
+                        }
+                    });
+
+                    it(`fixture ${index + 1}: node paths are unambiguous`, () => {
+                        const { root } = viz.buildMap(fixture);
+                        expect(findDuplicateChildIds(root)).toEqual([]);
+                    });
+                }
             }
 
             it('every source in the database is complete', () => {

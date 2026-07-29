@@ -1,0 +1,255 @@
+/* Drill-down instrument (Phase 4a): breadcrumb zoom over a tree of cited
+   architecture nodes. Shares the trace instrument's card language so the
+   two renderer tiers read as one site. */
+
+.dd {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: left;
+}
+
+/* --- Breadcrumbs ---------------------------------------------------------- */
+
+.dd-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.dd-crumb-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dd-crumb {
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    border-radius: var(--radius-pill);
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+
+.dd-crumb:hover {
+    background: var(--paper-sunken);
+    color: var(--ink);
+}
+
+.dd-crumb.current {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.dd-crumb-sep {
+    color: var(--ink-faint);
+}
+
+.dd-crumb-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+.dd-up {
+    padding: 6px 16px;
+    font-size: 0.82rem;
+}
+
+/* --- Focused node --------------------------------------------------------- */
+
+.dd-node {
+    padding: 24px 26px;
+}
+
+.dd-node-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.dd-node h3 {
+    font-size: 1.4rem;
+}
+
+.dd-node-summary {
+    margin-top: 6px;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    max-width: 62ch;
+}
+
+.dd-node-detail {
+    margin-top: 14px;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    max-width: 68ch;
+}
+
+.dd-stage {
+    margin-top: 18px;
+    padding: 14px;
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+/* --- Child cards ---------------------------------------------------------- */
+
+.dd-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.dd-grid.layout-grid {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.dd-grid.layout-stack {
+    grid-template-columns: 1fr;
+}
+
+.dd-grid.layout-flow {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(190px, 1fr);
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.dd-cell {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.dd-arrow {
+    align-self: center;
+    color: var(--ink-faint);
+    font-size: 1.1rem;
+}
+
+.dd-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    padding: 16px 18px;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.dd-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+}
+
+.dd-card.selected {
+    border-color: var(--ink);
+}
+
+.dd-card.leaf {
+    background: var(--paper-sunken);
+}
+
+.dd-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dd-card-title {
+    font-family: var(--font-serif);
+    font-size: 1.02rem;
+    color: var(--ink);
+}
+
+.dd-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+}
+
+.prov-dot-paper {
+    background: var(--prov-paper);
+}
+.prov-dot-theorem {
+    background: var(--prov-theorem);
+}
+.prov-dot-modern {
+    background: var(--prov-modern);
+}
+.prov-dot-pedagogical {
+    background: var(--prov-pedagogical);
+}
+
+.dd-card-summary {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+}
+
+.dd-card-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+}
+
+.dd-card-more {
+    white-space: nowrap;
+}
+
+.dd-hint {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+}
+
+/* --- Small live stages used inside nodes ---------------------------------- */
+
+.dd-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dd-chip {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--paper-raised);
+    border: 1px solid var(--hairline);
+}
+
+.dd-chip.filled {
+    background: var(--cobalt-soft);
+    border-color: transparent;
+}
+
+.dd-chip.pending {
+    color: var(--ink-faint);
+    border-style: dashed;
+}
+
+@media (max-width: 560px) {
+    .dd-node {
+        padding: 20px 18px;
+    }
+    .dd-grid.layout-flow {
+        grid-auto-flow: row;
+    }
+}

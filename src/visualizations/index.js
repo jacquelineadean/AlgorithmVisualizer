@@ -9,5 +9,9 @@ import './mergesort';
 import './pathfinding';
 import './vigenere';
 import './sieve';
+import './clt';
+import './montecarlo';
+import './markov';
+import './regression';
 
 export { getVisualization, listVisualizations } from './registry';

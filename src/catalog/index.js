@@ -160,18 +160,52 @@ export const CATALOG = [
         name: 'Central Limit Theorem',
         domain: 'statistics',
         year: 1810,
-        authors: 'Laplace',
-        summary: 'Any distribution, sampled enough, drifts toward the bell curve.',
-        status: 'planned',
+        authors: 'Laplace · Lyapunov · Lindeberg',
+        summary:
+            'Average anything — a skewed tail, two humps, a die — and the averages pile up into the same bell.',
+        intro:
+            'Pick a population that looks nothing like a bell curve, average n draws from it, and repeat. The histogram of those averages is normal every time, with a spread of exactly σ/√n. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/clt',
     },
     {
         id: 'monte-carlo',
         name: 'Monte Carlo π',
         domain: 'statistics',
-        year: 1946,
-        authors: 'Ulam · von Neumann',
-        summary: 'Estimate π by throwing darts and counting where they land.',
-        status: 'planned',
+        year: 1949,
+        authors: 'Metropolis · Ulam',
+        summary:
+            'Throw darts at a square, count the ones inside the circle, and π falls out of the hit rate.',
+        intro:
+            'A square, an inscribed circle, and a pile of random darts. The fraction that land inside is π/4 — so counting hits estimates π without ever writing π down. Then watch how slowly 1/√n buys precision. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/monte-carlo',
+    },
+    {
+        id: 'markov',
+        name: 'Markov Chains',
+        domain: 'statistics',
+        year: 1906,
+        authors: 'A. A. Markov',
+        summary:
+            'A walk that remembers only where it stands — and still settles into a distribution you can predict.',
+        intro:
+            'Choose a chain, push a distribution through its transition matrix, and watch the probability mass find its fixed point. Then break it: a periodic chain that oscillates forever, a reducible one whose answer depends on where you started. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/markov',
+    },
+    {
+        id: 'regression',
+        name: 'Least Squares as Projection',
+        domain: 'statistics',
+        year: 1805,
+        authors: 'Legendre · Gauss',
+        summary:
+            'Drag a line through a cloud of points and watch squared error find the one perpendicular answer.',
+        intro:
+            'Every line leaves residuals; least squares picks the line whose residuals are perpendicular to the data’s own directions. Push a trial line around, then see the normal equations land the projection exactly. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/regression',
     },
     {
         id: 'kmeans',
