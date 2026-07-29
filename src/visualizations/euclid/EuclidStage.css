@@ -1,0 +1,68 @@
+/* Euclid's rectangle, tiled by the squares each subtraction cuts off. */
+
+.euclid-stage {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.euclid-frame {
+    fill: var(--paper-sunken);
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+}
+
+.euclid-square {
+    fill: var(--cobalt);
+    stroke: var(--paper-raised);
+    stroke-width: 1;
+    transition: opacity 0.3s ease;
+}
+
+.euclid-remainder {
+    fill: none;
+    stroke: var(--vermilion);
+    stroke-width: 2;
+    stroke-dasharray: 4 3;
+}
+
+.euclid-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-faint);
+}
+
+.euclid-table-wrap {
+    overflow-x: auto;
+}
+
+.euclid-table {
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.euclid-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 4px 24px 4px 0;
+}
+
+.euclid-table td {
+    padding: 4px 24px 4px 0;
+    border-top: 1px solid var(--hairline);
+}
+
+.euclid-table tr.final td {
+    color: var(--cobalt);
+    font-weight: 600;
+}
+
+.euclid-note {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+}

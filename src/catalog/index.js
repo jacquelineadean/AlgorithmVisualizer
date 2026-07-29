@@ -39,6 +39,18 @@ export const DOMAINS = [
         blurb: 'Consensus, replication, and architectures that survive failure.',
         accent: 'green',
     },
+    {
+        id: 'numbers',
+        name: 'Numbers & Primes',
+        blurb: 'Divisibility, primality, and the arithmetic every cipher is built on.',
+        accent: 'vermilion',
+    },
+    {
+        id: 'methods',
+        name: 'Methodologies',
+        blurb: 'Coding, compression, and the general-purpose methods that turn up everywhere.',
+        accent: 'gold',
+    },
 ];
 
 export const CATALOG = [
@@ -110,7 +122,7 @@ export const CATALOG = [
     {
         id: 'sieve',
         name: 'Sieve of Eratosthenes',
-        domain: 'cryptography',
+        domain: 'numbers',
         year: 'c. 240 BC',
         authors: 'Eratosthenes · Horsley’s 1772 account',
         summary:
@@ -125,9 +137,52 @@ export const CATALOG = [
         name: 'SHA-256',
         domain: 'cryptography',
         year: 2001,
-        authors: 'NSA / NIST FIPS 180',
-        summary: 'Message schedule, rounds, and the avalanche effect.',
-        status: 'planned',
+        authors: 'NSA · NIST FIPS 180-4',
+        summary:
+            'Pad, expand, stir sixty-four times — then flip one input bit and watch half the output change.',
+        intro:
+            'A complete SHA-256, written to be read: the padding that encodes the length, the schedule that turns 16 words into 64, and all 64 rounds scrubbing through a live bit grid. Then a measured avalanche. Checked against the standard’s own published test vectors. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/sha-256',
+    },
+    {
+        id: 'euclid',
+        name: 'Euclid’s Algorithm',
+        domain: 'numbers',
+        year: -300,
+        authors: 'Euclid · Lamé',
+        summary:
+            'Cut the largest square off a rectangle and repeat — the oldest algorithm still in daily use.',
+        intro:
+            'Euclid posed it geometrically, and the picture still works: tile a rectangle with the biggest squares that fit, and the last square’s side is the greatest common divisor. Then watch division collapse the whole process, Bézout coefficients fall out for free, and Lamé prove the first complexity bound in history. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/euclid',
+    },
+    {
+        id: 'huffman',
+        name: 'Huffman Coding',
+        domain: 'methods',
+        year: 1952,
+        authors: 'D. A. Huffman',
+        summary:
+            'Merge the two rarest symbols, over and over, and the optimal prefix code builds itself from the bottom up.',
+        intro:
+            'Type anything and watch the tree assemble one merge at a time, then read the codes off its branches. The result is measured against Shannon’s entropy — Huffman always lands within one bit of it, and never below. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/huffman',
+    },
+    {
+        id: 'pagerank',
+        name: 'PageRank',
+        domain: 'graphs',
+        year: 1998,
+        authors: 'Page · Brin · Motwani · Winograd',
+        summary:
+            'A link is a vote, weighted by the voter’s own importance — a circular definition made well-defined by damping.',
+        intro:
+            'Pick a link graph and watch importance flow around it until it stops moving. Damping is what makes the circular definition have exactly one answer: with some probability the random surfer jumps instead of clicking, which is also how rank escapes a link farm. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/pagerank',
     },
     {
         id: 'quicksort',

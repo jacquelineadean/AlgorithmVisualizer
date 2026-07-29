@@ -1,0 +1,87 @@
+/* SHA-256: the working variables as a bit grid, and the message schedule. */
+
+.sha-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--font-mono);
+}
+
+.sha-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sha-name {
+    width: 22px;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+}
+
+.sha-bits {
+    display: flex;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sha-bit {
+    flex: 1;
+    height: 14px;
+    min-width: 3px;
+    border-radius: 1px;
+    background: var(--paper-sunken);
+    transition: background 0.15s ease;
+}
+
+.sha-bit.on {
+    background: var(--cobalt);
+}
+
+.sha-bit.diff {
+    background: var(--vermilion);
+}
+
+.sha-hex {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    width: 68px;
+    text-align: right;
+}
+
+.sha-note {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+}
+
+.sha-schedule {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sha-word {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--paper-sunken);
+    color: var(--ink-soft);
+}
+
+.sha-word.original {
+    background: var(--cobalt-soft);
+    color: var(--ink);
+}
+
+.sha-word-index {
+    color: var(--ink-faint);
+    margin-right: 6px;
+}
+
+.sha-schedule .sha-note {
+    flex-basis: 100%;
+}

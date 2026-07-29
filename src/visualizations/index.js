@@ -24,5 +24,9 @@ import './raft';
 import './consistenthashing';
 import './mapreduce';
 import './cap';
+import './euclid';
+import './huffman';
+import './pagerank';
+import './sha256';
 
 export { getVisualization, listVisualizations } from './registry';
