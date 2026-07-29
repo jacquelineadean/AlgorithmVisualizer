@@ -32,13 +32,22 @@ export default function MatrixStage({
     const rows = values.length;
     const cols = values[0]?.length ?? 0;
     const peak = max ?? Math.max(1e-9, ...values.flat().map((v) => Math.abs(v)));
-    const width = LABEL_W + cols * CELL + 16;
     const height = TOP + rows * ROW_H + (footer ? 34 : 12);
+    // The caption and footer are single unwrapped lines, so the viewBox has to
+    // be wide enough for whichever is longest — a 4 × 4 matrix under a long
+    // footer would otherwise clip it. IBM Plex Mono advances 0.6 em, so 11 px
+    // type is ~6.6 px per character; the extra 8 px is breathing room.
+    const textWidth = Math.ceil(Math.max(caption?.length ?? 0, footer?.length ?? 0) * 6.6) + 8;
+    const width = Math.max(LABEL_W + cols * CELL + 16, textWidth, 260);
 
     return (
         <svg
             className="matrix-stage"
-            viewBox={`0 0 ${Math.max(width, 340)} ${height}`}
+            viewBox={`0 0 ${width} ${height}`}
+            // Rendered at natural size and allowed to shrink, never to stretch:
+            // a small grid blown up to the full card width reads as a mistake.
+            width={width}
+            height={height}
             role="img"
             aria-label={ariaLabel}
         >

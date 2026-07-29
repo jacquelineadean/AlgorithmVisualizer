@@ -29,8 +29,10 @@ const tick = (value) => {
     return value.toFixed(2).replace(/0$/, '');
 };
 
+// count === 0 suppresses the axis entirely — categorical charts (a
+// parameter breakdown, a memory breakdown) label their own rows.
 const ticksFor = (min, max, count) =>
-    Array.from({ length: count + 1 }, (_, i) => min + ((max - min) * i) / count);
+    count <= 0 ? [] : Array.from({ length: count + 1 }, (_, i) => min + ((max - min) * i) / count);
 
 export default function PlotStage({
     domain = [0, 1],

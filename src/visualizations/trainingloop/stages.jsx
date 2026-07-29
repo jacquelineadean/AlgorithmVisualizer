@@ -24,7 +24,7 @@ export function MemoryStage({ data }) {
                 domain={[0, total]}
                 range={[-0.5, rows.length - 0.5]}
                 xTicks={4}
-                yTicks={rows.length - 1}
+                yTicks={0}
                 marks={[
                     ...rows.map((row, i) => ({
                         type: 'segment',
@@ -37,10 +37,11 @@ export function MemoryStage({ data }) {
                     })),
                     ...rows.map((row, i) => ({
                         type: 'label',
-                        x: row.bytes,
+                        // Clear the segment's round cap rather than butting against it.
+                        x: row.bytes + total * 0.015,
                         y: i,
                         dy: 4,
-                        text: `  ${row.label} · ${bytesLabel(row.bytes)}`,
+                        text: `${row.label} · ${bytesLabel(row.bytes)}`,
                         tone: 'ink',
                     })),
                 ]}

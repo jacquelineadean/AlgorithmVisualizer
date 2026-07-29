@@ -3,10 +3,17 @@
    the same visual language as the provenance chips. */
 
 .plot-stage,
-.graph-stage,
-.matrix-stage {
+.graph-stage {
     display: block;
     width: 100%;
+    height: auto;
+}
+
+/* The matrix carries its own intrinsic size (see MatrixStage.jsx) — it may
+   shrink on narrow screens but must never be stretched to fill a card. */
+.matrix-stage {
+    display: block;
+    max-width: 100%;
     height: auto;
 }
 

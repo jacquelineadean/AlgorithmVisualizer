@@ -23,7 +23,7 @@ export function ParamsStage({ data }) {
             domain={[0, params.total]}
             range={[-0.5, rows.length - 0.5]}
             xTicks={4}
-            yTicks={rows.length - 1}
+            yTicks={0}
             marks={[
                 ...rows.map((row, i) => ({
                     type: 'segment',
@@ -36,10 +36,11 @@ export function ParamsStage({ data }) {
                 })),
                 ...rows.map((row, i) => ({
                     type: 'label',
-                    x: row.value,
+                    // Clear the segment's round cap rather than butting against it.
+                    x: row.value + params.total * 0.015,
                     y: i,
                     dy: 4,
-                    text: `  ${row.label} · ${human(row.value)} (${(
+                    text: `${row.label} · ${human(row.value)} (${(
                         (row.value / params.total) *
                         100
                     ).toFixed(0)}%)`,

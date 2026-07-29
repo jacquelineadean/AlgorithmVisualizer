@@ -75,15 +75,15 @@ export default function RaftStage({ steps, stepIndex, artifacts, streamIndex }) 
             />
             <MatrixStage
                 values={values}
-                rowLabels={frame.nodes.map(
-                    (node) => `${node.id} (${node.commitIndex} committed)`
-                )}
+                // Kept short: the label column is 96 px wide, and the
+                // committed count is explained in the footer.
+                rowLabels={frame.nodes.map((node) => `${node.id} · ${node.commitIndex} ✓`)}
                 colLabels={commands.map((entry, i) => `${i + 1}: ${entry.command}`)}
                 max={Math.max(1, ...values.flat())}
                 format={(value) => (value === 0 ? '—' : `t${value}`)}
                 tone="cobalt"
                 caption="Logs — each cell is the term the entry was created in"
-                footer="An entry is committed once a majority holds it and it was created in the leader's own term."
+                footer={`✓ = entries committed. An entry commits once a majority holds it and it was created in the leader's own term.`}
                 ariaLabel="Per-server Raft logs."
             />
         </div>
