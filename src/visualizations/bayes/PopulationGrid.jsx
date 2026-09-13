@@ -76,17 +76,15 @@ export default function PopulationGrid({ steps, stepIndex, artifacts }) {
                 <span className="pkey">
                     <span className="pswatch flagged" /> tested positive
                 </span>
-                {conditioned && (
-                    <span className="pkey">
-                        <span className="pswatch dim" /> ruled out
-                    </span>
-                )}
-                {showPosterior && (
-                    <span className="population-readout">
-                        P(sick&nbsp;|&nbsp;positive) ={' '}
-                        <strong>{asPercent(posteriorNatural)}</strong>
-                    </span>
-                )}
+                {/* Both appear late in the trace; they keep their space from the
+                    start so the stage never changes height between steps. */}
+                <span className={`pkey${conditioned ? '' : ' is-hidden'}`}>
+                    <span className="pswatch dim" /> ruled out
+                </span>
+                <span className={`population-readout${showPosterior ? '' : ' is-hidden'}`}>
+                    P(sick&nbsp;|&nbsp;positive) ={' '}
+                    <strong>{asPercent(posteriorNatural)}</strong>
+                </span>
             </div>
         </div>
     );

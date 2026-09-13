@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Caveat, EvidenceRow, EvidenceSection } from '../evidence/Evidence';
 import TexLine from './TexLine';
+import Transport from './Transport';
+import useStickyInstrument from './useStickyInstrument';
 import './StepPlayer.css';
 
 // The shared instrument every trace-based visualization renders through:
-// controls card → stage → player controls → step list + detail card →
-// evidence section. A visualization supplies content (trace, sources,
-// stage, controls, custom detail kinds); this component owns behavior
-// (current step, autoplay, keyboard navigation, layout).
+// controls card → instrument (stage + transport, pinned on wide viewports)
+// → step list + detail card → evidence section. A visualization supplies
+// content (trace, sources, stage, controls, custom detail kinds); this
+// component owns behavior (current step, autoplay, keyboard navigation,
+// layout).
 //
 // Contract documented in docs/CONTRACTS.md.
 
@@ -196,6 +199,8 @@ export default function TraceInstrument({
     });
     const [playing, setPlaying] = useState(false);
     const [copied, setCopied] = useState(false);
+    const instrumentRef = useRef(null);
+    const { sticky, height: instrumentHeight } = useStickyInstrument(instrumentRef, !error);
     const clampedIndex = Math.min(stepIndex, Math.max(steps.length - 1, 0));
     const currentStep = steps[clampedIndex];
     const kinds = { ...BUILTIN_KINDS, ...detailKinds };
@@ -249,6 +254,16 @@ export default function TraceInstrument({
             return;
         }
         setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+    };
+
+    // Play from the current step; at the end, play again from the start.
+    const togglePlay = () => {
+        if (playing) {
+            setPlaying(false);
+            return;
+        }
+        if (clampedIndex >= steps.length - 1) setStepIndex(0);
+        setPlaying(true);
     };
 
     // Autoplay: advance only once the current step's stream has finished.
@@ -310,75 +325,39 @@ export default function TraceInstrument({
     };
 
     return (
-        <div className="ti">
+        <div className="ti" style={{ '--instrument-height': `${instrumentHeight}px` }}>
             <div className="card ti-controls">{controls}</div>
 
             {error ? (
                 <div className="card ti-error">{error}</div>
             ) : (
                 <>
-                    <div className="card ti-stage">
-                        {renderStage({
-                            steps,
-                            stepIndex: clampedIndex,
-                            artifacts: trace.artifacts,
-                            streamIndex,
-                            streamDone,
-                        })}
-                    </div>
-
-                    <div className="ti-player" role="group" aria-label="Step controls">
-                        <button
-                            type="button"
-                            className="pill-button secondary"
-                            onClick={goPrev}
-                            disabled={clampedIndex === 0}
-                        >
-                            ‹ Prev
-                        </button>
-                        <div className="player-progress">
-                            <span className="player-count" aria-live="polite">
-                                Step {clampedIndex + 1} / {steps.length}
-                            </span>
-                            <div className="player-rail">
-                                <div
-                                    className="player-fill"
-                                    style={{
-                                        width: `${((clampedIndex + 1) / steps.length) * 100}%`,
-                                    }}
-                                />
-                            </div>
+                    <div
+                        ref={instrumentRef}
+                        className={`ti-instrument${sticky ? ' is-sticky' : ''}`}
+                    >
+                        <div className="card ti-stage">
+                            {renderStage({
+                                steps,
+                                stepIndex: clampedIndex,
+                                artifacts: trace.artifacts,
+                                streamIndex,
+                                streamDone,
+                            })}
                         </div>
-                        <button
-                            type="button"
-                            className="pill-button secondary"
-                            onClick={goNext}
-                            disabled={clampedIndex === steps.length - 1 && streamDone}
-                        >
-                            Next ›
-                        </button>
-                        <button
-                            type="button"
-                            className="pill-button"
-                            onClick={() => {
-                                if (playing) {
-                                    setPlaying(false);
-                                } else {
-                                    if (clampedIndex >= steps.length - 1) setStepIndex(0);
-                                    setPlaying(true);
-                                }
-                            }}
-                        >
-                            {playing ? 'Pause' : 'Play'}
-                        </button>
-                        <button
-                            type="button"
-                            className="pill-button secondary"
-                            onClick={copyLink}
-                            title="Copy a link that restores these inputs and this step"
-                        >
-                            {copied ? 'Copied ✓' : 'Copy link'}
-                        </button>
+                        <Transport
+                            unit="Step"
+                            index={clampedIndex}
+                            count={steps.length}
+                            playing={playing}
+                            canPrev={clampedIndex > 0}
+                            canNext={!(clampedIndex === steps.length - 1 && streamDone)}
+                            onPrev={goPrev}
+                            onNext={goNext}
+                            onTogglePlay={togglePlay}
+                            onCopy={copyLink}
+                            copied={copied}
+                        />
                     </div>
 
                     <div className="ti-columns">

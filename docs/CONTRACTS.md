@@ -129,6 +129,23 @@ and browser-shortcut guards), layout, and the evidence section. Stages are
 pure functions of `(steps reached, artifacts)` so the diagram can never
 disagree with the step player.
 
+**The instrument block.** The stage and its transport render as one block
+(`.ti-instrument`): the graphic on top, and beneath it the shared
+`player/Transport.jsx` — previous · play/pause · next as icon buttons with
+full accessible names, the "Step 3 / 13" readout and progress rail, and Copy
+link. On viewports 900 px and wider the block pins below the floating nav
+while the step list, detail card, and evidence scroll under it, so the
+picture stays in place as the reader steps; `useStickyInstrument` enables
+that only when the block leaves at least half the viewport for reading —
+the drill-down pipelines pin on a laptop, full-width SVG stages on taller
+monitors, and tall stages such as the sieve grid never do. Play advances a
+step every `playIntervalMs`, waits for a running stream, and stops at the
+end; pressing Play at the end starts over.
+
+Two rules for stages follow from this: **keep a constant height across
+steps** (a legend that appears on the last step should reserve its space),
+and never scroll the page yourself — the instrument is the fixed point.
+
 Shared stages: `protocol/ProtocolStage.jsx` (two actors, public channel,
 optional eavesdropper, positioned tokens) — used by RSA and DH; Raft is its
 expected third consumer (multi-node variant, Phase 4).
@@ -162,11 +179,37 @@ a focused `stage`; most leaves do the latter, and those stages are small live
 instruments (`stageKinds={{ kind: Component }}`), free to hold their own
 state — the KV-cache scrubber and the nucleus sampler both do.
 
-Behavior owned by the instrument: current node, breadcrumb navigation,
-keyboard (↑↓ move, → / Enter descend, ← / Backspace ascend), and the deep
-link `#/visualizer/llm-inference?model=7b&node=decode.kv-cache`. A path that
-no longer resolves stops at the deepest node that still exists rather than
-blanking the page.
+**The phase player.** The instrument flattens the map into its pre-order
+sequence (`drilldown/model.js` `sequenceOf`: a phase, then each of its
+sub-phases, then the next phase — the root is phase 1, the overview) and
+renders the same instrument shape as the trace tier:
+
+- A fixed graphic, `PipelineStage`: the root as a full-width bar, then one
+  rail per level of the map (`maxDepth`). Rail 0 is the top-level flow;
+  each rail below shows the sub-phases of whichever phase above is on the
+  current path, or an empty track. Every rail is always drawn, so the
+  block never changes height as the reader moves. Boxes are buttons (click
+  = jump), named by the node title; they read done → on-path → current →
+  upcoming, arrows fill in as the flow passes, and a dot slides into the
+  phase just entered.
+- The shared transport beneath it: previous · play/pause · next, the
+  "Phase 4 / 16" readout, Copy link. Play walks the whole pipeline,
+  sub-phases included, one phase per `playIntervalMs`, and stops at the end.
+- One card for the focused node: breadcrumbs (`aria-label="Map location"`),
+  title, summary, evidence row, detail prose, metrics, the node's live
+  panel (`stageKinds`), caveat, and a line naming the sub-phases inside.
+
+Keyboard: ← / → previous and next phase (as on the trace player), ↑ or
+Backspace up a level, ↓ into the first sub-phase. The deep link is the node
+path, `#/visualizer/llm-inference?model=7b&node=decode.kv-cache`; a path
+that no longer resolves stops at the deepest node that still exists rather
+than blanking the page. The block pins on wide viewports exactly as the
+trace instrument does.
+
+Because rails show one level's siblings side by side, keep sibling titles
+short in front of the dash — `Prefill — read the prompt` shows as
+"Prefill" on the rail and in full in the tooltip, the accessible name, and
+the node card.
 
 **The gate applies per node.** `evidence-gate.test.js` walks the whole tree:
 any node without a resolvable citation, a declared provenance class, a title,

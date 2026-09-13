@@ -74,3 +74,9 @@
 .population-readout strong {
     font-size: 1.25rem;
 }
+
+/* Reserved but not yet reached: invisible, still laid out. */
+.pkey.is-hidden,
+.population-readout.is-hidden {
+    visibility: hidden;
+}

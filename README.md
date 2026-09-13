@@ -3,10 +3,12 @@
 Interactive, **evidence-cited** visualizations of famous algorithms — built with
 [React](https://react.dev/) and [Vite](https://vitejs.dev/).
 
-Pick an algorithm, feed it your own inputs, and step through a rendering in which
-**every step cites its source** — the original paper, the underlying theorem, or the
-modern standard — with labeled provenance whenever the visualization simplifies for
-teaching. See [ROADMAP.md](ROADMAP.md) for the multi-phase plan.
+Pick a domain, then an algorithm, feed it your own inputs, and step through a rendering
+in which **every step cites its source** — the original paper, the underlying theorem, or
+the modern standard — with labeled provenance whenever the visualization simplifies for
+teaching. Every page is the same instrument: a graphic that stays put, and a transport
+beneath it to step through each phase or play through end to end. See
+[ROADMAP.md](ROADMAP.md) for the multi-phase plan.
 
 **Live now** — 28 visualizations across eight domains, every step (and every architecture
 node) cited:

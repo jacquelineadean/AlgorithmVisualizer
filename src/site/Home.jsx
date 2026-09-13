@@ -70,7 +70,7 @@ export default function Home() {
                         const liveCount = entries.filter((e) => e.status === 'live').length;
                         return (
                             <Link
-                                to="/visualizer"
+                                to={`/visualizer?domain=${domain.id}`}
                                 key={domain.id}
                                 className={`card domain-card accent-${domain.accent}`}
                             >
