@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from '../../routes';
@@ -76,5 +76,93 @@ describe('drill-down navigation', () => {
         expect(
             screen.getByRole('button', { name: /rotary position embedding/i })
         ).toBeInTheDocument();
+    });
+});
+
+// The phase player: the pipeline graphic stays put while the transport
+// walks every phase and sub-phase in pre-order — by hand, or on play.
+describe('phase player', () => {
+    it('steps through the LLM inference pipeline in pre-order, sub-phases included', async () => {
+        const user = userEvent.setup();
+        renderAt('/visualizer/llm-inference');
+        expect(screen.getByText(/phase 1 \/ 16/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 3, name: /serving one request/i })).toBeInTheDocument();
+
+        // Rail boxes and breadcrumbs share names, so rail queries are scoped.
+        const rails = within(screen.getByRole('group', { name: /llm inference pipeline map/i }));
+        const next = screen.getByRole('button', { name: /next phase/i });
+        await user.click(next);
+        expect(screen.getByRole('heading', { level: 3, name: /^tokenize$/i })).toBeInTheDocument();
+        await user.click(next);
+        expect(screen.getByRole('heading', { level: 3, name: /prefill — read the prompt/i })).toBeInTheDocument();
+
+        // Prefill's sub-phases come before the next top-level phase…
+        await user.click(next);
+        expect(screen.getByRole('heading', { level: 3, name: /all positions at once/i })).toBeInTheDocument();
+        expect(screen.getByText(/phase 4 \/ 16/i)).toBeInTheDocument();
+        // …and the rail beneath Prefill marks the current one.
+        expect(rails.getByRole('button', { name: /all positions at once/i })).toHaveAttribute(
+            'aria-current',
+            'step'
+        );
+
+        await user.click(screen.getByRole('button', { name: /previous phase/i }));
+        expect(screen.getByRole('heading', { level: 3, name: /prefill — read the prompt/i })).toBeInTheDocument();
+        expect(rails.getByRole('button', { name: /prefill — read the prompt/i })).toHaveAttribute(
+            'aria-current',
+            'step'
+        );
+    });
+
+    it('jumps to any phase from the rails and restores it from the deep link', async () => {
+        const user = userEvent.setup();
+        renderAt('/visualizer/llm-inference');
+        await user.click(screen.getByRole('button', { name: /^sampling — logits to a token$/i }));
+        expect(screen.getByText(/phase 11 \/ 16/i)).toBeInTheDocument();
+        expect(screen.getByRole('slider', { name: /temperature/i })).toBeInTheDocument();
+
+        renderAt('/visualizer/llm-inference?node=decode.batching-gain');
+        expect(screen.getAllByText(/phase 10 \/ 16/i).length).toBeGreaterThan(0);
+    });
+
+    it('draws every rail whatever the phase, so the graphic never changes height', async () => {
+        const user = userEvent.setup();
+        const { container } = renderAt('/visualizer/llm-inference');
+        const pipe = within(screen.getByRole('group', { name: /llm inference pipeline map/i }));
+        const rails = () => container.querySelectorAll('.pipe-rail').length;
+        expect(rails()).toBe(2);
+        await user.click(pipe.getByRole('button', { name: /^tokenize$/i }));
+        expect(rails()).toBe(2); // a leaf: the second rail is an empty track
+        expect(container.querySelector('.pipe-rail.is-empty')).not.toBeNull();
+        await user.click(pipe.getByRole('button', { name: /prefill — read the prompt/i }));
+        expect(rails()).toBe(2);
+        expect(pipe.getByRole('button', { name: /build the kv cache/i })).toBeInTheDocument();
+    });
+
+    it('plays through the pipeline end to end and stops on the last phase', () => {
+        vi.useFakeTimers();
+        try {
+            renderAt('/visualizer/llm-inference');
+            fireEvent.click(screen.getByRole('button', { name: /^play$/i }));
+            expect(screen.getByRole('button', { name: /^pause$/i })).toBeInTheDocument();
+
+            act(() => {
+                vi.advanceTimersByTime(3200);
+            });
+            expect(screen.getByText(/phase 2 \/ 16/i)).toBeInTheDocument();
+
+            for (let i = 0; i < 14; i += 1) {
+                act(() => {
+                    vi.advanceTimersByTime(3200);
+                });
+            }
+            expect(screen.getByText(/phase 16 \/ 16/i)).toBeInTheDocument();
+            expect(screen.getByRole('heading', { level: 3, name: /detokenize and stream/i })).toBeInTheDocument();
+            // Playback stops by itself at the end.
+            expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /next phase/i })).toBeDisabled();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });

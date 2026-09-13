@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { countNodes, findDuplicateChildIds, leafCount, pathOf, resolvePath, walkNodes } from './model';
+import {
+    countNodes,
+    findDuplicateChildIds,
+    leafCount,
+    maxDepth,
+    pathOf,
+    resolvePath,
+    sequenceOf,
+    walkNodes,
+} from './model';
 
 const MAP = {
     id: 'pipeline',
@@ -39,5 +48,25 @@ describe('drill-down model', () => {
         expect(findDuplicateChildIds(MAP)).toEqual([]);
         const clashing = { id: 'r', children: [{ id: 'a' }, { id: 'a' }] };
         expect(findDuplicateChildIds(clashing)).toEqual(['r/a']);
+    });
+});
+
+describe('phase sequence', () => {
+    it('orders every node pre-order — a phase, its sub-phases, then the next phase', () => {
+        const sequence = sequenceOf(MAP);
+        expect(sequence.map((entry) => entry.path)).toEqual(['', 'prefill', 'prefill.kv', 'decode']);
+        expect(sequence.map((entry) => entry.depth)).toEqual([0, 1, 2, 1]);
+        expect(sequence.map((entry) => entry.index)).toEqual([0, 1, 2, 3]);
+        expect(sequence[2].node.title).toBe('KV cache');
+        // Paths round-trip through resolvePath, so a deep link lands on the
+        // same phase the transport was on.
+        for (const entry of sequence) {
+            expect(resolvePath(MAP, entry.path).at(-1)).toBe(entry.node);
+        }
+    });
+
+    it('measures the depth the pipeline stage reserves rails for', () => {
+        expect(maxDepth(MAP)).toBe(2);
+        expect(maxDepth({ id: 'solo', title: 'Solo' })).toBe(0);
     });
 });

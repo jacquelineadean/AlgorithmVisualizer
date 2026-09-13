@@ -110,3 +110,66 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- Domain filter ---------------------------------------------------------- */
+
+.domain-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.filter-pill:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+}
+
+.filter-pill.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.filter-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.domain-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.catalog-domain h2 a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.catalog-domain h2 a:hover {
+    border-bottom-color: var(--ink);
+}
+
+.catalog-back {
+    margin-top: 40px;
+}

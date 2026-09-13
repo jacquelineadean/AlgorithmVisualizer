@@ -1,6 +1,7 @@
-/* Drill-down instrument (Phase 4a): breadcrumb zoom over a tree of cited
-   architecture nodes. Shares the trace instrument's card language so the
-   two renderer tiers read as one site. */
+/* Drill-down instrument (Phase 4a, reworked as a phase player): a fixed
+   pipeline graphic drawn as rails, the shared transport beneath it, and one
+   card for the focused node. Shares the trace instrument's card language so
+   the two renderer tiers read as one site. */
 
 .dd {
     display: flex;
@@ -9,13 +10,269 @@
     text-align: left;
 }
 
-/* --- Breadcrumbs ---------------------------------------------------------- */
+/* --- Pipeline stage (the fixed graphic) ----------------------------------- */
+
+.dd-pipeline {
+    padding: 16px 18px 14px;
+}
+
+.pipe {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* The root as a full-width bar: phase 1, the overview. */
+.pipe-root {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.pipe-root:hover {
+    border-color: var(--ink);
+}
+
+.pipe-root.current {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.pipe-root-title {
+    font-family: var(--font-serif);
+    font-size: 1.02rem;
+}
+
+.pipe-root-meta {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+
+/* Rails: one per level of the map, always drawn, so the height is fixed. */
+.pipe-rail {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: 12px;
+    min-height: 70px;
+}
+
+.pipe-rail-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pipe-rail.is-empty .pipe-rail-label {
+    opacity: 0.5;
+}
+
+.pipe-track {
+    height: 0;
+    border-top: 1px dashed var(--hairline);
+}
+
+.pipe-flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+.pipe-cell {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+/* Arrows fill in as the flow passes; a dot slides into the phase entered. */
+.pipe-arrow {
+    position: relative;
+    flex: none;
+    align-self: center;
+    width: 22px;
+    height: 2px;
+    margin: 0 3px;
+    background: var(--hairline);
+    transition: background 0.25s ease;
+}
+
+.pipe-arrow::before {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    border: 5px solid transparent;
+    border-right: 0;
+    border-left: 6px solid var(--hairline);
+    transition: border-color 0.25s ease;
+}
+
+.pipe-arrow.passed {
+    background: var(--ink);
+}
+
+.pipe-arrow.passed::before {
+    border-left-color: var(--ink);
+}
+
+.pipe-arrow.entering::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cobalt);
+    animation: pipe-dot 0.7s ease-out forwards;
+}
+
+@keyframes pipe-dot {
+    from {
+        transform: translateX(-8px);
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    to {
+        transform: translateX(22px);
+        opacity: 0;
+    }
+}
+
+.pipe-box {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    height: 70px;
+    padding: 9px 11px;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+        transform 0.15s ease;
+}
+
+.pipe-box:hover {
+    border-color: var(--ink);
+    transform: translateY(-1px);
+}
+
+.pipe-box-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pipe-box-foot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pipe-box.done {
+    background: var(--paper-sunken);
+    color: var(--ink-soft);
+}
+
+.pipe-box.on-path {
+    border-color: var(--ink);
+}
+
+.pipe-box.current {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.pipe-box.current .pipe-box-foot {
+    color: var(--paper);
+    opacity: 0.7;
+}
+
+.pipe.is-playing .pipe-box.current,
+.pipe.is-playing .pipe-root.current {
+    animation: pipe-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pipe-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--cobalt) 45%, transparent);
+    }
+    50% {
+        box-shadow: 0 0 0 7px color-mix(in srgb, var(--cobalt) 0%, transparent);
+    }
+}
+
+.dd-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+}
+
+.prov-dot-paper {
+    background: var(--prov-paper);
+}
+.prov-dot-theorem {
+    background: var(--prov-theorem);
+}
+.prov-dot-modern {
+    background: var(--prov-modern);
+}
+.prov-dot-pedagogical {
+    background: var(--prov-pedagogical);
+}
+
+/* --- Breadcrumbs (inside the focused node's card) ------------------------- */
 
 .dd-crumbs {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 4px;
+    margin: -6px 0 14px -10px;
 }
 
 .dd-crumb-wrap {
@@ -30,7 +287,7 @@
     padding: 6px 10px;
     border-radius: var(--radius-pill);
     color: var(--ink-soft);
-    font-size: 0.86rem;
+    font-size: 0.84rem;
     cursor: pointer;
 }
 
@@ -99,118 +356,11 @@
     overflow-x: auto;
 }
 
-/* --- Child cards ---------------------------------------------------------- */
-
-.dd-grid {
-    display: grid;
-    gap: 12px;
-}
-
-.dd-grid.layout-grid {
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-}
-
-.dd-grid.layout-stack {
-    grid-template-columns: 1fr;
-}
-
-.dd-grid.layout-flow {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(190px, 1fr);
-    overflow-x: auto;
-    padding-bottom: 6px;
-}
-
-.dd-cell {
-    display: flex;
-    align-items: stretch;
-    gap: 8px;
-}
-
-.dd-arrow {
-    align-self: center;
+.dd-inside {
+    margin-top: 16px;
+    font-size: 0.82rem;
     color: var(--ink-faint);
-    font-size: 1.1rem;
-}
-
-.dd-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    text-align: left;
-    padding: 16px 18px;
-    background: var(--paper-raised);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-card);
-    cursor: pointer;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.dd-card:hover {
-    border-color: var(--ink);
-    transform: translateY(-2px);
-}
-
-.dd-card.selected {
-    border-color: var(--ink);
-}
-
-.dd-card.leaf {
-    background: var(--paper-sunken);
-}
-
-.dd-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.dd-card-title {
-    font-family: var(--font-serif);
-    font-size: 1.02rem;
-    color: var(--ink);
-}
-
-.dd-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex: none;
-}
-
-.prov-dot-paper {
-    background: var(--prov-paper);
-}
-.prov-dot-theorem {
-    background: var(--prov-theorem);
-}
-.prov-dot-modern {
-    background: var(--prov-modern);
-}
-.prov-dot-pedagogical {
-    background: var(--prov-pedagogical);
-}
-
-.dd-card-summary {
-    font-size: 0.85rem;
-    color: var(--ink-soft);
-    line-height: 1.5;
-}
-
-.dd-card-foot {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: auto;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    color: var(--ink-faint);
-}
-
-.dd-card-more {
-    white-space: nowrap;
+    max-width: 68ch;
 }
 
 .dd-hint {
@@ -245,11 +395,34 @@
     border-style: dashed;
 }
 
+/* --- Responsive ----------------------------------------------------------- */
+
+@media (max-width: 720px) {
+    .pipe-rail {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        min-height: 0;
+    }
+    .pipe-flow {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .pipe-cell {
+        flex: 1 1 140px;
+    }
+    .pipe-arrow {
+        display: none;
+    }
+    .pipe-track {
+        display: none;
+    }
+}
+
 @media (max-width: 560px) {
     .dd-node {
         padding: 20px 18px;
     }
-    .dd-grid.layout-flow {
-        grid-auto-flow: row;
+    .dd-crumbs {
+        margin-left: -6px;
     }
 }

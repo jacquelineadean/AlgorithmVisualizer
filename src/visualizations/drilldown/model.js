@@ -56,3 +56,21 @@ export const countNodes = (root) => walkNodes(root).length;
 
 export const leafCount = (root) =>
     walkNodes(root).filter(([node]) => !node.children?.length).length;
+
+// The order the phase player steps through: pre-order — a phase, then each
+// of its sub-phases, then the next phase — which is also the order a reader
+// would walk the map top to bottom. `path` is the dot path the deep link
+// carries ('' for the root); `index` is the transport's position.
+export function sequenceOf(root) {
+    return walkNodes(root).map(([node, ancestors], index) => ({
+        node,
+        index,
+        depth: ancestors.length,
+        path: ancestors.length ? [...ancestors.slice(1), node.id].join('.') : '',
+    }));
+}
+
+// How many rails the pipeline stage reserves: the deepest node's depth, so
+// the graphic's height never changes as the reader moves between phases.
+export const maxDepth = (root) =>
+    Math.max(0, ...walkNodes(root).map(([, ancestors]) => ancestors.length));

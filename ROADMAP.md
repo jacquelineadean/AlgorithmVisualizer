@@ -99,7 +99,7 @@ different failures.
 | 2 | Platform contracts & 2D breadth | ✅ Complete (2026-07-19) — exit met: 8 live, one shared player, zero per-page boilerplate | A new 2D visualization is a content-only PR; 8+ live |
 | 3 | 3D renderer tier | Started (2026-07-19) — 3a shell + RSA helix | 3D pages ship under the same trace + evidence contract |
 | 4 | Domain build-out + AI architecture explorer | ✅ Complete (2026-07-29) — 28 live, every domain ≥ 2, three drill-down maps | Every domain ≥ 2 live; drill-down maps live; 20+ live |
-| 5 | Polish, performance, community | Next | External contribution lands without maintainer surgery |
+| 5 | Polish, performance, community | Started (2026-09-13) — navigation + instrument rework | External contribution lands without maintainer surgery |
 
 ---
 
@@ -397,6 +397,23 @@ Knuth §4.5.2), SHA-256 rounds (NIST FIPS 180-4), Fourier epicycles (Fourier 182
 **Exit:** ✅ met — the catalog reads as an atlas (28 live across eight domains), and the AI
 systems story — architecture, inference with prefill/decode, training — is fully explorable
 with citations.
+
+> **Rework (2026-09-13), first Phase 5 work.** Two findings from using the atlas as a
+> reader rather than an author:
+>
+> - **Domains are pages.** The home page's domain cards all led to the whole catalog. Now a
+>   domain card, a catalog heading, or `#/visualizer?domain=ml` opens that domain's entries
+>   alone, with a filter row to switch; unknown ids fall back to the full list.
+> - **One instrument shape, both tiers.** Trace pages had a step player but the drill-down
+>   maps had none: the LLM inference page changed its picture entirely on every click and
+>   scrolled its phases off-screen. Both tiers now share `player/Transport.jsx` — previous
+>   · play · next as icon buttons, a readout, Copy link — under a graphic that stays put and
+>   pins below the nav on wide viewports (`useStickyInstrument`). The drill-down tier became
+>   a **phase player**: the map drawn as rails (`PipelineStage`, one rail per level, always
+>   drawn so the height never changes), stepped or played in pre-order through every phase
+>   and sub-phase, with the focused node's prose, metrics, live panel, and citations in one
+>   card beneath. The transformer, inference, training-loop, and MapReduce maps all moved
+>   over with no content changes; deep links (`?node=`) and the per-node gate are unchanged.
 
 **What Phase 4 taught us (inputs to Phase 5):**
 - Twenty-eight entries is past the point where a flat catalog page works. Phase 5a's search

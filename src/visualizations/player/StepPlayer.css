@@ -31,12 +31,99 @@
     overflow-x: auto;
 }
 
+/* --- Instrument: the stage and its transport as one fixed block ----------- */
+
+.ti-instrument {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* On wide viewports the block pins below the floating nav while the step
+   list, detail card, and evidence scroll beneath it — the graphic stays
+   put as the reader steps. useStickyInstrument adds the class only when the
+   block leaves enough of the viewport for reading; tall stages stay in
+   normal flow. */
+.ti-instrument.is-sticky {
+    position: sticky;
+    top: calc(var(--nav-height) + 32px);
+    z-index: 5;
+    background: var(--paper);
+}
+
+/* Cover the strip between the nav and the pinned block so scrolling content
+   never peeks through above the stage. */
+.ti-instrument.is-sticky::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -16px;
+    height: 16px;
+    background: var(--paper);
+}
+
 /* --- Player --------------------------------------------------------------- */
 
 .ti-player {
     display: flex;
     align-items: center;
     gap: 14px;
+}
+
+.transport {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.transport-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 50%;
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.transport-button svg {
+    display: block;
+}
+
+.transport-button:hover:not(:disabled) {
+    border-color: var(--ink);
+    transform: translateY(-1px);
+}
+
+.transport-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.transport-button.play {
+    width: 46px;
+    height: 46px;
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+}
+
+.transport-button.play.is-playing {
+    background: var(--cobalt);
+    border-color: var(--cobalt);
+}
+
+.transport-button:focus-visible {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 2px;
 }
 
 .player-progress {
@@ -121,6 +208,11 @@
 .step-item:hover {
     background: var(--paper-sunken);
     color: var(--ink);
+}
+
+/* A focused step scrolls clear of the pinned instrument block. */
+.step-item {
+    scroll-margin-top: calc(var(--instrument-height, 0px) + var(--nav-height) + 48px);
 }
 
 .step-item.current {
@@ -306,6 +398,17 @@
     }
 }
 
+@media (pointer: coarse) {
+    .transport-button {
+        width: 44px;
+        height: 44px;
+    }
+    .transport-button.play {
+        width: 48px;
+        height: 48px;
+    }
+}
+
 @media (max-width: 560px) {
     .ti-player {
         flex-wrap: wrap;
@@ -314,6 +417,9 @@
     .player-progress {
         order: -1;
         flex-basis: 100%;
+    }
+    .player-copy {
+        margin-left: auto;
     }
     .ti-detail {
         padding: 20px 18px;

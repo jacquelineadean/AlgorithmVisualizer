@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from './routes';
 
@@ -116,5 +117,74 @@ describe('rsa page', () => {
         // Every step button is reachable; the references list all sources.
         expect(document.getElementById('ref-RSA78')).not.toBeNull();
         expect(document.getElementById('ref-RFC8017')).not.toBeNull();
+    });
+});
+
+describe('catalog by domain', () => {
+    it('shows only one domain\'s entries with ?domain=', () => {
+        renderAt('/visualizer?domain=cryptography');
+        expect(screen.getByRole('heading', { level: 1, name: /^cryptography$/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /rsa encryption/i })).toBeInTheDocument();
+        expect(screen.queryByText(/bayes[’'] rule/i)).not.toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: /quicksort/i })).not.toBeInTheDocument();
+
+        // The filter row marks the active domain and offers the way back.
+        const filter = within(screen.getByRole('navigation', { name: /^domains$/i }));
+        expect(filter.getByRole('link', { name: /cryptography/i })).toHaveAttribute('aria-current', 'page');
+        expect(filter.getByRole('link', { name: /all domains/i })).not.toHaveAttribute('aria-current');
+    });
+
+    it('falls back to the full catalog for an unknown domain', () => {
+        renderAt('/visualizer?domain=nope');
+        expect(screen.getByRole('heading', { name: /pick an algorithm/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /rsa encryption/i })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 3, name: /^quicksort$/i })).toBeInTheDocument();
+    });
+
+    it('takes a home-page domain card to that domain only', async () => {
+        const user = userEvent.setup();
+        renderAt('/');
+        await user.click(screen.getByRole('link', { name: /distributed systems/i }));
+        expect(screen.getByRole('heading', { level: 1, name: /distributed systems/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /raft consensus/i })).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: /rsa encryption/i })).not.toBeInTheDocument();
+    });
+
+    it('links each catalog heading to its own domain', async () => {
+        const user = userEvent.setup();
+        renderAt('/visualizer');
+        await user.click(screen.getByRole('link', { name: /^sorting & order$/i }));
+        expect(screen.getByRole('heading', { level: 1, name: /sorting & order/i })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 3, name: /^quicksort$/i })).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: /rsa encryption/i })).not.toBeInTheDocument();
+    });
+});
+
+describe('step transport', () => {
+    it('steps with the icon buttons and plays through automatically until paused', () => {
+        vi.useFakeTimers();
+        try {
+            renderAt('/visualizer/bayes');
+            expect(screen.getByText(/step 1 \/ 7/i)).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /previous step/i })).toBeDisabled();
+
+            fireEvent.click(screen.getByRole('button', { name: /next step/i }));
+            expect(screen.getByText(/step 2 \/ 7/i)).toBeInTheDocument();
+
+            fireEvent.click(screen.getByRole('button', { name: /^play$/i }));
+            expect(screen.getByRole('button', { name: /^pause$/i })).toBeInTheDocument();
+            act(() => {
+                vi.advanceTimersByTime(2600);
+            });
+            expect(screen.getByText(/step 3 \/ 7/i)).toBeInTheDocument();
+
+            fireEvent.click(screen.getByRole('button', { name: /^pause$/i }));
+            act(() => {
+                vi.advanceTimersByTime(10000);
+            });
+            expect(screen.getByText(/step 3 \/ 7/i)).toBeInTheDocument();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });
