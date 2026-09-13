@@ -1,0 +1,89 @@
+/* The hash ring: a circle of server tokens with keys sitting just inside it. */
+
+.ring-stage {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ring-circle {
+    fill: none;
+    stroke: var(--hairline);
+    stroke-width: 2;
+}
+
+.ring-caption {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    fill: var(--ink);
+}
+
+.ring-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-faint);
+}
+
+.ring-key {
+    opacity: 0.85;
+    transition: fill 0.3s ease;
+}
+
+.ring-token line {
+    stroke: currentColor;
+    stroke-width: 1.5;
+    opacity: 0.5;
+}
+
+.ring-token circle {
+    fill: var(--paper-raised);
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.ring-token circle.fresh {
+    fill: currentColor;
+}
+
+.ring-token text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-soft);
+}
+
+.ch-cobalt {
+    color: var(--cobalt);
+    fill: var(--cobalt);
+}
+.ch-vermilion {
+    color: var(--vermilion);
+    fill: var(--vermilion);
+}
+.ch-green {
+    color: var(--green);
+    fill: var(--green);
+}
+.ch-gold {
+    color: var(--gold);
+    fill: var(--gold);
+}
+.ch-ink {
+    color: var(--ink);
+    fill: var(--ink);
+}
+
+.ring-token.ch-cobalt circle,
+.ring-token.ch-vermilion circle,
+.ring-token.ch-green circle,
+.ring-token.ch-gold circle,
+.ring-token.ch-ink circle {
+    fill: var(--paper-raised);
+}
+
+.ring-token.ch-cobalt circle.fresh,
+.ring-token.ch-vermilion circle.fresh,
+.ring-token.ch-green circle.fresh,
+.ring-token.ch-gold circle.fresh,
+.ring-token.ch-ink circle.fresh {
+    fill: currentColor;
+}

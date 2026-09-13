@@ -22,10 +22,11 @@ Two references anchor the product:
 ## Experience pillars
 
 1. **Select** — a catalog of algorithms grouped by domain (Cryptography, Graphs & Pathfinding,
-   Sorting & Order, Statistics & Probability, AI & Machine Learning, Distributed Systems).
+   Sorting & Order, Statistics & Probability, AI & Machine Learning, Distributed Systems,
+   Numbers & Primes, Methodologies).
 2. **Interact** — each algorithm page is a live instrument, not a video: the user supplies
-   inputs (a message, primes, sliders, a graph), scrubs a step player, and inspects any
-   intermediate value.
+   inputs (a message, primes, sliders, a graph), scrubs a step player *or zooms a drill-down
+   map*, and inspects any intermediate value.
 3. **Evidence** — each step displays provenance chips linking to a sources panel. Provenance
    classes (adapted from Tekton's measured / rule-derived / reconstruction / conjecture):
    - `paper` — taken directly from the primary source (e.g. RSA 1978, Bayes 1763).
@@ -58,17 +59,23 @@ visualizations/
     sources.js            Citation database: {key, authors, title, venue, year, url}
     trace.js              buildTrace(inputs) → { steps[], artifacts }; each step:
                           {id, title, provenance, sourceRefs[], explanation, caveat?, kind, data}
-    Visualizer            React component: step player + stage diagrams, driven only by the trace
+    map.js                …or buildMap(inputs) → { root } for architectures (Phase 4a):
+                          nodes carry {id, title, summary, provenance, sourceRefs[], children?, stage?}
+    Visualizer            React component: step player or drill-down map, driven only by the trace
   player/                 Shared TraceInstrument (steps, streams, deep links, KaTeX lines)
+  drilldown/              Shared DrilldownInstrument + pure node model (Phase 4a)
+  stages/                 Shared PlotStage · GraphStage · MatrixStage (Phase 4)
   protocol/ · sorting/    Shared stages (multi-actor lane; bar arrays)
   scene3d/                Phase 3 shell + pure scene geometry (lazy-loaded with three.js)
   registry.js · index.js  defineVisualization + central registration
 ```
 
 **The evidence gate:** one suite iterates the registry and builds every visualization's
-gate fixtures — any step or caveat without a resolvable citation and a declared provenance
-class fails the build. The CI translation of Tekton's "the build fails if verification
-fails"; registering a visualization *is* opting in.
+gate fixtures — any step, *map node*, or caveat without a resolvable citation and a declared
+provenance class fails the build. The CI translation of Tekton's "the build fails if
+verification fails"; registering a visualization *is* opting in. A second suite renders every
+live catalog card through the router, because a correct model and a broken component are
+different failures.
 
 ## How this roadmap ships
 
@@ -91,8 +98,8 @@ fails"; registering a visualization *is* opting in.
 | 1 | MVP, identity, first three cited visualizations | ✅ Shipped 2026-07-18 (PRs #2, #3) | RSA + Bayes + Dijkstra live under the evidence rule |
 | 2 | Platform contracts & 2D breadth | ✅ Complete (2026-07-19) — exit met: 8 live, one shared player, zero per-page boilerplate | A new 2D visualization is a content-only PR; 8+ live |
 | 3 | 3D renderer tier | Started (2026-07-19) — 3a shell + RSA helix | 3D pages ship under the same trace + evidence contract |
-| 4 | Domain build-out + AI architecture explorer | Planned | Every domain ≥ 2 live; drill-down maps live; 20+ live |
-| 5 | Polish, performance, community | Planned | External contribution lands without maintainer surgery |
+| 4 | Domain build-out + AI architecture explorer | ✅ Complete (2026-07-29) — 28 live, every domain ≥ 2, three drill-down maps | Every domain ≥ 2 live; drill-down maps live; 20+ live |
+| 5 | Polish, performance, community | Next | External contribution lands without maintainer surgery |
 
 ---
 
@@ -298,7 +305,40 @@ governed by the same trace + evidence contract as 2D.
 **Objective:** breadth across every domain — led by the **AI architecture explorer**, a third
 renderer tier for systems that are *architectures*, not step sequences.
 
-### 4a. DrilldownDiagram contract (M, designed first)
+> **Phase 4 complete (2026-07-29).** 20 new entries shipped, taking the atlas from 8 live to
+> **28**, with every domain at ≥ 2 — including two new ones (Numbers & Primes, Methodologies;
+> the sieve moved into the first). 4a's drill-down contract landed first and the three AI
+> maps were built on it; 4c, 4d, 4e and 4f followed as content on the existing contracts.
+>
+> - **4a** — `DrilldownInstrument` (breadcrumb zoom, keyboard navigation, deep-linkable node
+>   paths that degrade to the deepest surviving node), a pure `drilldown/model.js`, and a
+>   registry that now takes either `buildTrace` or `buildMap`. **The evidence gate walks map
+>   nodes**, so an uncited architecture component fails CI exactly like an uncited step; it
+>   also rejects sibling id collisions, which would make paths ambiguous.
+> - **Shared stage kit** (`stages/`) extracted at the usual bar of two-plus consumers:
+>   `PlotStage`, `GraphStage`, `MatrixStage`. Between them they carry seventeen of the new
+>   entries; only Euclid's square tiling, the hash ring, and SHA-256's bit grid needed
+>   bespoke stages.
+> - **4b** — transformer architecture map, LLM inference pipeline, training loop map, with
+>   live panels inside their leaves (a real attention head, a KV cache filling, a nucleus
+>   sampler, a decode roofline, a learning-rate schedule). Every metric is computed from the
+>   selected configuration, and the tests hold those computations to published totals.
+> - **4c** — CLT, Monte Carlo π, Markov chains, least squares as projection.
+> - **4d** — k-means, perceptron, backpropagation, attention internals.
+> - **4e** — Raft, consistent hashing, MapReduce, CAP.
+> - **4f** — Euclid, Huffman, PageRank, SHA-256, Fourier epicycles.
+> - **A second gate joined the first:** `pages/live-entries.test.jsx` renders every live
+>   catalog card through the real router. The evidence gate proves the trace is cited; this
+>   one proves the page mounts.
+>
+> **Two deviations from the plan, both deliberate.** PageRank shipped under *Graphs* rather
+> than Methodologies — it is power iteration on a link graph, and the domain needed a second
+> entry that was not a re-skin of pathfinding. Decision trees were dropped from 4d: with
+> k-means, the perceptron, backprop and attention live, a fifth classic added breadth
+> without adding a new idea, and Phase 5's discovery work is worth more. It stays in the
+> backlog.
+
+### 4a. DrilldownDiagram contract (M, designed first) ✅
 
 - Node schema: `{id, title, summary, provenance, sourceRefs[], children?, stage?}` — a node
   either drills into children or opens a focused stage (a small live diagram/matrix).
@@ -307,7 +347,7 @@ renderer tier for systems that are *architectures*, not step sequences.
 - **The evidence gate applies per node**, not just per step: an uncited component fails CI.
 - Built as 2D SVG/HTML — drill-down is an information architecture, not a 3D problem.
 
-### 4b. AI architecture explorer entries (L)
+### 4b. AI architecture explorer entries (L) ✅
 
 | Entry | Drill path (illustrative) | Anchor sources |
 | --- | --- | --- |
@@ -318,7 +358,7 @@ renderer tier for systems that are *architectures*, not step sequences.
 Small live stages inside nodes where they teach (an attention head computing real weights on
 a toy sentence; a KV cache filling as tokens decode; a batch scheduler packing requests).
 
-### 4c. Statistics & probability (M)
+### 4c. Statistics & probability (M) ✅
 
 | Entry | Stage | Anchor sources |
 | --- | --- | --- |
@@ -327,13 +367,13 @@ a toy sentence; a KV cache filling as tokens decode; a batch scheduler packing r
 | Markov chains | Editable transition graph → stationary distribution | Markov 1906 |
 | Regression as projection | Least squares as geometry | Legendre 1805; Gauss 1809 |
 
-### 4d. AI/ML classics (M)
+### 4d. AI/ML classics (M) ✅
 
 k-means (Lloyd 1957/1982), perceptron (Rosenblatt 1958), backprop on a tiny MLP
 (Rumelhart–Hinton–Williams 1986), attention internals (shares components with 4b), decision
 trees (Breiman et al. 1984). Gradient descent's 3D surface lands in Phase 3.
 
-### 4e. Distributed systems (M–L)
+### 4e. Distributed systems (M–L) ✅
 
 | Entry | Stage | Anchor sources |
 | --- | --- | --- |
@@ -342,7 +382,7 @@ trees (Breiman et al. 1984). Gradient descent's 3D surface lands in Phase 3.
 | MapReduce | Job flow map (drill-down contract reuse) | Dean & Ghemawat 2004 |
 | CAP explorer | Interactive partition scenarios | Brewer 2000; Gilbert & Lynch 2002 |
 
-### 4f. Methodologies & numbers (M)
+### 4f. Methodologies & numbers (M) ✅
 
 Huffman coding (Huffman 1952), PageRank as power iteration on an editable graph
 (Brin & Page 1998), Euclid's algorithm standalone (Euclid, *Elements* VII — Heath trans.;
@@ -354,8 +394,21 @@ Knuth §4.5.2), SHA-256 rounds (NIST FIPS 180-4), Fourier epicycles (Fourier 182
 - Drill-down maps pass the per-node evidence gate and are deep-linkable to any node.
 - The two priority maps (4b: transformer, inference pipeline) ship before the long tail.
 
-**Exit:** the catalog reads as an atlas, and the AI systems story — architecture, inference
-with prefill/decode, training — is fully explorable with citations.
+**Exit:** ✅ met — the catalog reads as an atlas (28 live across eight domains), and the AI
+systems story — architecture, inference with prefill/decode, training — is fully explorable
+with citations.
+
+**What Phase 4 taught us (inputs to Phase 5):**
+- Twenty-eight entries is past the point where a flat catalog page works. Phase 5a's search
+  and filters moved from nice-to-have to the next thing that matters.
+- The stage kit paid for itself immediately, but only because it was extracted after four
+  entries had duplicated the same plotting code — not before. The extraction bar held.
+- Two entries needed their maths corrected by a test rather than by review: the ring's hash
+  needed a proper avalanche step before consistent hashing balanced at all, and the
+  batching-gain claim on the inference map was wrong until the KV-cache term was measured.
+  Tests that assert the *property being taught* — not a golden output — are what caught both.
+- Rendering is a separate failure mode from computing. Every model was green while three
+  pages would have crashed on mount; `live-entries.test.jsx` exists because of that.
 
 ---
 
@@ -421,14 +474,14 @@ Phase tags mark where each entry is scheduled; unmarked "later" items are unsche
 
 | Domain | Live | Next up | Later |
 | --- | --- | --- | --- |
-| Cryptography | RSA, Diffie–Hellman, Vigenère | SHA-256 (P4) | AES rounds, elliptic curves, lattices/LLL (P3) |
-| Graphs & pathfinding | Dijkstra, A*, BFS | — | Bellman–Ford, max-flow, MST, weighted terrain |
+| Cryptography | RSA, Diffie–Hellman, Vigenère, SHA-256 | — | AES rounds, elliptic curves, lattices/LLL (P3) |
+| Graphs & pathfinding | Dijkstra, A*, BFS, PageRank | — | Bellman–Ford, max-flow, MST, weighted terrain |
 | Sorting & order | Quicksort, merge sort | — | Heapsort, radix, sorting networks (P3) |
-| Numbers & primes | Sieve of Eratosthenes | Euclid (P4) | Miller–Rabin, Karatsuba, FFT multiply |
-| Statistics & probability | Bayes' rule | CLT, Monte Carlo π (P4) | Markov chains (P4), regression (P4) |
-| AI & machine learning | — | Transformer architecture map, LLM inference pipeline (P4) | Attention internals, backprop, k-means, decision trees (P4); gradient descent (P3) |
-| Distributed & architectures | — | Raft, consistent hashing (P4) | MapReduce, CAP explorer, load balancing |
-| Methodologies | — | Huffman, PageRank (P4) | Fourier epicycles, simplex, RSA signatures |
+| Numbers & primes | Sieve of Eratosthenes, Euclid | — | Miller–Rabin, Karatsuba, FFT multiply |
+| Statistics & probability | Bayes' rule, CLT, Monte Carlo π, Markov chains, regression | — | Hypothesis testing, bootstrap |
+| AI & machine learning | k-means, perceptron, backprop, attention, transformer map, inference pipeline, training loop | — | Decision trees, gradient descent (P3), tokenizer internals |
+| Distributed & architectures | Raft, consistent hashing, MapReduce, CAP | — | Vector clocks, load balancing, Paxos |
+| Methodologies | Huffman, Fourier epicycles | — | Simplex, RSA signatures, arithmetic coding |
 
 ## Standing decisions
 

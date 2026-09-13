@@ -1,0 +1,124 @@
+export const meta = {
+    slug: 'citing-an-architecture',
+    title: 'Citing an architecture, not a step',
+    date: '2026-07-29',
+    readingMinutes: 7,
+    summary:
+        'The evidence rule was written for step sequences. Extending it to the transformer, the inference pipeline, and the training loop meant deciding what a citation attaches to when there is no step — and where the numbers on those pages come from.',
+};
+
+The atlas has had one rule since the first page shipped: nothing renders
+without a source. It was written for step sequences — a trace is a list of
+steps, each step names its citation, and a test walks the list. That works
+because a step is a claim, and a claim can have a source.
+
+Then Phase 4 asked for three pages that have no steps: the [transformer
+architecture map](#/visualizer/transformer-arch), the [LLM inference
+pipeline](#/visualizer/llm-inference), and the [training loop
+map](#/visualizer/training-loop). A transformer does not happen in an order
+you can scrub. It is a structure, and the interesting question is not "what
+comes next" but "what is inside this".
+
+## What a citation attaches to
+
+The resolution was to keep the rule and change what it applies to. A map is a
+tree of nodes; a node carries the same evidence fields a step does —
+`provenance`, `sourceRefs`, an optional `caveat` — and the gate walks the tree
+instead of the list. Concretely, this fails the build:
+
+```js
+{ id: 'rmsnorm', title: 'RMSNorm', summary: 'Normalize without centring.' }
+```
+
+and this passes:
+
+```js
+{
+  id: 'rmsnorm',
+  title: 'RMSNorm (pre-norm)',
+  summary: 'Rescale each token vector before the sublayer.',
+  provenance: 'paper',
+  sourceRefs: [{ key: 'ZHANG2019' }, { key: 'XIONG2020' }],
+}
+```
+
+The consequence is the useful part. You cannot add a box to one of these
+diagrams without naming the paper that introduced the thing in the box. Every
+component on the transformer map — pre-norm placement, rotary positions, the
+gated MLP, the residual stream — exists because someone published it, and the
+map now says who. Boxes that nobody could source did not get drawn.
+
+The gate also refuses two sibling nodes with the same id, which sounds like
+housekeeping and is not: node paths are the deep links (`?node=decode.kv-cache`),
+and an ambiguous path is a broken link with no error message.
+
+## The harder rule: no quoted numbers
+
+The evidence rule stops uncited claims. It does not stop *wrong* ones, and
+architecture pages are unusually good at producing those, because they are
+full of numbers that feel like facts. 124M parameters. Half a gigabyte of KV
+cache. Sixteen bytes per parameter of optimizer state. Every one of those is
+easy to type from memory and slightly wrong.
+
+So the maps have a second rule, inherited from the 3D scenes: **a number on the
+page must be computed by a pure module, or it does not go on the page.** The
+transformer map does not know that GPT-2 small has 124M parameters. It knows
+that a decoder-only stack has an embedding table, four square attention
+projections and two MLP projections per layer, and it multiplies:
+
+```js
+const blocks = config.layers * (4 * d * d + 2 * d * dFF);
+const total = vocab * d + context * d + blocks;
+```
+
+The test then holds that arithmetic to the published figure — between 120M and
+126M, the gap being biases and norm scales the weight-matrix count ignores. Do
+the same for GPT-2 XL and a Llama-shaped 7B and the model is pinned from three
+directions. Change the formula and something fails.
+
+The same applies further down. The inference map's claim that decoding is
+memory-bound is not an assertion in prose; it is `arithmeticIntensity(1)`
+compared against `deviceIntensity(device)`, both derived from the model
+configuration and the vendor's published bandwidth and FLOP numbers, with a
+test asserting the first is smaller for every model on every accelerator.
+
+## Where a test corrected the page
+
+That discipline earned its keep twice, in ways review would not have.
+
+The first was the claim that batching is nearly free. It is the standard
+teaching point, it is true at short context, and the page originally said it
+flatly. Then a test tried to pin the size of the win at batch 32 and got 15×,
+not the 30× the story implies. The reason is in the arithmetic: at a
+1,024-token context the per-sequence KV cache reads have overtaken the
+one-time weight read, so throughput stops scaling with the batch. That is not
+a footnote — it is precisely why paged and shared caches are worth writing
+papers about. The page now says the true thing, and the test says it twice: a
+near-linear win at 64 tokens of context, less than half of it at 4,096.
+
+The second was on [consistent hashing](#/visualizer/consistent-hashing). The
+page claims virtual nodes flatten load; a test asked for peak-to-average below
+1.35 at a hundred tokens per server and got 1.87. The algorithm was right; the
+hash was not. FNV-1a leaves its high bits dominated by a string's first
+characters, so tokens named `node-1#0` through `node-6#99` landed in clumps
+around the ring. Adding MurmurHash3's finalizer fixed it — and the fix is now
+a comment in the model, because "consistent hashing assumes a hash with good
+avalanche" is a real precondition that the tidy version of the story leaves
+out.
+
+## Renders is a separate claim from computes
+
+One more gate arrived with this phase, for a failure the evidence gate cannot
+see. Twenty new models were green, every trace built, every node cited — and
+three of the pages would have crashed on mount, because a stage indexed past
+the end of a frame array in a configuration the model tests never rendered.
+
+`live-entries.test.jsx` now walks the catalog, renders every card marked live
+through the real router, and asserts the page mounts with its player or its
+breadcrumbs and at least one resolvable reference. It is a dull test. It is
+also the one that would have caught all three.
+
+The pattern generalizes: the evidence gate proves a page is *sourced*, the
+model tests prove it is *right*, and the render test proves it *exists*. Three
+different claims, three different suites. A page that passes all three is one
+you can leave alone.

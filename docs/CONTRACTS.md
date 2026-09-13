@@ -133,6 +133,67 @@ Shared stages: `protocol/ProtocolStage.jsx` (two actors, public channel,
 optional eavesdropper, positioned tokens) — used by RSA and DH; Raft is its
 expected third consumer (multi-node variant, Phase 4).
 
+## Drill-down maps (Phase 4a)
+
+Some subjects are architectures, not step sequences: a transformer, an
+inference pipeline, a MapReduce job. Those register a **map** instead of a
+trace and render through `<DrilldownInstrument>` — a second renderer tier
+under the same evidence rule.
+
+```js
+// node
+{
+  id: 'attention',            // unique among its siblings; paths key off it
+  title: 'Multi-head self-attention',
+  summary: 'One line for the card.',
+  provenance: 'paper',
+  sourceRefs: [{ key: 'VASWANI2017', detail: '§3.2' }],  // ≥ 1, as for steps
+  detail: 'Prose shown when this node is focused.',       // optional
+  metrics: [{ label: 'heads', value: 12 }],               // optional tile row
+  caveat: { provenance, text, sourceRefs },               // optional
+  layout: 'flow' | 'stack' | 'grid',                      // how children lay out
+  stage: { kind: 'attention', data: { … } },              // optional live panel
+  children: [ …nodes ],                                   // or a leaf
+}
+```
+
+`buildMap(inputs) → { root }`. A node either drills into `children` or opens
+a focused `stage`; most leaves do the latter, and those stages are small live
+instruments (`stageKinds={{ kind: Component }}`), free to hold their own
+state — the KV-cache scrubber and the nucleus sampler both do.
+
+Behavior owned by the instrument: current node, breadcrumb navigation,
+keyboard (↑↓ move, → / Enter descend, ← / Backspace ascend), and the deep
+link `#/visualizer/llm-inference?model=7b&node=decode.kv-cache`. A path that
+no longer resolves stops at the deepest node that still exists rather than
+blanking the page.
+
+**The gate applies per node.** `evidence-gate.test.js` walks the whole tree:
+any node without a resolvable citation, a declared provenance class, a title,
+or a summary fails the suite — and sibling id collisions fail it too, since
+they would make paths ambiguous. Maps register with `buildMap` in place of
+`buildTrace`; `defineVisualization` rejects anything that supplies both or
+neither.
+
+Rule of thumb, inherited from the 3D tier: **metrics are computed, never
+quoted.** The transformer map derives its parameter counts from the selected
+configuration, and the tests hold them to the published totals. If a number
+on a map cannot be recomputed from a pure module, it does not belong there.
+
+## Shared stage kit
+
+`stages/` holds the primitives Phase 4 entries draw with. Each earned its
+place the usual way — two or more shipped consumers:
+
+| Stage | Shape | Consumers |
+| --- | --- | --- |
+| `PlotStage` | declarative cartesian marks (`points`, `line`, `bars`, `segment`, `circle`, `rect`, `marker`, `label`) | Monte Carlo, CLT, k-means, perceptron, regression, backprop, Fourier, consistent hashing, and the inference/training map panels |
+| `GraphStage` | nodes at normalized coordinates plus directed or undirected edges | Markov, PageRank, Huffman, backprop, Raft, CAP |
+| `MatrixStage` | labelled heat grid | attention, Markov, Raft logs, transformer map |
+
+Callers pass data-space values derived from trace artifacts; the stages
+compute nothing.
+
 ## Registration
 
 ```js
@@ -140,7 +201,7 @@ expected third consumer (multi-node variant, Phase 4).
 export default defineVisualization({
   id: 'dh',
   Visualizer: DhVisualizer,
-  buildTrace: buildDhTrace,
+  buildTrace: buildDhTrace,   // …or buildMap, for a drill-down map
   sources: SOURCES,
   gateFixtures: () => [ { p: 83n, g: 2n, a: 9n, b: 21n }, … ],
 });
@@ -152,10 +213,17 @@ tests import from that aggregator only.
 ## The evidence gate
 
 `src/visualizations/evidence-gate.test.js` iterates the registry: for every
-visualization it builds each `gateFixtures()` trace and fails the suite if
-any step (or caveat) lacks a resolvable citation or a declared provenance
-class, or if any source record is incomplete. Registering a visualization
-*is* opting into the gate — there is no way to ship an uncited entry.
+visualization it builds each `gateFixtures()` trace — or map — and fails the
+suite if any step, node, or caveat lacks a resolvable citation or a declared
+provenance class, or if any source record is incomplete. Registering a
+visualization *is* opting into the gate; there is no way to ship an uncited
+entry.
+
+`src/pages/live-entries.test.jsx` is the other half of that bargain: it
+renders every catalog card marked `live` through the real router and asserts
+the page mounts, shows its player or breadcrumbs, and resolves at least one
+reference. A model can be perfect and the component still broken — this is
+the suite that notices.
 
 ## 3D scenes (Phase 3)
 

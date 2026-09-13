@@ -1,0 +1,248 @@
+/* Shared Phase 4 stage kit: cartesian plots, node/edge graphs, and heat
+   matrices. Tone classes map onto the theme accents so every stage speaks
+   the same visual language as the provenance chips. */
+
+.plot-stage,
+.graph-stage {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* The matrix carries its own intrinsic size (see MatrixStage.jsx) — it may
+   shrink on narrow screens but must never be stretched to fill a card. */
+.matrix-stage {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- Tones ---------------------------------------------------------------- */
+
+.pl-ink,
+.gs-ink {
+    color: var(--ink);
+}
+.pl-cobalt,
+.gs-cobalt {
+    color: var(--cobalt);
+}
+.pl-green,
+.gs-green {
+    color: var(--green);
+}
+.pl-vermilion,
+.gs-vermilion {
+    color: var(--vermilion);
+}
+.pl-gold,
+.gs-gold {
+    color: var(--gold);
+}
+.pl-faint,
+.gs-faint {
+    color: var(--ink-faint);
+}
+
+.plf-ink {
+    fill: var(--ink);
+}
+.plf-cobalt {
+    fill: var(--cobalt);
+}
+.plf-green {
+    fill: var(--green);
+}
+.plf-vermilion {
+    fill: var(--vermilion);
+}
+.plf-gold {
+    fill: var(--gold);
+}
+.plf-faint {
+    fill: var(--ink-faint);
+}
+
+/* --- Plot ----------------------------------------------------------------- */
+
+.pl-grid {
+    stroke: var(--hairline);
+    stroke-width: 1;
+}
+
+.pl-axis {
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+}
+
+.pl-tick,
+.pl-axis-label,
+.pl-note {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-faint);
+}
+
+.pl-note {
+    font-size: 11px;
+    fill: var(--ink-soft);
+}
+
+.pl-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pl-line.dashed,
+.pl-shape.dashed {
+    stroke-dasharray: 5 4;
+}
+
+.pl-shape {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.pl-shape.filled {
+    fill: currentColor;
+    fill-opacity: 0.08;
+}
+
+.pl-points circle {
+    transition: cx 0.25s ease, cy 0.25s ease;
+}
+
+.pl-marker circle {
+    fill: var(--paper-raised);
+    stroke: currentColor;
+    stroke-width: 2.5;
+    transition: cx 0.35s ease, cy 0.35s ease;
+}
+
+.pl-marker .pl-marker-core {
+    fill: currentColor;
+    stroke: none;
+}
+
+.pl-marker text,
+.pl-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: currentColor;
+}
+
+/* --- Graph ---------------------------------------------------------------- */
+
+.gr-edge path {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+}
+
+.gr-edge path.dashed {
+    stroke-dasharray: 5 4;
+}
+
+.gr-arrow {
+    fill: currentColor;
+    stroke: none;
+}
+
+.gr-edge-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-soft);
+    paint-order: stroke;
+    stroke: var(--paper-raised);
+    stroke-width: 3px;
+}
+
+.gr-node circle {
+    fill: var(--paper-sunken);
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: r 0.3s ease, fill 0.3s ease;
+}
+
+.gr-node.ringed circle {
+    fill: currentColor;
+    fill-opacity: 0.14;
+    stroke-width: 2.5;
+}
+
+.gr-node.dim {
+    opacity: 0.35;
+}
+
+.gr-node-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    fill: var(--ink);
+    font-weight: 600;
+}
+
+.gr-node-sub,
+.gr-node-caption {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    fill: var(--ink-soft);
+}
+
+.gr-node-caption {
+    fill: var(--ink-faint);
+}
+
+/* --- Matrix --------------------------------------------------------------- */
+
+.mx-caption,
+.mx-footer {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-faint);
+}
+
+.mx-head {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-soft);
+}
+
+.mx-head.lit {
+    fill: var(--ink);
+    font-weight: 600;
+}
+
+.mx-cell {
+    transition: opacity 0.25s ease;
+}
+
+.mx-cobalt {
+    fill: var(--cobalt);
+}
+.mx-green {
+    fill: var(--green);
+}
+.mx-vermilion {
+    fill: var(--vermilion);
+}
+.mx-gold {
+    fill: var(--gold);
+}
+
+.mx-cell.lit {
+    stroke: var(--ink);
+    stroke-width: 1.5;
+}
+
+.mx-value {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink);
+}
+
+.mx-value.inverted {
+    fill: var(--paper-raised);
+}
