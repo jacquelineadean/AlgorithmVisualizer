@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    # master is this repo's default branch; main is listed so a future rename
+    # keeps deploying without touching this file.
+    branches: [master, main]
+  workflow_dispatch:
+
+# The site is served from the gh-pages branch, so the job pushes the build there.
+permissions:
+  contents: write
+
+# Queue deploys instead of letting two jobs race for the gh-pages branch.
+concurrency:
+  group: deploy-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Test, build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run test:run
+
+      - run: npm run build
+
+      - name: Publish dist/ to the gh-pages branch
+        run: |
+          set -euo pipefail
+          publish="$RUNNER_TEMP/gh-pages"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # Commit on top of the existing published tree so history is kept.
+          git fetch --depth=1 origin '+refs/heads/gh-pages:refs/remotes/origin/gh-pages'
+          git worktree add --detach "$publish" origin/gh-pages
+
+          # Replace the published files wholesale; stale assets must not linger.
+          find "$publish" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -R dist/. "$publish"/
+          touch "$publish/.nojekyll"   # serve the build as-is, no Jekyll pass
+
+          git -C "$publish" add -A
+          if git -C "$publish" diff --cached --quiet; then
+            echo "Published build is already current — nothing to deploy."
+            exit 0
+          fi
+          git -C "$publish" commit -m "Deploy ${GITHUB_SHA:0:7} to GitHub Pages"
+          git -C "$publish" push origin HEAD:gh-pages
+
+      - name: Summary
+        run: echo "Deployed to https://jacquelineadean.github.io/AlgorithmVisualizer/" >> "$GITHUB_STEP_SUMMARY"
