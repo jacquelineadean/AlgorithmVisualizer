@@ -53,6 +53,19 @@ npm start          # dev server at http://localhost:5173
 | `npm run test:run`| Run the test suite once                      |
 | `npm run deploy`  | Build and publish `dist/` to GitHub Pages    |
 
+### Deployment
+
+Deploys are automated. Every push to `master` — and every manual run of the
+**Deploy to GitHub Pages** workflow (Actions → Deploy to GitHub Pages → Run
+workflow) — runs the test suite, builds `dist/`, and publishes it to the
+`gh-pages` branch that GitHub Pages serves at
+[jacquelineadean.github.io/AlgorithmVisualizer](https://jacquelineadean.github.io/AlgorithmVisualizer/).
+A failing test stops the deploy, so `master` only ships green builds. See
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+
+`npm run deploy` still publishes by hand from a local checkout if you ever need
+to ship without CI.
+
 ## Architecture
 
 ```
