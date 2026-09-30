@@ -10,7 +10,7 @@ teaching. Every page is the same instrument: a graphic that stays put, and a tra
 beneath it to step through each phase or play through end to end. See
 [ROADMAP.md](ROADMAP.md) for the multi-phase plan.
 
-**Live now** — 28 visualizations across eight domains, every step (and every architecture
+**Live now** — 31 visualizations across eight domains, every step (and every architecture
 node) cited:
 
 **Cryptography** — RSA (`#/visualizer/rsa`, with an optional 3D mod-n helix) · Diffie–Hellman ·
@@ -30,7 +30,10 @@ Markov chains · least squares as a projection.
 **AI & machine learning** — k-means · the perceptron · backpropagation on a nine-parameter
 network (gradients checked against finite differences) · attention internals · and three
 **drill-down architecture maps**: the transformer stack, the LLM inference pipeline, and the
-training loop.
+training loop · and **LLM quantization**: GPTQ's Hessian-compensated column sweep (checked
+against the one-weight-at-a-time Optimal Brain Surgeon update it reformulates), AWQ's
+activation-aware scale search, and SmoothQuant's migration of activation outliers into the
+weights — each a port of its reference implementation, run on a layer small enough to read.
 
 **Distributed systems** — Raft, with a partition you can watch it refuse to commit through ·
 consistent hashing · MapReduce · the CAP theorem.
@@ -85,6 +88,7 @@ src/
 │   ├── drilldown/         # DrilldownInstrument: breadcrumb zoom over cited node trees
 │   ├── stages/            # Shared PlotStage · GraphStage · MatrixStage
 │   ├── protocol/ sorting/ # Shared stages (multi-actor lane, bar arrays)
+│   ├── quantization/      # Shared quantizers + SVG parts for GPTQ · AWQ · SmoothQuant
 │   ├── scene3d/           # Phase 3 shell + pure scene geometry (lazy three.js)
 │   ├── registry.js        # defineVisualization; index.js registers everything
 │   └── <id>/              # One directory per visualization: math|model, sources,
