@@ -29,5 +29,8 @@ import './huffman';
 import './pagerank';
 import './sha256';
 import './fourier';
+import './gptq';
+import './awq';
+import './smoothquant';
 
 export { getVisualization, listVisualizations } from './registry';

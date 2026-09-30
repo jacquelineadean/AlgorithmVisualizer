@@ -367,6 +367,45 @@ export const CATALOG = [
         route: '/visualizer/training-loop',
     },
     {
+        id: 'gptq',
+        name: 'GPTQ',
+        domain: 'ml',
+        year: 2022,
+        authors: 'Frantar · Ashkboos · Hoefler · Alistarh',
+        summary:
+            'Round one column, let every column after it absorb the error — 175 billion weights to 3 or 4 bits in a few GPU hours.',
+        intro:
+            'Quantize a small layer to 2, 3, or 4 bits and watch GPTQ sweep it column by column: each weight snaps to its grid while the weights still to come slide over to cancel the error, steered by the inverse Hessian of the layer’s inputs. The page runs the reference algorithm — lazy blocks and Cholesky factor included — and checks it against the one-weight-at-a-time Optimal Brain Surgeon update it reformulates. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/gptq',
+    },
+    {
+        id: 'awq',
+        name: 'AWQ',
+        domain: 'ml',
+        year: 2023,
+        authors: 'Lin · Tang · Tang · Yang · … · Han',
+        summary:
+            'A weight matters as much as the input it multiplies — so scale up the few that see loud inputs before rounding.',
+        intro:
+            'Quantize a layer whose inputs are uneven and find out which weights deserve protecting: not the largest ones, but the ones fed by the loudest channels. Then watch AWQ protect them without any mixed precision — scale each channel by its activation magnitude to a searched power α, round, and fold the scales into the layer before. The α search runs point by point, as the reference code does. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/awq',
+    },
+    {
+        id: 'smoothquant',
+        name: 'SmoothQuant',
+        domain: 'ml',
+        year: 2022,
+        authors: 'Xiao · Lin · Seznec · Wu · Demouth · Han',
+        summary:
+            'Activations have outliers, weights do not — so move the difficulty across the matrix multiply, exactly, before quantizing both to INT8.',
+        intro:
+            'A layer whose activations carry a few channels forty times louder than the rest, quantized to INT8 on both sides. Watch per-tensor scaling crush the quiet channels, per-token scaling fail to rescue them, and per-channel scaling work but be impossible to run — then divide each channel by s and multiply the weights by s, and the product is unchanged while both sides become easy. Slide α to choose how much difficulty moves. Every step cites its source.',
+        status: 'live',
+        route: '/visualizer/smoothquant',
+    },
+    {
         id: 'raft',
         name: 'Raft Consensus',
         domain: 'systems',
