@@ -1,5 +1,8 @@
 # Visualization contracts
 
+These contracts cover the Algorithm Visualizer (`src/visualizations/`). The
+System Design Visualizer has its own, in [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md).
+
 How a visualization plugs into the atlas. Established in Phase 2a; the
 reference implementations are `src/visualizations/rsa/` (acts, custom detail
 kind, protocol stage) and `src/visualizations/dh/` (the first entry built

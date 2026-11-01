@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { CATALOG, DOMAINS, entriesByDomain, liveEntries } from '../catalog';
 import { listVisualizations } from '../visualizations';
+import { CATEGORIES } from '../systemdesign/categories';
 import { GITHUB_URL } from './FloatingNav';
 import HeroBayes from './HeroBayes';
 import './Home.css';
@@ -20,12 +21,15 @@ export default function Home() {
                     <h1 className="hero-title">See how the classics compute</h1>
                     <p className="hero-subtitle">
                         Interactive visualizations of famous algorithms across cryptography,
-                        mathematics, statistics, and machine learning — where every step
-                        cites the paper it came from.
+                        mathematics, statistics, and machine learning, plus layer-by-layer
+                        walkthroughs of whole systems. Every step cites the paper it came from.
                     </p>
                     <div className="hero-actions">
                         <Link to="/visualizer" className="pill-button">
                             Explore the catalog
+                        </Link>
+                        <Link to="/systems" className="text-link">
+                            System design <span className="chev">›</span>
                         </Link>
                         <Link to="/visualizer/rsa" className="text-link">
                             RSA encryption <span className="chev">›</span>
@@ -54,6 +58,41 @@ export default function Home() {
                 <div className="stat">
                     <div className="stat-value">{CATALOG.length - live.length}</div>
                     <div className="stat-label">On the roadmap</div>
+                </div>
+            </section>
+
+            <section className="content components" aria-labelledby="components-title">
+                <h2 id="components-title" className="section-title">
+                    Two visualizers
+                </h2>
+                <p className="section-sub">
+                    One steps through a single algorithm. The other walks a whole system, one
+                    layer at a time.
+                </p>
+                <div className="component-grid">
+                    <Link to="/visualizer" className="card component-card accent-cobalt">
+                        <div className="eyebrow">Algorithm Visualizer</div>
+                        <h3>Step through the classics</h3>
+                        <p>
+                            RSA, Dijkstra, quicksort, Bayes’ rule and more, traced step by step
+                            from the original papers.
+                        </p>
+                        <span className="domain-count">
+                            {live.length} visualizations live · {DOMAINS.length} domains
+                        </span>
+                    </Link>
+                    <Link to="/systems" className="card component-card accent-vermilion">
+                        <div className="eyebrow">System Design Visualizer</div>
+                        <h3>Walk a system, layer by layer</h3>
+                        <p>
+                            The AI inference stack from SDK call to GPU, and the fundamentals
+                            behind any design: what each layer owns, how it fails, and the
+                            numbers that bound it.
+                        </p>
+                        <span className="domain-count">
+                            {CATEGORIES.length} categories · {CATEGORIES.map((c) => c.name).join(' and ')}
+                        </span>
+                    </Link>
                 </div>
             </section>
 

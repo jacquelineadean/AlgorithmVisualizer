@@ -13,7 +13,8 @@ export default function Footer() {
                     </p>
                 </div>
                 <div className="footer-links">
-                    <Link to="/visualizer">Visualizer</Link>
+                    <Link to="/visualizer">Algorithms</Link>
+                    <Link to="/systems">System Design</Link>
                     <Link to="/blog">Blog</Link>
                     <a href={GITHUB_URL} target="_blank" rel="noreferrer">
                         GitHub
