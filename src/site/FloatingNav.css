@@ -67,6 +67,10 @@
     background: var(--ink);
 }
 
+.label-short {
+    display: none;
+}
+
 .external-icon {
     display: block;
     opacity: 0.55;
@@ -82,5 +86,25 @@
     }
     .nav-link {
         padding: 7px 10px;
+    }
+}
+
+/* Four links and the wordmark do not fit on a phone: the wordmark takes two
+   lines, System Design shortens to Systems, and GitHub stays in the footer. */
+@media (max-width: 480px) {
+    .floating-nav {
+        padding-right: 6px;
+    }
+    .wordmark {
+        width: min-content;
+        white-space: normal;
+        line-height: 1.2;
+    }
+    .label-long,
+    .nav-github {
+        display: none;
+    }
+    .label-short {
+        display: inline;
     }
 }

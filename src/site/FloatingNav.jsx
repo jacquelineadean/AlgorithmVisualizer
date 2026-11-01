@@ -10,17 +10,21 @@ export default function FloatingNav() {
         <header className="floating-nav-wrap">
             <nav className="floating-nav" aria-label="Primary">
                 <Link to="/" className="wordmark">
-                    Algorithm&nbsp;Visualizer
+                    Algorithm Visualizer
                 </Link>
                 <div className="nav-links">
                     <NavLink to="/visualizer" className={navLinkClass}>
-                        Visualizer
+                        Algorithms
+                    </NavLink>
+                    <NavLink to="/systems" className={navLinkClass} aria-label="System Design">
+                        <span className="label-long">System Design</span>
+                        <span className="label-short">Systems</span>
                     </NavLink>
                     <NavLink to="/blog" className={navLinkClass}>
                         Blog
                     </NavLink>
                     <a
-                        className="nav-link external"
+                        className="nav-link external nav-github"
                         href={GITHUB_URL}
                         target="_blank"
                         rel="noreferrer"
