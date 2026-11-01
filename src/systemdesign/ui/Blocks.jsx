@@ -97,37 +97,62 @@ const SPEC_FIELDS = [
     ['boundary', 'Decision boundary'],
 ];
 
-function Spec({ block }) {
+// A datasheet: a dark header band in the layer's color, then two columns.
+function Spec({ block, tray }) {
     return (
-        <dl className="sd-spec">
-            {SPEC_FIELDS.filter(([key]) => block[key]).map(([key, label]) => (
-                <div key={key} className={`sd-spec-row ${key}`}>
-                    <dt>{label}</dt>
-                    <dd>
-                        {Array.isArray(block[key]) ? (
-                            <ul>
-                                {block[key].map((item, i) => (
-                                    <li key={i}>
-                                        <Rich text={item} />
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <Rich text={block[key]} />
-                        )}
-                    </dd>
-                </div>
-            ))}
-        </dl>
+        <div className="sd-specsheet">
+            <div className="sd-sp-head">
+                <span>Spec sheet</span>
+                {tray && (
+                    <span className="sd-sp-tag">
+                        {tray.code} · {tray.name}
+                    </span>
+                )}
+            </div>
+            <dl className="sd-spec">
+                {SPEC_FIELDS.filter(([key]) => block[key]).map(([key, label]) => (
+                    <div key={key} className={`sd-spec-row ${key}`}>
+                        <dt>{label}</dt>
+                        <dd>
+                            {Array.isArray(block[key]) ? (
+                                <ul>
+                                    {block[key].map((item, i) => (
+                                        <li key={i}>
+                                            <Rich text={item} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <Rich text={block[key]} />
+                            )}
+                        </dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
     );
 }
 
-function Stats({ block }) {
+// "209 tokens/s" draws the number large and the unit small; values such as
+// "2× to 4×" or "up to 6.4×" stay whole.
+function StatValue({ value }) {
+    const m = /^([\d.,]+\S*)\s+(\D+)$/.exec(String(value));
+    if (!m) return <div className="sd-stat-value">{value}</div>;
     return (
-        <div className="sd-stats">
-            {block.items.map((item) => (
-                <div className="sd-stat" key={item.label}>
-                    <div className="sd-stat-value">{item.value}</div>
+        <div className="sd-stat-value">
+            {m[1]} <small>{m[2]}</small>
+        </div>
+    );
+}
+
+// On an overview the stats render as rack front panels, one color each.
+function Stats({ block, tray }) {
+    const panel = tray?.kind === 'overview';
+    return (
+        <div className={`sd-stats${panel ? ' fp' : ''}`}>
+            {block.items.map((item, i) => (
+                <div className={`sd-stat${panel ? ` c${(i % 7) + 1}` : ''}`} key={item.label}>
+                    <StatValue value={item.value} />
                     <div className="sd-stat-label">
                         <Rich text={item.label} />
                     </div>
@@ -259,7 +284,10 @@ function Quiz({ block }) {
                                         aria-pressed={chosen === oi}
                                         onClick={() => setAnswers((a) => ({ ...a, [qi]: oi }))}
                                     >
-                                        <Rich text={opt} />
+                                        <i aria-hidden="true">{String.fromCharCode(65 + oi)}</i>
+                                        <span>
+                                            <Rich text={opt} />
+                                        </span>
                                     </button>
                                 );
                             })}
@@ -438,18 +466,20 @@ function Links({ block }) {
     );
 }
 
+// The system's layers as a row of rack trays, each one a link.
 function LayerIndex({ system }) {
     const trays = [...system.layers, ...system.topics];
     return (
         <ol className="sd-layer-index">
-            {trays.map((t) => (
+            {trays.map((t, i) => (
                 <li key={t.id}>
-                    <Link to={trayPath(system.id, t.id)} className={`sd-layer-card c${t.color}`}>
+                    <Link to={trayPath(system.id, t.id)} className={`sd-layer-card c${t.color}`} style={{ '--d': `${(i * 0.08).toFixed(2)}s` }}>
                         <span className="sd-layer-code">{t.code}</span>
                         <span className="sd-layer-text">
                             <strong>{t.name}</strong>
                             {t.products && <span>{t.products}</span>}
                         </span>
+                        <span className="sd-layer-led" aria-hidden="true" />
                     </Link>
                 </li>
             ))}

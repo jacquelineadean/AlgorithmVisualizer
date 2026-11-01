@@ -1,71 +1,216 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Caveat, EvidenceRow, EvidenceSection } from '../../visualizations/evidence/Evidence';
 import { getCategory, getSystem } from '..';
-import { citedSources, findTray, neighborsOf, trayPath } from '../model';
+import { citedSources, findTray, neighborsOf, trayPath, traysOf } from '../model';
 import { SOURCES } from '../sources';
 import { Block } from './Blocks';
+import { useVisited } from './progress';
+import { RackSignal, useRackSignal } from './rackSignal';
 import Rich from './Rich';
 import '../../visualizations/evidence/Evidence.css';
 import './SystemDesign.css';
 
 // One page per tray: /systems/:systemId is the overview, /systems/:id/:layer
 // a layer or topic, and ?tab=<section> the open tab. The rack on the left
-// is the whole system at a glance; ← and → walk it one tray at a time.
+// is the whole system drawn as a server rack: a plate with the system's
+// name, one tray per layer in the cabinet, and the cross-cutting topics as
+// jacks on a patch panel. An amber token on the cabinet wire marks the open
+// layer. ← and → walk the trays in order.
 
 const isTyping = (el) =>
     el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
 
-function Rack({ system, current }) {
-    const tray = (t) => (
-        <li key={t.id}>
+function TrayLink({ system, tray, current, done, peek, index = 0 }) {
+    const on = tray.id === current.id;
+    return (
+        <li>
             <Link
-                to={trayPath(system.id, t.id)}
-                className={`sd-tray c${t.color}${t.id === current.id ? ' is-current' : ''}`}
-                aria-current={t.id === current.id ? 'page' : undefined}
+                to={trayPath(system.id, tray.id)}
+                data-tray={tray.id}
+                className={`sd-tray c${tray.color}${on ? ' is-current' : ''}${peek === tray.id ? ' is-peek' : ''}${done ? ' is-done' : ''}${tray.products ? '' : ' no-sub'}`}
+                aria-current={on ? 'page' : undefined}
+                style={{ '--d': `${(index * 0.45).toFixed(2)}s` }}
             >
-                <span className="sd-tray-code">{t.code}</span>
-                <span className="sd-tray-text">
-                    <span className="sd-tray-name">{t.name}</span>
-                    {t.products && <span className="sd-tray-sub">{t.products}</span>}
+                <span className="sd-tray-band" aria-hidden="true" />
+                <span className="sd-tray-code">{tray.code}</span>
+                <span className="sd-tray-name">
+                    {tray.name}
+                    {done && <span className="sd-sr"> (explored)</span>}
+                </span>
+                {tray.products && <span className="sd-tray-sub">{tray.products}</span>}
+                <span className="sd-tray-led" aria-hidden="true" />
+            </Link>
+        </li>
+    );
+}
+
+function Jack({ system, tray, current, done }) {
+    const on = tray.id === current.id;
+    return (
+        <li>
+            <Link
+                to={trayPath(system.id, tray.id)}
+                className={`sd-jack${on ? ' is-current' : ''}${done ? ' is-done' : ''}`}
+                aria-current={on ? 'page' : undefined}
+            >
+                <span className="sd-jack-port" aria-hidden="true" />
+                <span className="sd-jack-name">
+                    {tray.name}
+                    {done && <span className="sd-sr"> (explored)</span>}
                 </span>
             </Link>
         </li>
     );
+}
+
+function Rack({ system, category, current, visited, onReset }) {
+    const rack = useRef(null);
+    const cabinet = useRef(null);
+    const [tokenY, setTokenY] = useState(null);
+    const { peek } = useRackSignal();
+    const target = peek ?? (current.kind === 'layer' ? current.id : null);
+
+    // The token sits beside the layer a lab points at, else the open layer,
+    // else at the top of the cabinet.
+    useLayoutEffect(() => {
+        const tray = target && cabinet.current?.querySelector(`[data-tray="${target}"]`);
+        setTokenY(tray ? tray.offsetTop + tray.offsetHeight / 2 : null);
+    }, [target]);
+
+    // Keep the open tray in view when the rack scrolls; on phones it is a sideways strip.
+    useLayoutEffect(() => {
+        rack.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }, [current.id]);
+
+    const trays = traysOf(system);
+    const seen = trays.filter((t) => visited.has(t.id)).length;
+
     return (
-        <nav className="sd-rack" aria-label="Layers">
-            <ol className="sd-rack-list">{tray(system.overview)}</ol>
+        <nav className="sd-rack" aria-label="Layers" ref={rack}>
+            <div className="sd-plate">
+                <span className="sd-plate-kicker">
+                    {category.name} · {system.kicker}
+                </span>
+                <h1 className="sd-plate-name">{system.name}</h1>
+            </div>
+            <ol className="sd-rack-list">
+                <TrayLink system={system} tray={system.overview} current={current} done={visited.has(system.overview.id)} />
+            </ol>
             {system.direction && (
-                <div className="sd-rack-dir">
+                <div className="sd-rack-label">
                     <span>{system.direction.label}</span>
-                    <span className="sd-rack-ends">
+                    <span>
                         {system.direction.top} <span aria-hidden="true">↓</span> {system.direction.bottom}
                     </span>
                 </div>
             )}
-            <ol className="sd-rack-list sd-rack-layers">{system.layers.map(tray)}</ol>
+            <div className="sd-cabinet" ref={cabinet}>
+                <span className="sd-rack-wire" aria-hidden="true" />
+                <span
+                    className={`sd-rack-token${tokenY == null ? ' parked' : ''}`}
+                    style={tokenY == null ? undefined : { '--ty': `${tokenY}px` }}
+                    aria-hidden="true"
+                />
+                <ol className="sd-trays">
+                    {system.layers.map((tray, i) => (
+                        <TrayLink key={tray.id} system={system} tray={tray} current={current} done={visited.has(tray.id)} peek={peek} index={i} />
+                    ))}
+                </ol>
+            </div>
             {system.topics.length > 0 && (
                 <>
-                    <div className="sd-rack-dir">
+                    <div className="sd-rack-label">
                         <span>{system.topicsLabel ?? 'Across the layers'}</span>
                     </div>
-                    <ol className="sd-rack-list">{system.topics.map(tray)}</ol>
+                    <ul className="sd-patch">
+                        {system.topics.map((tray) => (
+                            <Jack key={tray.id} system={system} tray={tray} current={current} done={visited.has(tray.id)} />
+                        ))}
+                    </ul>
                 </>
             )}
+            <div className="sd-rack-progress">
+                <div className="sd-meter" aria-hidden="true">
+                    <i style={{ width: `${(100 * seen) / trays.length}%` }} />
+                </div>
+                <span>
+                    <b>
+                        {seen} of {trays.length}
+                    </b>{' '}
+                    trays explored
+                    {seen > 1 && (
+                        <button type="button" className="sd-rack-reset" onClick={onReset}>
+                            Reset
+                        </button>
+                    )}
+                </span>
+            </div>
         </nav>
+    );
+}
+
+function Tabs({ tray, sections, current, onSelect }) {
+    const list = useRef(null);
+    const [bar, setBar] = useState(null);
+
+    // Slide the underline to the selected tab, and follow it on resize.
+    useLayoutEffect(() => {
+        const measure = () => {
+            const tab = list.current?.querySelector('[aria-selected="true"]');
+            if (tab) setBar({ x: tab.offsetLeft, w: tab.offsetWidth });
+        };
+        measure();
+        window.addEventListener('resize', measure);
+        return () => window.removeEventListener('resize', measure);
+    }, [current.id, sections]);
+
+    const onKeyDown = (e) => {
+        const i = sections.indexOf(current);
+        let j = null;
+        if (e.key === 'ArrowRight') j = (i + 1) % sections.length;
+        if (e.key === 'ArrowLeft') j = (i - 1 + sections.length) % sections.length;
+        if (j == null) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onSelect(sections[j].id);
+        list.current?.querySelectorAll('[role="tab"]')[j]?.focus();
+    };
+
+    return (
+        <div className="sd-tabs" role="tablist" aria-label={`${tray.name} sections`} ref={list} onKeyDown={onKeyDown}>
+            {sections.map((s, i) => (
+                <button
+                    key={s.id}
+                    type="button"
+                    role="tab"
+                    id={`tab-${s.id}`}
+                    aria-selected={s.id === current.id}
+                    aria-controls={`panel-${s.id}`}
+                    tabIndex={s.id === current.id ? 0 : -1}
+                    className={`sd-tab${s.id === current.id ? ' is-current' : ''}`}
+                    onClick={() => onSelect(s.id)}
+                >
+                    <span className="sd-tab-n">{String(i + 1).padStart(2, '0')}</span> {s.label}
+                </button>
+            ))}
+            {bar && bar.w > 0 && <span className="sd-tab-bar" style={{ transform: `translateX(${bar.x}px)`, width: bar.w }} aria-hidden="true" />}
+        </div>
     );
 }
 
 function NotFound({ systemId }) {
     return (
-        <div className="content sd-page sd-missing">
-            <h1 className="page-title">Not in the atlas (yet)</h1>
-            <p className="page-sub" style={{ marginTop: '12px' }}>
-                There is no system or layer at “{systemId}”.{' '}
-                <Link to="/systems" className="text-link">
-                    Browse the systems <span className="chev">›</span>
-                </Link>
-            </p>
+        <div className="sd-page sd-missing">
+            <div className="sd-frame">
+                <h1 className="sd-display">Not in the atlas (yet)</h1>
+                <p className="sd-dek">
+                    There is no system or layer at “{systemId}”.{' '}
+                    <Link to="/systems" className="text-link">
+                        Browse the systems <span className="chev">›</span>
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 }
@@ -76,7 +221,9 @@ export default function SystemPage() {
     const navigate = useNavigate();
     const system = getSystem(systemId);
     const tray = system ? findTray(system, layerId) : null;
-    const tabsRef = useRef(null);
+    const [visited, resetVisited] = useVisited(system?.id ?? '', tray?.id);
+    const [peek, setPeek] = useState(null);
+    const signal = useMemo(() => ({ peek, setPeek }), [peek]);
 
     const { prev, next } = system && tray ? neighborsOf(system, tray.id) : {};
 
@@ -99,6 +246,11 @@ export default function SystemPage() {
     const sections = tray.sections ?? [];
     const section = sections.find((s) => s.id === params.get('tab')) ?? sections[0];
     const sources = citedSources(system, SOURCES);
+    const isOverview = tray.kind === 'overview';
+    const eyebrow = isOverview
+        ? `${category.name} · ${system.kicker}`
+        : `${tray.kind === 'topic' ? `${system.topicsLabel ?? 'Across the layers'} · ` : ''}${tray.name}${tray.products ? ` · ${tray.products}` : ''}`;
+    const dek = isOverview ? system.intro : tray.lede;
 
     const selectTab = (id) => {
         const nextParams = new URLSearchParams(params);
@@ -107,116 +259,74 @@ export default function SystemPage() {
         setParams(nextParams, { replace: true });
     };
 
-    const onTabKey = (e) => {
-        const i = sections.indexOf(section);
-        let j = null;
-        if (e.key === 'ArrowRight') j = (i + 1) % sections.length;
-        if (e.key === 'ArrowLeft') j = (i - 1 + sections.length) % sections.length;
-        if (j == null) return;
-        e.preventDefault();
-        e.stopPropagation();
-        selectTab(sections[j].id);
-        tabsRef.current?.querySelectorAll('[role="tab"]')[j]?.focus();
-    };
-
     return (
-        <div className="content sd-page">
-            <nav className="sd-crumbs" aria-label="Breadcrumb">
-                <Link to="/systems">System Design</Link>
-                <span aria-hidden="true">›</span>
-                <Link to={category.id === 'fundamentals' ? '/systems' : `/systems?category=${category.id}`}>{category.name}</Link>
-                <span aria-hidden="true">›</span>
-                <Link to={trayPath(system.id)}>{system.name}</Link>
-            </nav>
-            <header className="sd-head">
-                <div className="eyebrow">
-                    {category.name} · {system.kicker}
+        <RackSignal.Provider value={signal}>
+            <div className="sd-page">
+                <div className="sd-frame sd-layout">
+                    <Rack system={system} category={category} current={tray} visited={visited} onReset={resetVisited} />
+
+                    <article className={`sd-panel c${tray.color}`} aria-labelledby="sd-tray-title" key={tray.id}>
+                        <header className="sd-ph">
+                            <div className="sd-ph-eyebrow">
+                                <span className="sd-ph-chip">{tray.code}</span>
+                                <span>{eyebrow}</span>
+                            </div>
+                            <h2 id="sd-tray-title" className="sd-ph-title">
+                                {tray.title}
+                            </h2>
+                            {dek && (
+                                <p className="sd-ph-dek">
+                                    <Rich text={dek} />
+                                </p>
+                            )}
+                        </header>
+
+                        {sections.length > 1 && <Tabs tray={tray} sections={sections} current={section} onSelect={selectTab} />}
+
+                        {section && (
+                            <section
+                                className="sd-section"
+                                role={sections.length > 1 ? 'tabpanel' : undefined}
+                                id={`panel-${section.id}`}
+                                aria-labelledby={sections.length > 1 ? `tab-${section.id}` : 'sd-tray-title'}
+                                key={`${tray.id}-${section.id}`}
+                            >
+                                <EvidenceRow provenance={section.provenance} refs={section.sourceRefs} sources={SOURCES} />
+                                {section.heading && <h3 className="sd-section-title">{section.heading}</h3>}
+                                {section.blocks.map((block, i) => (
+                                    <Block key={i} block={block} system={system} tray={tray} />
+                                ))}
+                                <Caveat caveat={section.caveat} sources={SOURCES} />
+                            </section>
+                        )}
+
+                        <nav className="sd-nextbar" aria-label="Previous and next layer">
+                            {prev ? (
+                                <Link to={trayPath(system.id, prev.id)} className={`sd-nb prev c${prev.color}`}>
+                                    <small>← Previous</small>
+                                    <span>
+                                        <b>{prev.code}</b> {prev.name}
+                                    </span>
+                                </Link>
+                            ) : (
+                                <span />
+                            )}
+                            {next && (
+                                <Link to={trayPath(system.id, next.id)} className={`sd-nb next c${next.color}`}>
+                                    <small>Next →</small>
+                                    <span>
+                                        <b>{next.code}</b> {next.name}
+                                    </span>
+                                </Link>
+                            )}
+                        </nav>
+                    </article>
                 </div>
-                <h1 className="page-title">{system.name}</h1>
-                <p className="page-sub sd-head-sub">{system.intro}</p>
-            </header>
 
-            <div className="sd-layout">
-                <Rack system={system} current={tray} />
-
-                <article className={`sd-panel c${tray.color}`} aria-labelledby="sd-tray-title">
-                    <div className="sd-panel-head">
-                        <span className="sd-panel-code">{tray.code}</span>
-                        <span className="sd-panel-name">
-                            {tray.name}
-                            {tray.products && <span className="sd-panel-products"> · {tray.products}</span>}
-                        </span>
-                    </div>
-                    <h2 id="sd-tray-title" className="sd-panel-title">
-                        {tray.title}
-                    </h2>
-                    {tray.lede && (
-                        <p className="sd-panel-lede">
-                            <Rich text={tray.lede} />
-                        </p>
-                    )}
-
-                    {sections.length > 1 && (
-                        <div className="sd-tabs" role="tablist" aria-label={`${tray.name} sections`} ref={tabsRef} onKeyDown={onTabKey}>
-                            {sections.map((s, i) => (
-                                <button
-                                    key={s.id}
-                                    type="button"
-                                    role="tab"
-                                    id={`tab-${s.id}`}
-                                    aria-selected={s.id === section.id}
-                                    aria-controls={`panel-${s.id}`}
-                                    tabIndex={s.id === section.id ? 0 : -1}
-                                    className={`sd-tab${s.id === section.id ? ' is-current' : ''}`}
-                                    onClick={() => selectTab(s.id)}
-                                >
-                                    <span className="sd-tab-n">{String(i + 1).padStart(2, '0')}</span> {s.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    {section && (
-                        <section
-                            className="sd-section"
-                            role={sections.length > 1 ? 'tabpanel' : undefined}
-                            id={`panel-${section.id}`}
-                            aria-labelledby={sections.length > 1 ? `tab-${section.id}` : 'sd-tray-title'}
-                            key={`${tray.id}-${section.id}`}
-                        >
-                            <EvidenceRow provenance={section.provenance} refs={section.sourceRefs} sources={SOURCES} />
-                            {section.heading && <h3 className="sd-section-title">{section.heading}</h3>}
-                            {section.blocks.map((block, i) => (
-                                <Block key={i} block={block} system={system} tray={tray} />
-                            ))}
-                            <Caveat caveat={section.caveat} sources={SOURCES} />
-                        </section>
-                    )}
-
-                    <nav className="sd-panel-nav" aria-label="Previous and next layer">
-                        {prev ? (
-                            <Link to={trayPath(system.id, prev.id)} className="sd-step prev">
-                                <span className="sd-step-dir">← Previous</span>
-                                <span>
-                                    {prev.code} {prev.name}
-                                </span>
-                            </Link>
-                        ) : (
-                            <span />
-                        )}
-                        {next && (
-                            <Link to={trayPath(system.id, next.id)} className="sd-step next">
-                                <span className="sd-step-dir">Next →</span>
-                                <span>
-                                    {next.code} {next.name}
-                                </span>
-                            </Link>
-                        )}
-                    </nav>
-                </article>
+                <div className="sd-frame sd-evidence">
+                    <EvidenceSection sources={sources} />
+                </div>
             </div>
-
-            <EvidenceSection sources={sources} />
-        </div>
+        </RackSignal.Provider>
     );
 }

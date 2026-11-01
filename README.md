@@ -15,6 +15,9 @@ The site has two components:
   seven-layer AI inference stack, from the SDK call to the GPU). Every layer has labs you
   can run, calculators, a spec sheet and design scenarios. See [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
 
+Light and dark themes follow the system setting; the sun and moon button in the nav
+overrides it and remembers the choice.
+
 Pick a domain, then an algorithm, feed it your own inputs, and step through a rendering
 in which **every step cites its source** — the original paper, the underlying theorem, or
 the modern standard — with labeled provenance whenever the visualization simplifies for

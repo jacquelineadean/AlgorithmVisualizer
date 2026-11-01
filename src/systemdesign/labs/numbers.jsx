@@ -3,6 +3,7 @@ import { LATENCY_LADDER, formatDuration, formatHumanScale, kvLayouts, ordinal, q
 import { addPartition, partitionLoad, reshard } from '../models/hashing';
 import { SERVING_GPUS, SERVING_MODELS, batchPoint, estimateFleet, fmtInt, formatBytes, kvBytesPerToken, serving } from '../models/serving';
 import { FAILURES } from '../systems/fundamentalsData';
+import { useTheme } from '../../site/theme';
 import Rich from '../ui/Rich';
 import { Button, Note, Readouts, Says, Seg, Select, Slider, pct } from './kit';
 
@@ -482,6 +483,8 @@ export function KafkaPartitions() {
 
 function KvCanvas({ layout, cols = 240 }) {
     const ref = useRef(null);
+    // The canvas reads theme tokens when it draws, so redraw on a theme change.
+    const theme = useTheme();
     useEffect(() => {
         const cv = ref.current;
         if (!cv || !cv.getContext) return;
@@ -518,7 +521,7 @@ function KvCanvas({ layout, cols = 240 }) {
             ctx.fillRect(x, y, cw - 0.6, cw - 0.6);
         }
         ctx.globalAlpha = 1;
-    }, [layout, cols]);
+    }, [layout, cols, theme]);
     return <canvas ref={ref} className="sd-kv-canvas" role="img" aria-label={`${layout.requests} requests in ${layout.cell.length} blocks of GPU memory`} />;
 }
 

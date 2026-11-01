@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 import './FloatingNav.css';
 
 export const GITHUB_URL = 'https://github.com/jacquelineadean/AlgorithmVisualizer';
@@ -45,6 +46,7 @@ export default function FloatingNav() {
                             />
                         </svg>
                     </a>
+                    <ThemeToggle />
                 </div>
             </nav>
         </header>

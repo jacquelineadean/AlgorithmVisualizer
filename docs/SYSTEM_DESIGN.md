@@ -123,6 +123,39 @@ companions to a podcast. The podcast stays in `sources.js` as citations
 `pages.test.jsx` renders every tab of every tray of every system through the
 real router and checks the heading and that no lab is missing.
 
+## The page
+
+`ui/SystemPage.jsx` draws each system as a server rack beside a stage.
+
+- The rack (left, sticky) holds a plate with the category, kicker and
+  system name (the page's h1), the overview tray, the direction label, a
+  cabinet with one tray per layer, a patch panel with the topics as jacks,
+  and a meter of trays opened. Opened trays live in `localStorage` under
+  `sd-visited:<systemId>` (`ui/progress.js`).
+- An amber token rides the cabinet's cable beside the open layer.
+  `ui/rackSignal.js` lets a lab point it at another layer: the request
+  trace moves it tray by tray while the request travels.
+- The stage shows a chip and eyebrow, the tray title in Big Shoulders
+  Display, the lede as an italic dek, tabs with a sliding bar, the section,
+  and previous and next buttons.
+- A `stats` block renders as rack front panels on an overview tray and as
+  cards elsewhere. A `spec` block renders as a datasheet under a dark band
+  in the layer's color. The `layers` block draws the trays as rack units.
+- Below 900px the rack becomes a sticky strip of tray codes and jacks.
+
+## Theme
+
+- Colors are tokens. `src/styles/theme.css` holds the site's; the top of
+  `ui/SystemDesign.css` holds the layer colors (`--sd-c1` to `--sd-c7`),
+  the rack (`--sd-rack*`) and the token (`--sd-token`).
+- Every token has a dark value, written twice: under
+  `prefers-color-scheme: dark` and under `:root[data-theme='dark']`.
+- The theme follows the system setting until the nav's toggle stores a
+  choice (`src/site/theme.js`); `index.html` applies it before first paint.
+- The rack stays dark in both themes.
+- Canvas and WebGL code reads tokens with `themeVar()` and re-renders on a
+  theme change through `useTheme()`.
+
 ## Copy
 
 Labs carry the explanation, so text stays short. An intro is one sentence,

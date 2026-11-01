@@ -105,7 +105,7 @@
 }
 
 .public-token text {
-    fill: #ffffff;
+    fill: var(--on-accent);
 }
 
 .priv-token rect {
@@ -132,7 +132,10 @@
     fill: var(--ink);
 }
 
-.plain-token text,
+.plain-token text {
+    fill: var(--on-accent);
+}
+
 .cipher-token text {
-    fill: #ffffff;
+    fill: var(--paper);
 }

@@ -71,6 +71,37 @@
     display: none;
 }
 
+.theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin-left: 2px;
+    padding: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 50%;
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+    border-color: var(--ink-faint);
+    transform: rotate(-12deg);
+}
+
+.theme-toggle svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .external-icon {
     display: block;
     opacity: 0.55;
@@ -93,12 +124,24 @@
    lines, System Design shortens to Systems, and GitHub stays in the footer. */
 @media (max-width: 480px) {
     .floating-nav {
+        gap: 6px;
+        padding-left: 14px;
         padding-right: 6px;
     }
     .wordmark {
-        width: min-content;
-        white-space: normal;
-        line-height: 1.2;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+    }
+    .nav-links {
+        gap: 2px;
+    }
+    .nav-link {
+        padding: 7px 8px;
+        font-size: 0.84rem;
+    }
+    .theme-toggle {
+        width: 32px;
+        height: 32px;
     }
     .label-long,
     .nav-github {

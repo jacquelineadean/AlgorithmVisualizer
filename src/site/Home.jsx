@@ -83,6 +83,11 @@ export default function Home() {
                     </Link>
                     <Link to="/systems" className="card component-card accent-vermilion">
                         <div className="eyebrow">System Design Visualizer</div>
+                        <div className="mini-rack" aria-hidden="true">
+                            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                                <span key={n} style={{ '--c': `var(--sd-c${n})`, '--i': n }} />
+                            ))}
+                        </div>
                         <h3>Walk a system, layer by layer</h3>
                         <p>
                             Labs, calculators and failure drills for the AI inference stack

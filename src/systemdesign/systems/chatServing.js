@@ -22,7 +22,7 @@ export default defineSystem({
     kicker: 'Worked design',
     summary: 'A public LLM chat API, from client to KV cache, with the stores beside it.',
     intro: 'Chat for a public LLM API, where time to first token is the target every layer serves.',
-    direction: { label: 'The request path', top: 'user', bottom: 'GPU memory' },
+    direction: { label: 'Request path', top: 'user', bottom: 'GPU memory' },
     topicsLabel: 'Beside the request path',
     trace: {
         down: 'request',
