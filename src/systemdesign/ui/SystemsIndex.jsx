@@ -42,11 +42,7 @@ export default function SystemsIndex() {
         <div className="content sd-index">
             <div className="eyebrow">System Design Visualizer</div>
             <h1 className="page-title">Explore a system, layer by layer</h1>
-            <p className="page-sub">
-                Each system is a stack. Open it at the top and walk down one layer at a time: what the layer
-                owns, the mechanism you can run, the numbers that bound it and how it fails. Every layer cites
-                its sources.
-            </p>
+            <p className="page-sub">Run each layer’s mechanism, size it with real numbers, then break it.</p>
             <nav className="domain-filter" aria-label="Categories">
                 {CATEGORIES.map((c) => (
                     <Link
@@ -61,7 +57,6 @@ export default function SystemsIndex() {
             </nav>
             <section className="sd-category" aria-label={`${category.name} systems`}>
                 <h2>{category.name}</h2>
-                <p className="domain-blurb">{category.blurb}</p>
                 <div className="sd-system-grid">
                     {systems.map((s) => (
                         <SystemCard key={s.id} system={s} />

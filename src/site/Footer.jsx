@@ -7,7 +7,7 @@ export default function Footer() {
         <footer className="site-footer">
             <div className="content footer-inner">
                 <div>
-                    <div className="eyebrow">Algorithm Visualizer</div>
+                    <div className="eyebrow">Visualizer</div>
                     <p className="footer-tagline">
                         Built in the open. Every step cites its source.
                     </p>

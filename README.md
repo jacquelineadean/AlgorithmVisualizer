@@ -13,7 +13,7 @@ The site has two components:
   **Fundamentals** (the default: a design method, Kafka as a durable log, a paged KV cache,
   sharded Postgres, and a worked chat-serving design that uses all three) and **AI** (the
   seven-layer AI inference stack, from the SDK call to the GPU). Every layer has labs you
-  can run, a spec sheet, and practice drills. See [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
+  can run, calculators, a spec sheet and design scenarios. See [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
 
 Pick a domain, then an algorithm, feed it your own inputs, and step through a rendering
 in which **every step cites its source** — the original paper, the underlying theorem, or

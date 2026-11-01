@@ -61,9 +61,9 @@ describe('system page', () => {
         const tabs = within(screen.getByRole('tablist'));
         expect(tabs.getByRole('tab', { name: /spec/i })).toHaveAttribute('aria-selected', 'true');
         expect(screen.getByText(/an operating system: a scheduler/i)).toBeInTheDocument();
-        fireEvent.click(tabs.getByRole('tab', { name: /practice/i }));
-        expect(tabs.getByRole('tab', { name: /practice/i })).toHaveAttribute('aria-selected', 'true');
-        expect(screen.getByRole('heading', { name: /design drill/i })).toBeInTheDocument();
+        fireEvent.click(tabs.getByRole('tab', { name: /exercises/i }));
+        expect(tabs.getByRole('tab', { name: /exercises/i })).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByRole('heading', { name: /design scenario/i })).toBeInTheDocument();
     });
 
     it('walks to the next layer with the arrow key', async () => {

@@ -10,10 +10,20 @@ import { BLOCKS } from './ui/Blocks';
 // the algorithm pages follow (every section cites a resolvable source and
 // declares its provenance), plus the structural checks that keep a system
 // navigable: unique ids, known block kinds and labs, internal links and
-// layer references that resolve, and no podcast-specific references
-// outside the citations themselves.
+// layer references that resolve, no podcast-specific references outside
+// the citations themselves, and no interview framing anywhere.
 
 const PODCAST = /\b(episodes?|podcasts?|spotify|show notes|listen on)\b|\bthe host\b|\brubric\b/i;
+const INTERVIEW = /\binterview/i;
+
+// Labs and shared data hold text outside the system objects, so the
+// framing check reads every source file. sources.js keeps each citation's
+// real title, so it is exempt.
+const SOURCE_FILES = import.meta.glob(['./**/*.{js,jsx}', '!./**/*.test.{js,jsx}', '!./sources.js'], {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+});
 
 const checkRefs = (owner, refs) => {
     expect(refs?.length, `${owner} has no sources`).toBeGreaterThan(0);
@@ -61,6 +71,14 @@ describe('catalog', () => {
         const stack = getSystem('ai-inference-stack');
         expect(stack.category).toBe('ai');
         expect(stack.layers.map((l) => l.code)).toEqual(['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7']);
+    });
+
+    it('frames the material for learning and design work, never for interviews', () => {
+        expect(Object.keys(SOURCE_FILES).length).toBeGreaterThan(10);
+        for (const [path, source] of Object.entries(SOURCE_FILES)) {
+            const hit = INTERVIEW.exec(source);
+            expect(hit ? `${path}: ${source.slice(Math.max(0, hit.index - 60), hit.index + 60)}` : null).toBeNull();
+        }
     });
 
     it('gives every source an https link', () => {

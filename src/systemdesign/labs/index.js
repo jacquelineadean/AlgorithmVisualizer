@@ -1,17 +1,4 @@
-import {
-    BreadthClock,
-    ConsumerQuestion,
-    DepthBudget,
-    DepthStrata,
-    EndStrong,
-    EscapeHatches,
-    PokeTest,
-    Primitives,
-    RequirementsChecklist,
-    Signals,
-    ThreeSecondCheck,
-    TradeoffPairs,
-} from './method';
+import { ConsumerQuestion, DepthBudget, DepthStrata, DesignSummary, PokeTest, Primitives, RequirementsChecklist, TradeoffPairs } from './method';
 import { BatchingCurve, CapacityEstimator, FailureDrill, KafkaPartitions, KvLayout, LatencyLadder, Quorum, Resharding } from './numbers';
 import {
     BatchingRace,
@@ -36,7 +23,7 @@ import {
 // Every interactive figure a system can place in a section, by the key a
 // `lab` block names. content.test.js checks every key a system uses is here.
 export const LABS = {
-    // How to run a design discussion
+    // The design method
     'requirements-checklist': RequirementsChecklist,
     'consumer-question': ConsumerQuestion,
     'poke-test': PokeTest,
@@ -44,11 +31,7 @@ export const LABS = {
     tradeoffs: TradeoffPairs,
     'depth-strata': DepthStrata,
     'depth-budget': DepthBudget,
-    'breadth-clock': BreadthClock,
-    signals: Signals,
-    'three-second-check': ThreeSecondCheck,
-    'escape-hatches': EscapeHatches,
-    'end-strong': EndStrong,
+    'design-summary': DesignSummary,
 
     // Numbers computed from the models in ../models
     'capacity-estimator': CapacityEstimator,

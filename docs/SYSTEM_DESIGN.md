@@ -56,19 +56,19 @@ defineSystem({
     name: 'Kafka as a durable log',
     kicker: 'Component, five layers deep',
     summary: 'One line for the index card.',
-    intro: 'The paragraph under the page title.',
+    intro: 'One sentence under the page title.',
     direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
     topicsLabel: 'Beside the request path', // optional heading over topic trays
     trace: { steps: [...] },          // optional: the request-trace lab's steps
-    overview: { title, lede, sections },
+    overview: { title, sections },   // lede optional
     layers: [tray, ...],              // read top to bottom; colors 1–7 in order
     topics: [tray, ...],              // cross-cutting trays after the layers
 });
 ```
 
 A **tray** is `{ id, code, name, products?, title, lede, sections }`. The rack
-shows `code` and `name`; the panel shows `title`, `lede` and one tab per
-section.
+and the `layers` block show `code`, `name` and `products`; the panel shows
+`title`, `lede` and one tab per section.
 
 A **section** is `{ id, label, provenance, sourceRefs, heading?, blocks, caveat? }`.
 `provenance` is one of `paper`, `theorem`, `modern`, `pedagogical`.
@@ -112,7 +112,9 @@ Text fields accept three inline marks: `**bold**`, `` `code` `` and
   not exist;
 - an internal link points at a system, tray or `?tab=` that does not exist;
 - a quiz answer index is out of range;
-- any text mentions podcast episodes, hosts or show notes.
+- any text mentions podcast episodes, hosts or show notes;
+- any source file under `src/systemdesign/` except `sources.js` mentions
+  interviews. The material is for learning and design work.
 
 The last rule exists because the Fundamentals and AI material started as
 companions to a podcast. The podcast stays in `sources.js` as citations
@@ -120,6 +122,13 @@ companions to a podcast. The podcast stays in `sources.js` as citations
 
 `pages.test.jsx` renders every tab of every tray of every system through the
 real router and checks the heading and that no lab is missing.
+
+## Copy
+
+Labs carry the explanation, so text stays short. An intro is one sentence,
+a tray lede one sentence, and a prose block at most two short paragraphs.
+A lab's `sub` says what to press and what to watch. A tray opens on the
+lab that runs its mechanism when it has one; explanation tabs follow it.
 
 ## Numbers
 

@@ -216,10 +216,7 @@ export default function SystemPage() {
                 </article>
             </div>
 
-            <EvidenceSection
-                sources={sources}
-                intro={`Every section of ${system.name} cites at least one of these. The provenance chip says how closely the section follows its source.`}
-            />
+            <EvidenceSection sources={sources} />
         </div>
     );
 }

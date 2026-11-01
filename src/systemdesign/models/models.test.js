@@ -8,7 +8,7 @@ import {
     serving,
 } from './serving';
 import { addPartition, kafkaPartition, murmur2, partitionLoad, reshard, toPositive } from './hashing';
-import { breadthClock, kvGeometry, kvLayouts, ladderRatio, quorum } from './fundamentals';
+import { kvGeometry, kvLayouts, ladderRatio, quorum } from './fundamentals';
 import {
     DEEPSEEK_V3,
     KV_MODELS,
@@ -155,12 +155,6 @@ describe('quorums, ladder, clock', () => {
     it('keeps the ladder ratios the text quotes', () => {
         expect(ladderRatio('Main memory reference', 'Round trip within one datacenter')).toBeCloseTo(5000, 6);
         expect(ladderRatio('Round trip within one datacenter', 'California to Netherlands and back')).toBeCloseTo(300, 6);
-    });
-
-    it('runs out of depth as breadth grows', () => {
-        expect(breadthClock(4)).toMatchObject({ remaining: 24, perDive: 12, depth: 5 });
-        expect(breadthClock(12).depth).toBe(3);
-        expect(breadthClock(20)).toMatchObject({ remaining: 0, depth: 1 });
     });
 });
 

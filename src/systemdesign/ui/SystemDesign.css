@@ -1864,138 +1864,7 @@ rect.faint { opacity: 0.35; }
     padding: 4px 10px;
 }
 
-/* Signals */
-.sd-signals {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-}
-
-.sd-signal-list {
-    list-style: none;
-    margin: 0;
-    padding: 10px;
-    border-radius: 10px;
-    background: #24231f;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.sd-signal-list button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #3a3833;
-    border-radius: 6px;
-    background: #2e2d28;
-    color: #d8d4c8;
-    text-align: left;
-    font-size: 0.86rem;
-    cursor: pointer;
-}
-
-.sd-signal-list button[aria-pressed='true'] {
-    border-color: #f2b33d;
-    color: #fff;
-}
-
-.sd-lamp {
-    width: 10px;
-    height: 10px;
-    flex: none;
-    border-radius: 50%;
-    background: #5a574f;
-}
-
-.sd-signal-list button[aria-pressed='true'] .sd-lamp {
-    background: #f2b33d;
-    box-shadow: 0 0 8px #f2b33d;
-}
-
-.sd-signal-card {
-    padding: 14px 16px;
-    border: 1px solid var(--hairline);
-    border-radius: 10px;
-    background: var(--paper-raised);
-}
-
-.sd-signal-card h4 {
-    margin: 0 0 6px;
-    font-family: var(--font-serif);
-    font-size: 1.15rem;
-    font-weight: 500;
-}
-
-.sd-signal-card p {
-    margin: 0;
-}
-
-/* Three-second game */
-.sd-game {
-    padding: 14px 16px;
-    border: 1px solid var(--hairline);
-    border-radius: 10px;
-    background: var(--paper-raised);
-}
-
-.sd-game > * + * {
-    margin-top: 10px;
-}
-
-.sd-game-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.82rem;
-    color: var(--ink-faint);
-}
-
-.sd-game-clock {
-    font-family: var(--font-mono);
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--sd-bad);
-}
-
-.sd-game-text {
-    margin: 0;
-    font-family: var(--font-serif);
-    font-size: 1.15rem;
-}
-
-/* Escape hatches */
-.sd-hatches {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 10px;
-}
-
-.sd-hatch {
-    padding: 12px 14px;
-    border: 1px solid var(--hairline);
-    border-radius: 10px;
-    background: var(--paper-raised);
-}
-
-.sd-hatch p {
-    margin: 0 0 6px;
-}
-
-.sd-hatch-say {
-    font-family: var(--font-serif);
-    font-size: 1.02rem;
-}
-
-.sd-hatch-when {
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-}
-
-/* End strong */
+/* Design summary */
 .sd-close {
     list-style: none;
     margin: 0;
@@ -2768,7 +2637,6 @@ a:hover > .sd-trace-tray .body {
     .sd-two.even,
     .sd-trace-grid,
     .sd-venn-wrap,
-    .sd-signals,
     .sd-strata-grid,
     .sd-phase-tokens {
         grid-template-columns: 1fr;

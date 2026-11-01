@@ -414,7 +414,7 @@ function Code({ block }) {
 function Quote({ block }) {
     return (
         <figure className="sd-quote">
-            <figcaption>{block.label ?? 'Say it this way'}</figcaption>
+            <figcaption>{block.label ?? 'The decision'}</figcaption>
             <blockquote>“{block.text}”</blockquote>
         </figure>
     );
@@ -448,7 +448,7 @@ function LayerIndex({ system }) {
                         <span className="sd-layer-code">{t.code}</span>
                         <span className="sd-layer-text">
                             <strong>{t.name}</strong>
-                            <span>{t.title}</span>
+                            {t.products && <span>{t.products}</span>}
                         </span>
                     </Link>
                 </li>

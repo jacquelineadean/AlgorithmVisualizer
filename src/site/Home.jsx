@@ -85,9 +85,8 @@ export default function Home() {
                         <div className="eyebrow">System Design Visualizer</div>
                         <h3>Walk a system, layer by layer</h3>
                         <p>
-                            The AI inference stack from SDK call to GPU, and the fundamentals
-                            behind any design: what each layer owns, how it fails, and the
-                            numbers that bound it.
+                            Labs, calculators and failure drills for the AI inference stack
+                            and the fundamentals of any design.
                         </p>
                         <span className="domain-count">
                             {CATEGORIES.length} categories · {CATEGORIES.map((c) => c.name).join(' and ')}

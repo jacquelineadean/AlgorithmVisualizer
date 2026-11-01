@@ -524,11 +524,11 @@ function KvCanvas({ layout, cols = 240 }) {
 
 const KV_SAYS = {
     reserve: (L) =>
-        `The server cannot know how long an answer will run, so each request reserves room for 2,048 tokens up front. Only **${pct(L.utilization)}** of that reservation ever holds a token. The PagedAttention paper measured earlier systems using just 20 to 38 percent of KV memory for real token state, because they also lost memory to fragmentation.`,
+        `Answer length is unknown, so each request reserves 2,048 tokens up front. Only **${pct(L.utilization)}** of that reservation ever holds a token.`,
     paged: (L) =>
-        `Blocks of 16 tokens are handed out as a sequence grows, from anywhere in memory, and a block table maps each sequence’s logical blocks to physical ones. The only waste is the unfilled tail of each request’s last block. The same memory now holds **${fmtInt(L.requests)}** requests. The vLLM team reports under 4 percent waste.`,
+        `A block table hands out 16-token blocks as each sequence grows, so only the tail of each last block is wasted. The same memory now holds **${fmtInt(L.requests)}** requests.`,
     shared: (L, base, all) =>
-        `Every request points at one copy of the system prompt’s ${all.sharedFull} full blocks. Only full blocks are shared, so the prompt’s last ${all.sharedTail} tokens sit in each request’s own first block. The same memory now holds **${fmtInt(L.requests)}** requests, ${(L.requests / base).toFixed(1)} times the reserved layout. The price: a block table, a scheduler and less contiguous memory.`,
+        `Every request points at one copy of the system prompt’s ${all.sharedFull} full blocks, and only its last ${all.sharedTail} tokens are stored per request. The same memory now holds **${fmtInt(L.requests)}** requests, ${(L.requests / base).toFixed(1)} times the reserved layout.`,
 };
 
 export function KvLayout() {

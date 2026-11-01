@@ -10,7 +10,7 @@ export default function FloatingNav() {
         <header className="floating-nav-wrap">
             <nav className="floating-nav" aria-label="Primary">
                 <Link to="/" className="wordmark">
-                    Algorithm Visualizer
+                    Visualizer
                 </Link>
                 <div className="nav-links">
                     <NavLink to="/visualizer" className={navLinkClass}>
