@@ -46,9 +46,128 @@
     --radius-pill: 999px;
     --shadow-float: 0 10px 30px rgba(28, 27, 24, 0.08), 0 2px 6px rgba(28, 27, 24, 0.05);
 
+    /* Text on an accent fill */
+    --on-accent: #ffffff;
+
     /* Layout */
     --content-width: 1080px;
     --nav-height: 56px;
+
+    color-scheme: light;
+}
+
+/* Dark theme: the system setting applies unless the reader picked a theme
+   with the toggle, which sets data-theme on <html> (see site/theme.js). The
+   two blocks below must stay identical. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --paper: #131210;
+        --paper-raised: #1c1b18;
+        --paper-sunken: #0d0c0b;
+        --ink: #eceae3;
+        --ink-soft: #b5b1a6;
+        --ink-faint: #858176;
+        --hairline: #2e2c28;
+        --cobalt: #7b95f2;
+        --cobalt-soft: #1e2647;
+        --green: #4dbb88;
+        --green-soft: #13291e;
+        --vermilion: #f07a5a;
+        --vermilion-soft: #3b1c13;
+        --gold: #e2b34a;
+        --gold-soft: #33290f;
+        --on-accent: #131210;
+        --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme='dark'] {
+    --paper: #131210;
+    --paper-raised: #1c1b18;
+    --paper-sunken: #0d0c0b;
+    --ink: #eceae3;
+    --ink-soft: #b5b1a6;
+    --ink-faint: #858176;
+    --hairline: #2e2c28;
+    --cobalt: #7b95f2;
+    --cobalt-soft: #1e2647;
+    --green: #4dbb88;
+    --green-soft: #13291e;
+    --vermilion: #f07a5a;
+    --vermilion-soft: #3b1c13;
+    --gold: #e2b34a;
+    --gold-soft: #33290f;
+    --on-accent: #131210;
+    --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+}
+
+/* --- Rack palette ---------------------------------------------------------
+   The System Design Visualizer's look: seven layer colors, a dark server
+   rack that stays dark in both themes, an amber request token, condensed
+   display type. Used by systemdesign/ui/SystemDesign.css and the home page. */
+
+:root {
+    --sd-c1: #2f6db5;
+    --sd-c2: #d2652d;
+    --sd-c3: #13896e;
+    --sd-c4: #6a4fc7;
+    --sd-c5: #a87600;
+    --sd-c6: #c2457a;
+    --sd-c7: #3e8a1c;
+    --sd-token: #e39a2d;
+    --sd-token-ink: #925a00;
+    --sd-rack: #1f1e1b;
+    --sd-rack-2: #2a2925;
+    --sd-rack-3: #3a3833;
+    --sd-rack-deep: #0e0d0c;
+    --sd-rack-ink: #e6e3da;
+    --sd-rack-muted: #9b978c;
+    --sd-rack-bright: #ffffff;
+    --sd-led-off: #46433c;
+    --sd-shadow: 0 1px 0 rgba(28, 27, 24, 0.04), 0 10px 30px -18px rgba(28, 27, 24, 0.35);
+    --sd-bad: var(--vermilion);
+    --sd-good: var(--green);
+    --sd-display: 'Big Shoulders Display', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+    --sd-ui: 'IBM Plex Sans Condensed', 'Arial Narrow', var(--font-sans);
+}
+
+/* Keep these two blocks identical, like the theme blocks above. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --sd-c1: #5b8fdb;
+        --sd-c2: #e07a45;
+        --sd-c3: #2aae8d;
+        --sd-c4: #9583ea;
+        --sd-c5: #cf9d1f;
+        --sd-c6: #de6a9b;
+        --sd-c7: #66b544;
+        --sd-token: #eda94a;
+        --sd-token-ink: #f0b865;
+        --sd-rack: #191816;
+        --sd-rack-2: #24231f;
+        --sd-rack-3: #34322d;
+        --sd-rack-deep: #080807;
+        --sd-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -18px rgba(0, 0, 0, 0.8);
+    }
+}
+
+:root[data-theme='dark'] {
+    --sd-c1: #5b8fdb;
+    --sd-c2: #e07a45;
+    --sd-c3: #2aae8d;
+    --sd-c4: #9583ea;
+    --sd-c5: #cf9d1f;
+    --sd-c6: #de6a9b;
+    --sd-c7: #66b544;
+    --sd-token: #eda94a;
+    --sd-token-ink: #f0b865;
+    --sd-rack: #191816;
+    --sd-rack-2: #24231f;
+    --sd-rack-3: #34322d;
+    --sd-rack-deep: #080807;
+    --sd-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -18px rgba(0, 0, 0, 0.8);
 }
 
 * {

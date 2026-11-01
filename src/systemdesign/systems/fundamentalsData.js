@@ -1,7 +1,7 @@
 // Shared data for the Fundamentals systems and their labs. Lists and
 // examples are written for this site; the structure and counts (eight
 // questions, forty primitives, five layers of depth, three tests for
-// depth, six signals, five escape hatches) follow SDDD_MODELS.
+// depth) follow SDDD_MODELS.
 
 export const REQUIREMENT_QUESTIONS = [
     ['Who uses it, and how many of them?', 'Request rate, fan-out, and whether one region is enough.'],
@@ -60,10 +60,10 @@ export const CONSUMERS = {
 };
 
 export const POKES = [
-    { at: 'request', mark: 'p99?', read: '“p99?” on the request path.', means: 'They care about tail latency. Talk about the read path: caching, precomputation and timeouts.' },
-    { at: 'app', mark: 'it dies?', read: '“It dies?” on the app server.', means: 'They care about availability. Talk about redundancy, health checks and what users see during failover.' },
-    { at: 'db', mark: '10× writes?', read: '“10× writes?” on the database.', means: 'They care about write scale. Talk about partitioning, the shard key and the write path.' },
-    { at: 'client', mark: 'who reads it?', read: '“Who reads it?” on the client.', means: 'They are asking the consumer question for you. Answer it, then redraw.' },
+    { at: 'request', mark: 'p99?', read: '“p99?” on the request path.', means: 'Tail latency. Work on the read path: caching, precomputation and timeouts.' },
+    { at: 'app', mark: 'it dies?', read: '“It dies?” on the app server.', means: 'Availability. Add redundancy and health checks, and decide what users see during failover.' },
+    { at: 'db', mark: '10× writes?', read: '“10× writes?” on the database.', means: 'Write scale. Pick a shard key and partition the write path.' },
+    { at: 'client', mark: 'who reads it?', read: '“Who reads it?” on the client.', means: 'The consumer question. Answer it, then redraw the design.' },
 ];
 
 // [id, name, what it is, vendors, reach for it when]
@@ -138,7 +138,7 @@ export const ACCESS_PATTERNS = [
     ['Serve an LLM', ['gpu', 'kvc', 'rl', 'lb', 'mq', 'gw']],
 ];
 
-// [id, title, side A, side B, the number to say]; each side is [name, gives, costs, choose it for].
+// [id, title, side A, side B, the deciding number]; each side is [name, gives, costs, choose it for].
 export const TRADEOFFS = [
     ['btree-lsm', 'B-tree or LSM tree',
         ['B-tree', 'A lookup reads about log base fanout of the row count pages: 3 or 4 even at billions of rows. Rows update in place.', 'Random writes. Changing one row rewrites a whole page plus the write-ahead log, so small writes are amplified.', 'Read-heavy tables, range queries, transactions. Postgres, MySQL InnoDB.'],
@@ -167,10 +167,10 @@ export const TRADEOFFS = [
 ];
 
 export const ANTI_PATTERNS = [
-    { title: 'Vendor first.', text: 'Naming Kafka, Redis or Pinecone before stating the access pattern. Say the pattern, then the primitive, then the product.' },
-    { title: 'Boxes without reasons.', text: 'A component appears because systems like this usually have one. Tie every box to a requirement from the first eight minutes.' },
-    { title: 'No costs stated.', text: 'Every choice is presented as free, so no judgment is on display. For each choice, say what it gives up and when you would switch.' },
-    { title: 'No numbers.', text: 'No estimate of traffic, data size or latency, so no choice can be checked. Write three numbers on the board before the second box.' },
+    { title: 'Vendor first.', text: 'Naming Kafka or Redis before the access pattern. State the pattern, then the primitive, then the product.' },
+    { title: 'Boxes without reasons.', text: 'A component added because similar systems have one. Tie every box to a requirement.' },
+    { title: 'No costs stated.', text: 'Every choice looks free, so nothing can be compared. Name what each choice gives up and when to switch.' },
+    { title: 'No numbers.', text: 'No traffic, data size or latency estimate, so no choice can be checked. Write down three numbers before the second box.' },
 ];
 
 // Five layers of depth, the same for every component.
@@ -179,40 +179,40 @@ export const DEPTH_LAYERS = ['Role', 'Interface and data model', 'Mechanism', 'L
 export const DEPTH_TEXT = {
     'kafka-log': [
         'A durable, ordered event log between the ingest service and everything that consumes its events.',
-        'Topics split into partitions. Producers choose a partition key. Consumer groups share partitions and track their own offsets. Retention is set per topic.',
-        'Each partition is an append-only log on disk, replicated to follower brokers. A consumer reads sequentially from its offset, so replaying history is a matter of resetting that offset.',
-        'Ordering is guaranteed only within a partition. A skewed key creates a hot partition that no amount of extra consumers can fix. With `acks=all`, writes fail once in-sync replicas fall below `min.insync.replicas`.',
-        'Kafka does not support reducing a topic’s partitions, and adding partitions changes which partition a key maps to. Watch consumer lag. The documentation describes a typical setup of replication factor 3 with `min.insync.replicas` set to 2.',
+        'Topics split into partitions, producers pick a key, and each consumer group tracks its own offsets.',
+        'Each partition is an append-only file copied to follower brokers. Replay means moving a consumer’s offset back.',
+        'Order holds only within a partition. A skewed key makes a hot partition, and `acks=all` writes fail below `min.insync.replicas`.',
+        'Partitions can grow but never shrink, and growing them remaps keys. Consumer lag is the number to watch.',
     ],
     'paged-kv-cache': [
-        'Holds the attention keys and values for every active sequence on the GPU, so decoding each new token does not recompute the whole prompt.',
-        'Each sequence gets a block table that maps its logical blocks to physical blocks in GPU memory. The default block size in vLLM is 16 tokens.',
-        'Blocks are allocated on demand, the way an operating system pages virtual memory. Sequences that share a prefix share physical blocks, and copy-on-write splits them when they diverge.',
-        'The PagedAttention paper found earlier systems used only about 20 to 38 percent of KV cache memory for real token state. vLLM reports under 4 percent waste. When memory still runs out, the scheduler preempts sequences, either dropping their blocks to recompute later or swapping them to CPU memory.',
-        'Watch KV cache utilization and preemption counts per GPU. The paper reports 2 to 4 times the throughput of FasterTransformer and Orca at the same latency.',
+        'Holds every active sequence’s attention keys and values on the GPU, so a new token never recomputes the prompt.',
+        'A block table per sequence maps logical blocks to physical GPU blocks of 16 tokens, vLLM’s default.',
+        'Blocks are allocated on demand, like virtual memory pages. Sequences with a shared prefix share blocks until copy-on-write splits them.',
+        'Earlier systems used only 20 to 38 percent of KV memory for real tokens, and vLLM wastes under 4 percent. When memory runs out, the scheduler preempts sequences.',
+        'Watch KV cache utilization and preemptions per GPU. The paper reports 2 to 4 times the throughput of FasterTransformer and Orca at the same latency.',
     ],
     'sharded-postgres': [
         'The relational store for data that is too large or too busy for a single primary.',
         'A shard key, a routing map from key to shard, and the same schema on every shard.',
-        'Rows are split across primaries by hash or by range of the shard key. Each shard keeps its own replicas and fails over on its own.',
-        'A skewed key creates a hot shard. Joins and transactions that cross shards become slow or need two-phase commit. Changing the shard key later means moving data while serving traffic.',
-        'Plan online resharding before you need it. Run schema migrations shard by shard. Keep per-shard backups, failover drills and dashboards for the hottest shard.',
+        'Rows split across primaries by hash or range of the shard key. Each shard keeps its own replicas and fails over alone.',
+        'A skewed key makes a hot shard. Cross-shard joins and transactions are slow or need two-phase commit.',
+        'Plan online resharding early, migrate schemas shard by shard, and rehearse failover per shard.',
     ],
 };
 
 // Components of a chat-serving design, placed on the three depth tests:
-// L = load-bearing, N = novel; team = the interviewer's team.
+// L = load-bearing, N = novel; team = the team that owns it.
 export const DEPTH_CANDIDATES = [
     ['router', 'KV-aware router', 'LN', 'inference', 'Decides which GPU holds a conversation. Getting it wrong multiplies prefill work, and few systems outside LLM serving need one.'],
     ['batcher', 'GPU batcher', 'LN', 'inference', 'Sets throughput and latency for the whole service. Continuous batching is specific to autoregressive models.'],
-    ['kvmem', 'KV cache memory', 'LN', 'inference', 'Memory per sequence caps concurrency. Paging it is the newest idea on the board.'],
+    ['kvmem', 'KV cache memory', 'LN', 'inference', 'Memory per sequence caps concurrency. Paging it is the newest idea in the design.'],
     ['weights', 'Model weight loading', 'N', 'inference', 'Cold starts for very large weights are rare in other systems. They matter only during scale-up.'],
     ['rl', 'Per-org rate limiter', 'L', 'api', 'Protects every other customer from one heavy caller. The algorithm itself is standard.'],
     ['sse', 'Token streaming', 'L', 'api', 'Chat feels slow without it. Server-sent events are well understood.'],
     ['gw', 'Gateway and auth', '', 'api', 'Necessary, standard and rarely where the hard decisions are.'],
     ['conv', 'Conversation store', 'L', 'storage', 'Every request reads history from it. A sharded key-value design is familiar.'],
     ['usage', 'Usage log for billing', 'L', 'storage', 'Money depends on it being complete. An append-only log handles it.'],
-    ['cdn', 'CDN for the web app', '', '', 'Commodity. One sentence and move on.'],
+    ['cdn', 'CDN for the web app', '', '', 'Commodity. One line in the design is enough.'],
 ];
 
 export const DEPTH_TEAMS = [
@@ -221,37 +221,12 @@ export const DEPTH_TEAMS = [
     { id: 'storage', name: 'Storage' },
 ];
 
-export const SIGNALS = [
-    ['“What about X?”', 'X is on their list. Go there now, even if it means leaving a sentence unfinished.'],
-    ['They restate a requirement', 'Your design breaks it somewhere. Stop and check before you add anything.'],
-    ['They hand you a number', 'They want an estimate built on it. Do the arithmetic out loud and use the result.'],
-    ['“Why this over that?”', 'A tradeoff check. Name what your choice gives up, and when you would switch.'],
-    ['The pen stops moving', 'You are spending time on something they are not scoring. Ask whether to continue.'],
-    ['“In the interest of time…”', 'Move to the next phase now, and say out loud what you are skipping.'],
-];
-
-export const REACTIONS = [
-    ['You have spent four minutes on load-balancing algorithms. The interviewer has stopped writing.', 'r', 'The pen stopped. This topic is not what they are scoring.'],
-    ['You explain hash versus range sharding. The interviewer nods and asks which key you would choose.', 'k', 'A follow-up inside your topic is a green light.'],
-    ['The interviewer says, for the second time, that the workload is read-heavy.', 'r', 'A repeated requirement means the design has drifted away from it.'],
-    ['You are deriving storage for five years of logs. The interviewer says a ballpark is fine.', 'r', 'They are telling you the precision is not worth the minutes.'],
-    ['You name a queue. The interviewer asks why you did not choose a log.', 'k', 'Stay and answer with the tradeoff. That exchange is what they came for.'],
-    ['The interviewer leans in and asks what happens when the leader fails.', 'k', 'They picked this direction. Go deeper on it.'],
-];
-
-export const ESCAPE_HATCHES = [
-    ['Re-anchor', 'Let me step back to the requirements. I think I optimized for the wrong one.', 'The interviewer restates a requirement, or your design no longer serves it.'],
-    ['Fork', 'There are two reasonable options. I will take A because of X, and switch to B if X changes.', 'You are stuck between two designs and the clock is running.'],
-    ['Unknown internals', 'I have not run this in production. Here is how I would reason about it from first principles.', 'You are asked about a system you only know from the outside.'],
-    ['Ask for direction', 'I can go deeper on the write path or on failure recovery. Which is more useful to you?', 'Two paths look equally valuable, or the interviewer has gone quiet.'],
-    ['Timebox', 'I will spend two more minutes here, then move on to failure modes.', 'You are deep in a detail and unsure it is worth the time.'],
-];
-
-export const CLOSING_LINES = [
-    ['The requirement I designed for', 'Interactive chat, so time to first token was the target.', '[The requirement that drove the design, and its number.]'],
-    ['The two tradeoffs I made', 'Paged KV cache over static reservation: more concurrent users, at the cost of preemption under memory pressure. Continuous batching over static batches: lower latency, more scheduler work.', '[Choice A over B: what it bought, what it cost. Twice.]'],
-    ['The biggest risk, and how I would see it', 'One popular prefix overloading a single GPU pool. I would watch per-pool KV cache use and queue time.', '[The failure most likely to hurt, and the metric that shows it first.]'],
-    ['What I would build next', 'Prefix-aware autoscaling, then a cheaper batch tier for evaluation traffic.', '[The next two things, in order.]'],
+// A design summary: [heading, worked example for chat serving, blank template line].
+export const SUMMARY_LINES = [
+    ['Requirement', 'Interactive chat, so time to first token is the target.', '[The requirement that drove the design, and its number.]'],
+    ['Two tradeoffs', 'Paged KV cache over static reservation: more concurrent users, at the cost of preemption under memory pressure. Continuous batching over static batches: lower latency, more scheduler work.', '[Choice A over B: what it bought, what it cost. Twice.]'],
+    ['Biggest risk and its metric', 'One popular prefix overloading a single GPU pool. Watch per-pool KV cache use and queue time.', '[The failure most likely to hurt, and the metric that shows it first.]'],
+    ['Next to build', 'Prefix-aware autoscaling, then a cheaper batch tier for evaluation traffic.', '[The next two things, in order.]'],
 ];
 
 // The chat-serving design, failed one box at a time.

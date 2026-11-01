@@ -26,6 +26,7 @@ import {
 } from '../models/inference';
 import { BATCH_MAX_LEN, LAUNCH_MODES, attentionTraffic, batchRace, deploySeries, gatewaySim, launchTimeline, prefillDecode } from '../models/sims';
 import { findTray, trayPath } from '../model';
+import { useRackSignal } from '../ui/rackSignal';
 import Rich from '../ui/Rich';
 import { Button, Note, Readouts, Row, Says, Seg, Slider, pct, usePlayer } from './kit';
 
@@ -51,6 +52,12 @@ export function RequestTrace({ system }) {
     const up = pos >= N;
     const at = pos < 0 ? -1 : down ? pos : 2 * N - 1 - pos;
     const layer = at >= 0 ? layers[at] : null;
+
+    // Move the page's rack token along with the request.
+    const { setPeek } = useRackSignal();
+    const peekId = layer?.id ?? null;
+    useEffect(() => setPeek(peekId), [peekId, setPeek]);
+    useEffect(() => () => setPeek(null), [setPeek]);
     const ROW = 58;
     const H = 30 + N * ROW + 10;
     return (

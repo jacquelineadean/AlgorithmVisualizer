@@ -21,12 +21,11 @@ export default defineSystem({
     category: 'fundamentals',
     name: 'PagedAttention KV cache',
     kicker: 'Component, five layers deep',
-    summary: 'The GPU memory that holds every live conversation. Followed from why it exists down to the block tables and the waste they remove.',
-    intro: 'Any design that serves a large language model has a box for GPU workers. Inside that box, the KV cache decides how many users one GPU can serve. These five layers explain why, using vLLM’s design as the worked example.',
+    summary: 'The GPU memory for every live conversation, and how paging fits more of them.',
+    intro: 'Five layers of vLLM’s design show why the KV cache limits how many users one GPU serves.',
     direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
     overview: {
         title: 'Memory that becomes throughput',
-        lede: 'Each decode step reads the model weights once and produces one token for every sequence in the batch. The KV cache decides how big that batch can be.',
         sections: [
             {
                 id: 'layers',
@@ -40,7 +39,7 @@ export default defineSystem({
                         lab: 'depth-strata',
                         props: { only: ['paged-kv-cache'] },
                         title: 'Step through the layers',
-                        sub: 'Each layer in one paragraph. The link under each opens that layer here.',
+                        sub: 'Press a layer to read its one-paragraph summary, then follow the link to open it.',
                     },
                 ],
             },
@@ -80,7 +79,7 @@ export default defineSystem({
                         {
                             kind: 'spec',
                             owns: 'The keys and values that every active sequence has computed so far, in GPU memory.',
-                            neighbors: 'The scheduler asks for blocks before it admits a request. The attention kernel reads through block tables. The prefix cache shares blocks between requests.',
+                            neighbors: 'The scheduler asks for blocks before it admits a request, and the attention kernel reads through block tables. The prefix cache shares blocks between requests that start with the same tokens.',
                             pattern: 'Virtual memory in an operating system: fixed-size pages, a page table per process, pages shared copy-on-write.',
                             metrics: ['KV cache utilization', 'Preemptions per minute', 'Prefix cache hit rate', 'Time requests wait before admission'],
                             knobs: ['Share of GPU memory given to the cache', `Block size (${KV_BLOCK_TOKENS} tokens by default)`, 'Maximum sequences per batch', 'Prefix caching'],
@@ -98,8 +97,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Attention lets each new token look at every earlier token, through that token’s key and value vectors. Recomputing them at every step would repeat the whole prompt each time. Caching them makes each decode step cost one token of new work.',
-                                `The size follows from the model config: 2 (key and value) × layers × KV heads × head size × 2 bytes. Llama 3 8B needs **${PER_TOKEN.l8}** per token and Llama 3 70B needs ${PER_TOKEN.l70}. Llama 2 13B, without grouped-query attention, needs ${PER_TOKEN.l13}. One ${fmt(KV_RESERVE_TOKENS)}-token sequence on Llama 3 8B holds ${formatBytes(ONE_H100.perSeq)}.`,
+                                'Attention lets each new token read every earlier token’s key and value vectors. Each token adds 2 (key and value) × layers × KV heads × head size × 2 bytes to the cache.',
+                                `That is **${PER_TOKEN.l8}** on Llama 3 8B, so one ${fmt(KV_RESERVE_TOKENS)}-token sequence holds ${formatBytes(ONE_H100.perSeq)}. Llama 3 70B needs ${PER_TOKEN.l70}, and Llama 2 13B, without grouped-query attention, needs ${PER_TOKEN.l13}.`,
                             ],
                         },
                     ],
@@ -122,13 +121,12 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'A sequence sees its cache as contiguous logical blocks. The block table maps each logical block to a physical block anywhere in GPU memory. Only the last block can be partly empty.',
-                                `A request with 40 tokens so far uses three blocks of ${KV_BLOCK_TOKENS}: two full, one with 8 tokens and room for 8 more.`,
+                                'A sequence sees its cache as contiguous logical blocks, while the physical blocks sit anywhere in GPU memory. Only the last block can be partly empty.',
                             ],
                         },
                         {
                             kind: 'table',
-                            caption: 'Block table for one 40-token sequence',
+                            caption: `Block table for one 40-token sequence, ${KV_BLOCK_TOKENS} tokens per block`,
                             columns: ['Logical block', 'Physical block', 'Tokens filled'],
                             rows: [
                                 ['0', '7', '16 of 16'],
@@ -148,8 +146,8 @@ export default defineSystem({
                             kind: 'code',
                             code: 'vllm serve meta-llama/Meta-Llama-3-8B-Instruct \\\n  --gpu-memory-utilization 0.90 \\\n  --block-size 16 \\\n  --max-num-seqs 256 \\\n  --enable-prefix-caching',
                             notes: [
-                                '`--gpu-memory-utilization` is the share of GPU memory vLLM may use. What the weights leave becomes KV blocks.',
-                                '`--block-size` is tokens per block. Smaller blocks waste less in the last block and add more table entries.',
+                                '`--gpu-memory-utilization` is the share of GPU memory vLLM may use, and what the weights leave becomes KV blocks.',
+                                '`--block-size` sets tokens per block, and smaller blocks waste less in the last block but add table entries.',
                                 '`--max-num-seqs` caps the batch even when memory would allow more.',
                                 '`--enable-prefix-caching` lets requests that start with the same tokens share their blocks.',
                             ],
@@ -174,15 +172,18 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Before PagedAttention, servers reserved one contiguous region per request, sized for the longest output the request might produce. Most requests stop early, so most of that region was never written.',
-                                'Paging allocates a block only when the sequence fills the previous one. A finished sequence returns its blocks to a free list at once.',
+                                'Before PagedAttention, servers reserved one contiguous region per request, sized for the longest output it might produce.',
                             ],
                         },
                         {
                             kind: 'lab',
                             lab: 'kv-layout',
                             title: 'Where the KV cache memory goes',
-                            sub: `One H100 serving Llama 3 8B: ${fmt(GEO.blocks)} blocks of ${KV_BLOCK_TOKENS} tokens. Every request carries the same ${fmt(KV_SYSTEM_PROMPT)}-token system prompt plus 48 to 1,048 tokens of its own.`,
+                            sub: `Switch the layout of ${fmt(GEO.blocks)} blocks and watch requests that fit and blocks reserved but never used.`,
+                        },
+                        {
+                            kind: 'prose',
+                            paras: ['A finished sequence returns its blocks to a free list at once.'],
                         },
                     ],
                 },
@@ -195,8 +196,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Because blocks are referenced through a table, two sequences can point at the same physical block. Each block keeps a reference count. When a shared block must change, it is copied first: copy-on-write.',
-                                'vLLM’s automatic prefix caching identifies each full block by a hash of its tokens together with the hash of the block before it. A new request that starts with the same system prompt finds those blocks already computed. SGLang’s RadixAttention keeps the same information as a radix tree of token sequences.',
+                                'Each physical block keeps a reference count of the sequences that point at it. A new request that starts with a cached system prompt finds its blocks already computed.',
+                                'vLLM’s automatic prefix caching identifies each full block by a hash of its tokens and the previous block’s hash. SGLang’s RadixAttention keeps the same information as a radix tree of token sequences.',
                             ],
                         },
                     ],
@@ -218,7 +219,7 @@ export default defineSystem({
                     blocks: [
                         {
                             kind: 'table',
-                            caption: 'One H100, Llama 3 8B, the request mix in the lab above',
+                            caption: 'One H100, Llama 3 8B, and the request mix from the D3 lab',
                             columns: ['Layout', 'Requests that fit', 'Memory holding real tokens'],
                             rows: [
                                 [`Reserve ${fmt(KV_RESERVE_TOKENS)} tokens per request`, fmt(LAYOUT.reserve.requests), pct(LAYOUT.reserve.utilization)],
@@ -229,14 +230,14 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                `Paging fits ${(LAYOUT.paged.requests / LAYOUT.reserve.requests).toFixed(2)} times as many requests here. Sharing the ${fmt(KV_SYSTEM_PROMPT)}-token prompt fits ${(LAYOUT.shared.requests / LAYOUT.reserve.requests).toFixed(1)} times as many, because the largest part of every request is stored once.`,
+                                `Paging fits ${(LAYOUT.paged.requests / LAYOUT.reserve.requests).toFixed(2)} times as many requests as reserving does. Sharing the ${fmt(KV_SYSTEM_PROMPT)}-token prompt fits ${(LAYOUT.shared.requests / LAYOUT.reserve.requests).toFixed(1)} times as many, because the largest part of every request is stored once.`,
                             ],
                         },
                     ],
                     caveat: {
                         provenance: 'pedagogical',
                         sourceRefs: [{ key: 'KWON2023' }],
-                        text: 'The request mix is invented for the lab. The paper measured 20 to 38 percent of KV memory holding real state in earlier systems, against under 4 percent waste in vLLM.',
+                        text: 'The lab’s request mix is invented, while the paper’s 20 to 38 percent and under 4 percent figures are measured.',
                     },
                 },
                 {
@@ -248,8 +249,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Paging admits requests before knowing how long they will run, so the cache can still fill. The scheduler then preempts the most recent sequences and frees their blocks.',
-                                'The paper describes two ways back. Swapping copies the blocks to CPU memory and back later. Recomputation drops them and rebuilds the cache in one prefill pass when the sequence resumes. The paper found the two comparable at block sizes of 16 to 64 tokens. With smaller blocks, swapping is slower because it moves many small pieces.',
+                                'Paging admits requests before knowing their length, so the cache can still fill. The scheduler then preempts the newest sequences and either swaps their blocks to CPU memory or drops them.',
+                                'Recomputation rebuilds dropped blocks in one prefill pass when the sequence resumes. In the paper, swapping matched recomputation at 16 to 64 tokens per block and slowed on smaller, more numerous blocks.',
                             ],
                         },
                     ],
@@ -263,7 +264,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Reading through a block table costs extra indirection inside the attention kernel. The paper measured its attention kernel at about 20 to 26 percent slower than a contiguous one. Attention is a fraction of each step, and the larger batch more than pays for it.',
+                                'Reading through the block table made the paper’s attention kernel about 20 to 26 percent slower than a contiguous one. Attention is a fraction of each step, and the larger batch gains more than the kernel loses.',
                             ],
                         },
                     ],
@@ -285,15 +286,13 @@ export default defineSystem({
                     blocks: [
                         {
                             kind: 'prose',
-                            paras: [
-                                'At small batches, a decode step is bound by memory bandwidth: it reads every weight once whatever the batch size. Extra sequences add little time to each step and multiply tokens per second. The KV cache sets the largest batch that fits.',
-                            ],
+                            paras: ['A small-batch decode step is bound by memory bandwidth, so extra sequences add little time and multiply tokens per second.'],
                         },
                         {
                             kind: 'lab',
                             lab: 'batching-curve',
                             title: 'One decode step, many streams',
-                            sub: 'Grow the batch. Throughput climbs until the step becomes compute bound or the KV cache runs out.',
+                            sub: 'Drag batch size and watch throughput climb until the step turns compute bound or the KV cache fills.',
                         },
                     ],
                 },
@@ -307,15 +306,15 @@ export default defineSystem({
                             kind: 'list',
                             style: 'cards',
                             items: [
-                                { title: 'KV cache utilization.', text: 'Near 100 percent at peak is healthy. Pinned at 100 percent with a queue means you need more GPUs or shorter outputs.' },
-                                { title: 'Preemptions.', text: 'A steady trickle is fine. A spike means requests are being recomputed and latency at p99 will follow.' },
+                                { title: 'KV cache utilization.', text: 'Near 100 percent at peak is healthy, but 100 percent with a queue calls for more GPUs or shorter outputs.' },
+                                { title: 'Preemptions.', text: 'A low, steady rate is fine, while a spike means recomputed requests and a rising p99 latency.' },
                                 { title: 'Prefix cache hit rate.', text: 'Falls when routing ignores which GPU holds which prefix.' },
-                                { title: 'Queue time.', text: 'Time before admission. This is what users feel as a slow first token.' },
+                                { title: 'Queue time.', text: 'Time before admission, which users feel as a slow first token.' },
                             ],
                         },
                         {
                             kind: 'quote',
-                            text: 'Paging the KV cache cuts waste from most of the reservation to under 4 percent, so the batch grows two to four times. I would autoscale on KV cache utilization, not GPU busy time.',
+                            text: 'Page the KV cache: waste drops below 4 percent and the batch grows two to four times. Autoscale on KV cache utilization, the metric that shows when the batch can no longer grow.',
                         },
                     ],
                 },

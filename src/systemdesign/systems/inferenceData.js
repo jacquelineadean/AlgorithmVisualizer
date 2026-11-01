@@ -1,10 +1,14 @@
-// Drills, quizzes, glossary and timeline for the AI inference stack,
+// Scenarios, quizzes, glossary and timeline for the AI inference stack,
 // written for this site from the papers and announcements in sources.js.
 // Steps name the layer they act on (l1 to l7).
 
+import { CACHE_READ_SHARE, CACHE_TTL_MINUTES, CACHE_WRITE_SURCHARGE, ridgePoint } from '../models/inference';
+
+const pct = (x) => `${Math.round(x * 100)}%`;
+
 export const LAYER_DRILLS = {
     l1: {
-        scenario: 'A support bot sends: the current time, a long system prompt, the customer’s account record, the conversation so far and the new message. Costs are high and time to first token is slow. Lay out the prompt again.',
+        scenario: 'A support bot sends the current time, a long system prompt, the account record, the conversation and the new message. Costs are high and time to first token is slow, so lay out the prompt again.',
         scarce: 'Prefill compute on repeated tokens. Every request recomputes thousands of tokens that did not change since the last turn.',
         steps: [
             {
@@ -15,7 +19,7 @@ export const LAYER_DRILLS = {
             {
                 layer: 'l1',
                 title: 'Mark the cache breakpoints',
-                text: 'Cache up to the end of the conversation so far. Each new turn appends to it.',
+                text: 'Cache up to the end of the conversation so far, so each new turn appends to a cached prefix.',
             },
             {
                 layer: 'l2',
@@ -25,7 +29,7 @@ export const LAYER_DRILLS = {
         ],
         switches: [
             'If the account record changes every turn, move it after the conversation.',
-            'If prompts are below the provider’s minimum cacheable length, caching does nothing; spend effort on shorter prompts instead.',
+            'If prompts are below the provider’s minimum cacheable length, caching does nothing, so shorten the prompts instead.',
         ],
     },
     l2: {
@@ -35,7 +39,7 @@ export const LAYER_DRILLS = {
             {
                 layer: 'l2',
                 title: 'Identity and budgets',
-                text: 'Issue a virtual key per team and service. Store budgets in tokens and dollars per key.',
+                text: 'Issue a virtual key per team and service, with budgets in tokens and dollars per key.',
             },
             {
                 layer: 'l2',
@@ -45,7 +49,7 @@ export const LAYER_DRILLS = {
             {
                 layer: 'l2',
                 title: 'Routing and failure',
-                text: 'Route by model and price. Retry with capped backoff, then fall back to the next provider. Log every retry as cost.',
+                text: 'Route by model and price, retry with capped backoff, fall back to the next provider, and log every retry as cost.',
             },
             { layer: 'l3', title: 'Self-hosted fleet behind it', text: 'Treat your own fleet as one more provider with its own capacity signal.' },
         ],
@@ -58,23 +62,20 @@ export const LAYER_DRILLS = {
             {
                 layer: 'l3',
                 title: 'Split the pools',
-                text: 'Prefill GPUs read documents; decode GPUs stream answers; NIXL or RDMA moves the KV cache between them.',
+                text: 'Prefill GPUs read documents, decode GPUs stream answers, and NIXL or RDMA moves the KV cache between them.',
             },
             {
                 layer: 'l3',
                 title: 'Route by document',
-                text: 'Send repeat questions about the same document to the replica that holds its KV cache, and offload cold documents to CPU memory or SSD.',
+                text: 'Send repeat questions to the replica holding that document’s KV cache, and offload cold documents to CPU memory or SSD.',
             },
             {
                 layer: 'l4',
                 title: 'Tune each engine for its job',
-                text: 'Prefill workers take large token budgets; decode workers take many concurrent sequences.',
+                text: 'Prefill workers take large token budgets, and decode workers take many concurrent sequences.',
             },
         ],
-        switches: [
-            'If documents are rarely reused, the KV pool buys little; size it small.',
-            'If the fleet is a single node, start with chunked prefill on one pool.',
-        ],
+        switches: ['If documents are rarely reused, the KV pool buys little, so size it small.', 'If the fleet is a single node, start with chunked prefill on one pool.'],
     },
     l4: {
         scenario: 'An engine serving a 70B-class model shows high throughput but users complain that answers stutter. KV cache usage sits near 100%.',
@@ -83,7 +84,7 @@ export const LAYER_DRILLS = {
             {
                 layer: 'l4',
                 title: 'Confirm preemption',
-                text: 'Check preemption and recompute counters. A full KV cache forces the engine to evict and recompute requests.',
+                text: 'Check the preemption and recompute counters, since a full KV cache forces the engine to evict and recompute requests.',
             },
             { layer: 'l4', title: 'Cap concurrency', text: 'Lower the maximum concurrent sequences so admitted requests finish without eviction.' },
             { layer: 'l6', title: 'Shrink the cache', text: 'Use an FP8 KV cache where the kernels support it, halving bytes per token.' },
@@ -99,11 +100,11 @@ export const LAYER_DRILLS = {
         scarce: 'CPU time to launch GPU work.',
         steps: [
             { layer: 'l5', title: 'Compile', text: 'Turn on torch.compile so small operations fuse into fewer kernels.' },
-            { layer: 'l5', title: 'Capture', text: 'Capture CUDA graphs for the batch sizes you serve; pad to the nearest one.' },
+            { layer: 'l5', title: 'Capture', text: 'Capture CUDA graphs for the batch sizes you serve, and pad each batch to the nearest one.' },
             { layer: 'l4', title: 'Grow the step', text: 'A bigger batch makes each kernel longer, so launch overhead becomes a smaller share.' },
         ],
         switches: [
-            'If shapes vary wildly, graphs will miss often; fix the shape buckets first.',
+            'If shapes vary widely, graphs miss often, so fix the shape buckets first.',
             'If gaps remain, look for host-side work such as sampling or detokenization on the critical path.',
         ],
     },
@@ -147,7 +148,7 @@ export const LAYER_DRILLS = {
                 text: 'More GPUs per replica means more combined HBM bandwidth per step, which lowers time per output token.',
             },
             { layer: 'l6', title: 'Halve the bytes', text: 'FP8 weights halve the bytes each step reads, if the quality holds.' },
-            { layer: 'l4', title: 'Keep batches modest', text: 'Small batches keep each step short; add replicas for more users.' },
+            { layer: 'l4', title: 'Keep batches modest', text: 'Small batches keep each step short, and more replicas serve more users.' },
         ],
         switches: [
             'If total throughput matters more, use fewer GPUs per replica and bigger batches.',
@@ -160,25 +161,25 @@ export const CROSS_DRILLS = {
     chat: {
         title: 'Chat assistant',
         scenario: 'Design the serving stack for a chat assistant with many thousands of concurrent users. Product wants a fast first token and a steady stream of text.',
-        scarce: 'GPU memory for KV cache, and decode bandwidth. Concurrency is bounded by how many conversations’ caches fit; stream speed by how many bytes each step reads.',
+        scarce: 'GPU memory for KV cache, and decode bandwidth. The caches that fit cap concurrency, and the bytes each step reads cap stream speed.',
         steps: [
             { layer: 'l1', title: 'Prompt layout', text: 'Stable system prompt and tools first so every user shares one cached prefix.' },
-            { layer: 'l2', title: 'Gateway', text: 'Token-per-minute limits per tenant; route simple turns to a smaller model.' },
+            { layer: 'l2', title: 'Gateway', text: 'Set token-per-minute limits per tenant and route simple turns to a smaller model.' },
             {
                 layer: 'l3',
                 title: 'Platform',
-                text: 'KV-aware routing keeps a conversation on the replica holding its history; offload idle conversations to CPU memory.',
+                text: 'KV-aware routing keeps a conversation on the replica holding its history and offloads idle ones to CPU memory.',
             },
             {
                 layer: 'l4',
                 title: 'Engine',
-                text: 'Continuous batching with paged KV and chunked prefill; cap concurrency below the preemption point.',
+                text: 'Run continuous batching with paged KV and chunked prefill, and cap concurrency below the preemption point.',
             },
-            { layer: 'l6', title: 'Kernels', text: 'FlashAttention for long histories; FP8 if quality holds.' },
+            { layer: 'l6', title: 'Kernels', text: 'Use FlashAttention for long histories, and FP8 if quality holds.' },
             {
                 layer: 'l7',
                 title: 'Hardware',
-                text: 'Size replicas so weights plus a healthy KV budget fit; scale out with replicas, not wider ones.',
+                text: 'Size replicas so weights plus a healthy KV budget fit, and scale out with more replicas instead of wider ones.',
             },
         ],
         switches: [
@@ -189,7 +190,7 @@ export const CROSS_DRILLS = {
     },
     tenant: {
         title: 'Shared gateway',
-        scenario: 'Forty teams share two model providers and one self-hosted fleet. Finance wants per-team budgets; platform wants one place to change routing.',
+        scenario: 'Forty teams share two model providers and one self-hosted fleet. Finance wants per-team budgets, and the platform team wants one place to change routing.',
         scarce: 'Money, metered in tokens, plus provider capacity that fails independently.',
         steps: [
             { layer: 'l2', title: 'Identity', text: 'Virtual keys per team and service, mapped to provider keys held only by the gateway.' },
@@ -201,38 +202,38 @@ export const CROSS_DRILLS = {
             {
                 layer: 'l2',
                 title: 'Routing',
-                text: 'Rules by model, price and health; capped retries; fallback chains that are tested for answer quality.',
+                text: 'Route by model, price and health, with capped retries and fallback chains tested for answer quality.',
             },
             {
                 layer: 'l3',
                 title: 'Own fleet',
                 text: 'Expose the self-hosted platform as one more provider with a capacity signal the gateway can read.',
             },
-            { layer: 'l1', title: 'Clients', text: 'One SDK config: base URL and virtual key. Teams never hold provider keys.' },
+            { layer: 'l1', title: 'Clients', text: 'Each team gets one SDK config, a base URL and a virtual key, and never holds a provider key.' },
         ],
         switches: ['One team, one provider: the SDK library alone is enough.', 'Data residency rules: route by region before price.'],
     },
     rag: {
         title: 'RAG cost',
-        scenario: 'A document question-answering product sends long retrieved passages with every question. The monthly bill doubled in a quarter; latency is acceptable.',
+        scenario: 'A document question-answering product sends long retrieved passages with every question. The monthly bill doubled in a quarter, while latency is acceptable.',
         scarce: 'Input tokens. Most of the bill is prompt, and most of the prompt repeats.',
         steps: [
             {
                 layer: 'l1',
                 title: 'Measure',
-                text: 'Split spend into input, output and cache reads per route; find the share of input that repeats.',
+                text: 'Split spend into input, output and cache reads per route, and find the share of input that repeats.',
             },
-            { layer: 'l1', title: 'Reorder', text: 'Put instructions and the most reused passages first; move per-question context to the end.' },
-            { layer: 'l2', title: 'Route', text: 'Send lookups and classification to a smaller model; keep synthesis on the large one.' },
+            { layer: 'l1', title: 'Reorder', text: 'Put instructions and the most reused passages first, and move per-question context to the end.' },
+            { layer: 'l2', title: 'Route', text: 'Send lookups and classification to a smaller model, and keep synthesis on the large one.' },
             { layer: 'l2', title: 'Batch', text: 'Move nightly re-indexing and evaluation runs to a batch API.' },
             {
                 layer: 'l3',
                 title: 'If self-hosted',
-                text: 'Route by document so repeated passages hit one replica’s cache; offload cold documents to SSD.',
+                text: 'Route by document so repeated passages hit one replica’s cache, and offload cold documents to SSD.',
             },
         ],
         switches: [
-            'If passages rarely repeat, caching buys little; shorten retrieval instead.',
+            'If passages rarely repeat, caching buys little, so shorten retrieval instead.',
             'If output dominates, cap answer length and use stop sequences first.',
         ],
     },
@@ -244,13 +245,13 @@ export const CROSS_DRILLS = {
             {
                 layer: 'l1',
                 title: 'Diff the prompt',
-                text: 'Compare prompt templates before and after; look for anything new ahead of the stable prefix.',
+                text: 'Compare prompt templates before and after, and look for anything new ahead of the stable prefix.',
             },
             { layer: 'l2', title: 'Check cache fields', text: 'Plot cache read tokens against cache creation tokens per route across the deploy.' },
             {
                 layer: 'l4',
                 title: 'Check the engine',
-                text: 'Look at queue time, KV cache usage and preemptions; longer prompts can push the cache past full.',
+                text: 'Look at queue time, KV cache usage and preemptions, because longer prompts can push the cache past full.',
             },
             { layer: 'l3', title: 'Check routing', text: 'A routing change can scatter one prefix across replicas and turn hits into misses.' },
         ],
@@ -260,6 +261,12 @@ export const CROSS_DRILLS = {
         ],
     },
 };
+
+const LAYER_RESULTS = [
+    { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
+    { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
+    { min: 1, label: 'Both right', text: 'Try the design scenario below.' },
+];
 
 export const QUIZZES = {
     l1: {
@@ -273,20 +280,16 @@ export const QUIZZES = {
                     'Only output tokens change',
                 ],
                 answer: 1,
-                explain: 'Caches match token for token from the start. A different key order changes the first tokens. Serialize tools deterministically, for example with sorted keys.',
+                explain: 'Caches match from the first token, so a new key order misses, and sorted keys fix it.',
             },
             {
                 q: 'Which parameter caps the most expensive tokens in a request?',
                 options: ['temperature', '`max_tokens`', 'top_p', 'stream'],
                 answer: 1,
-                explain: 'Output tokens cost more than input tokens, and `max_tokens` bounds them. An answer that hits the cap still returns success, with `finish_reason` set to length.',
+                explain: '`max_tokens` bounds output tokens, the costly ones, and a capped answer returns success with `finish_reason = length`.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l2: {
         questions: [
@@ -299,7 +302,7 @@ export const QUIZZES = {
                     'Gateways cannot count requests',
                 ],
                 answer: 1,
-                explain: 'Cost scales with tokens. Limit tokens per minute and dollars per month, and keep a request limit as a secondary guard.',
+                explain: 'Cost scales with tokens, so limit tokens per minute and dollars per month, with a request limit as backup.',
             },
             {
                 q: 'Output length is unknown when a request arrives. How does a gateway enforce a token budget?',
@@ -313,11 +316,7 @@ export const QUIZZES = {
                 explain: 'Reserve-then-reconcile is the standard pattern for metering work whose size is known only afterward.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l3: {
         questions: [
@@ -325,7 +324,7 @@ export const QUIZZES = {
                 q: 'A router can send a request to the least-loaded replica or to the replica holding its prefix. What does a good KV-aware router do?',
                 options: ['Always the least-loaded replica', 'Always the replica with the prefix', 'Weigh cache overlap against load', 'Pick at random'],
                 answer: 2,
-                explain: 'Pure affinity creates hot spots; pure load balancing throws away cached work. Score both.',
+                explain: 'Pure affinity creates hot spots and pure load balancing throws away cached work, so score both.',
             },
             {
                 q: 'When is splitting prefill and decode onto separate GPU pools least worth it?',
@@ -339,11 +338,7 @@ export const QUIZZES = {
                 explain: 'With short prompts, prefill interference is small and moving the KV cache between GPUs costs more than it saves.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l4: {
         questions: [
@@ -356,20 +351,16 @@ export const QUIZZES = {
                     'Prefix caching turns off',
                 ],
                 answer: 1,
-                explain: 'In the memory-bound region extra requests are nearly free. Past the ridge point, and as KV reads grow, each step takes longer.',
+                explain: 'Below the ridge point extra requests are nearly free, but past it, and as KV reads grow, steps take longer.',
             },
             {
                 q: 'What does PagedAttention borrow from operating systems?',
                 options: ['Process scheduling', 'Virtual memory with page tables', 'File systems', 'Interrupt handling'],
                 answer: 1,
-                explain: 'Fixed-size blocks, block tables per request and copy-on-write sharing, the way virtual memory maps pages.',
+                explain: 'It uses fixed-size blocks, a block table per request and copy-on-write sharing, the way virtual memory maps pages.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l5: {
         questions: [
@@ -377,20 +368,16 @@ export const QUIZZES = {
                 q: 'Why do engines pad batches to a fixed set of sizes?',
                 options: ['Tokenizers need it', 'CUDA graphs replay fixed shapes', 'GPUs only accept powers of two', 'It improves accuracy'],
                 answer: 1,
-                explain: 'A captured CUDA graph replays one exact sequence of launches for one shape. Padding reuses a captured graph.',
+                explain: 'A captured CUDA graph replays one exact launch sequence for one shape, so padding lets a batch reuse it.',
             },
             {
                 q: 'Eager PyTorch launches each operation separately. When does that overhead matter most?',
                 options: ['Long prefills', 'Small decode steps with tiny kernels', 'Training', 'Loading weights'],
                 answer: 1,
-                explain: 'Decode kernels are short, so CPU launch time can rival the GPU work. Fusion and CUDA graphs remove most of it.',
+                explain: 'Short decode kernels let CPU launch time rival the GPU work, and fusion and CUDA graphs remove most of it.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l6: {
         questions: [
@@ -403,20 +390,16 @@ export const QUIZZES = {
                     'It runs on the CPU',
                 ],
                 answer: 1,
-                explain: 'Standard attention writes and reads an N by N score matrix in HBM. FlashAttention keeps tiles of it in on-chip memory.',
+                explain: 'Standard attention moves an N by N score matrix through HBM, while FlashAttention keeps its tiles in on-chip memory.',
             },
             {
                 q: 'Which “Triton” do you use to write a fused GPU kernel?',
                 options: ['OpenAI’s Triton', 'NVIDIA’s Triton Inference Server', 'Either', 'Neither'],
                 answer: 0,
-                explain: 'OpenAI’s Triton is a kernel language. NVIDIA’s Triton serves models and is now Dynamo-Triton.',
+                explain: 'OpenAI’s Triton is a kernel language, while NVIDIA’s Triton serves models and is now Dynamo-Triton.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     l7: {
         questions: [
@@ -433,11 +416,7 @@ export const QUIZZES = {
                 explain: 'Each step reads every weight once to make one token per request, so bytes per second set the floor.',
             },
         ],
-        results: [
-            { min: 0, label: 'Review the Spec tab', text: 'The Spec tab covers both answers.' },
-            { min: 0.5, label: 'Nearly there', text: 'One more pass through the Spec tab will close the gap.' },
-            { min: 1, label: 'Both right', text: 'Try the design drill below.' },
-        ],
+        results: LAYER_RESULTS,
     },
     all: {
         questions: [
@@ -457,19 +436,19 @@ export const QUIZZES = {
                 q: 'End-to-end latency for one answer is roughly:',
                 options: ['TTFT × output tokens', 'TTFT + (output tokens − 1) × TPOT', 'TPOT ÷ TTFT', 'Throughput ÷ requests'],
                 answer: 1,
-                explain: 'The first token arrives after TTFT; each later token adds one step.',
+                explain: 'The first token arrives after TTFT, and each later token adds one step.',
             },
             {
                 q: 'NVIDIA Dynamo belongs to which layer?',
                 options: ['The inference engine', 'The inference platform', 'The kernels', 'The AI gateway'],
                 answer: 1,
-                explain: 'Dynamo sits above engines such as vLLM, SGLang and TensorRT-LLM. It routes requests across replicas, splits prefill from decode and resizes GPU pools.',
+                explain: 'Dynamo sits above vLLM, SGLang and TensorRT-LLM, routing across replicas, splitting prefill from decode and resizing GPU pools.',
             },
             {
                 q: 'Which “Triton” is a language for writing GPU kernels?',
                 options: ['OpenAI’s Triton', 'NVIDIA’s Triton Inference Server', 'Both', 'Neither'],
                 answer: 0,
-                explain: 'OpenAI’s Triton writes kernels (L6). NVIDIA’s Triton Inference Server serves models and was renamed Dynamo-Triton in 2025.',
+                explain: 'OpenAI’s Triton writes kernels (L6), and NVIDIA’s Triton Inference Server, renamed Dynamo-Triton in 2025, serves models.',
             },
             {
                 q: 'Why does decode at batch size one waste most of a GPU?',
@@ -480,13 +459,13 @@ export const QUIZZES = {
                     'Tokenization runs on the CPU',
                 ],
                 answer: 1,
-                explain: 'An H100 needs about 295 FLOPs per byte of math per byte read to be compute-bound. Decode at batch one does about one.',
+                explain: `An H100 needs about ${Math.round(ridgePoint())} FLOPs per byte read to be compute-bound, and decode at batch one does about one.`,
             },
             {
                 q: 'A cached input token on Anthropic’s API bills at what share of the base input price?',
                 options: ['10%', '25%', '50%', '90%'],
                 answer: 0,
-                explain: 'Reads bill at 10%. Writing the entry costs 25% extra, once per 5 min window.',
+                explain: `Reads bill at ${pct(CACHE_READ_SHARE)}, and writing the entry costs ${pct(CACHE_WRITE_SURCHARGE)} extra, once per ${CACHE_TTL_MINUTES}-minute window.`,
             },
             {
                 q: 'Where does the split between prefill and decode live?',
@@ -497,7 +476,7 @@ export const QUIZZES = {
                     'In the kernels',
                 ],
                 answer: 2,
-                explain: 'Chunked prefill mixes the phases inside one engine. Disaggregated serving gives each phase its own GPUs across the fleet.',
+                explain: 'Chunked prefill mixes the phases inside one engine, and disaggregated serving gives each phase its own GPUs.',
             },
             {
                 q: 'What does a CUDA graph remove?',
@@ -514,13 +493,13 @@ export const QUIZZES = {
                     'You pay the write surcharge once, then hit',
                 ],
                 answer: 0,
-                explain: 'Caches match from token one. A different first token means no match, and the response still succeeds.',
+                explain: 'Caches match from token one, so a different first token misses and the response still succeeds.',
             },
         ],
         results: [
             { min: 0, label: 'Back to the concepts', text: 'Start with Concepts, then step through Ownership on the overview.' },
             { min: 0.6, label: 'Most of the map', text: 'Each layer’s Spec tab will close the remaining gaps.' },
-            { min: 1, label: 'Every piece placed', text: 'Try the design drills next.' },
+            { min: 1, label: 'Every piece placed', text: 'Try the scenarios next.' },
         ],
     },
 };

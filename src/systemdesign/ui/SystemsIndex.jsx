@@ -1,32 +1,66 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { CATEGORIES, DEFAULT_CATEGORY, getCategory, systemsByCategory } from '..';
 import { trayPath } from '../model';
-import '../../pages/VisualizerIndex.css';
 import './SystemDesign.css';
 
 // The System Design Visualizer's front door: one category at a time,
 // Fundamentals by default, ?category=<id> for the rest. Unknown ids fall
-// back to the default.
+// back to the default. Each system is drawn as a small rack unit; hovering
+// one lights its trays from the top down.
+
+// A decorative rack for the hero: seven trays, blinking LEDs, and a token
+// that rides the cable down and back up, the way a request does.
+function HeroRack() {
+    return (
+        <div className="sd-hero-rack" aria-hidden="true">
+            <div className="sd-hero-plate">
+                <span>Rack 01</span>
+                <span className="sd-hero-dots">
+                    <i />
+                    <i />
+                    <i />
+                </span>
+            </div>
+            <div className="sd-hero-cabinet">
+                <span className="sd-hero-wire" />
+                <span className="sd-hero-token" />
+                {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                    <div key={n} className={`sd-hero-tray c${n}`} style={{ '--d': `${(n * 0.53) % 3.2}s` }}>
+                        <span className="band" />
+                        <span className="code">L{n}</span>
+                        <span className="vents" />
+                        <span className="led" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 function SystemCard({ system }) {
     return (
-        <Link to={trayPath(system.id)} className="card sd-system-card">
-            <div className="sd-card-kicker">{system.kicker}</div>
-            <h3>{system.name}</h3>
-            <p className="sd-card-summary">{system.summary}</p>
-            <ol className="sd-card-stack" aria-label={`${system.layers.length} layers`}>
-                {system.layers.map((layer) => (
-                    <li key={layer.id} className={`c${layer.color}`}>
+        <Link to={trayPath(system.id)} className="sd-unit">
+            <div className="sd-unit-head">
+                <span className="sd-unit-kicker">{system.kicker}</span>
+                <h3 className="sd-unit-name">{system.name}</h3>
+                <p className="sd-unit-summary">{system.summary}</p>
+            </div>
+            <ol className="sd-unit-cabinet" aria-label={`${system.layers.length} layers`}>
+                {system.layers.map((layer, i) => (
+                    <li key={layer.id} className={`c${layer.color}`} style={{ '--i': i }}>
                         <span className="code">{layer.code}</span>
                         <span className="name">{layer.name}</span>
+                        <span className="led" aria-hidden="true" />
                     </li>
                 ))}
             </ol>
-            <div className="sd-card-foot">
-                {system.layers.length} layers
-                {system.topics.length > 0 && ` · ${system.topics.length} cross-cutting topics`}
-                <span className="chev" aria-hidden="true">
-                    ›
+            <div className="sd-unit-foot">
+                <span>
+                    {system.layers.length} layers
+                    {system.topics.length > 0 && ` · ${system.topics.length} topics`}
+                </span>
+                <span className="sd-unit-open">
+                    Open <span aria-hidden="true">›</span>
                 </span>
             </div>
         </Link>
@@ -39,35 +73,42 @@ export default function SystemsIndex() {
     const systems = systemsByCategory(category.id);
 
     return (
-        <div className="content sd-index">
-            <div className="eyebrow">System Design Visualizer</div>
-            <h1 className="page-title">Explore a system, layer by layer</h1>
-            <p className="page-sub">
-                Each system is a stack. Open it at the top and walk down one layer at a time: what the layer
-                owns, the mechanism you can run, the numbers that bound it and how it fails. Every layer cites
-                its sources.
-            </p>
-            <nav className="domain-filter" aria-label="Categories">
-                {CATEGORIES.map((c) => (
-                    <Link
-                        key={c.id}
-                        to={c.id === DEFAULT_CATEGORY ? '/systems' : `/systems?category=${c.id}`}
-                        className={`filter-pill${c.id === category.id ? ' is-active' : ''}`}
-                        aria-current={c.id === category.id ? 'page' : undefined}
-                    >
-                        {c.name} <span className="filter-count">{systemsByCategory(c.id).length}</span>
-                    </Link>
-                ))}
-            </nav>
-            <section className="sd-category" aria-label={`${category.name} systems`}>
-                <h2>{category.name}</h2>
-                <p className="domain-blurb">{category.blurb}</p>
-                <div className="sd-system-grid">
-                    {systems.map((s) => (
-                        <SystemCard key={s.id} system={s} />
+        <div className="sd-index">
+            <div className="sd-frame narrow">
+                <header className="sd-index-head">
+                    <div>
+                        <div className="sd-eyebrow">System Design Visualizer</div>
+                        <h1 className="sd-display">Explore a system, layer by layer</h1>
+                        <p className="sd-dek">Run each layer’s mechanism, size it with real numbers, then break it.</p>
+                    </div>
+                    <HeroRack />
+                </header>
+                <nav className="sd-cats" aria-label="Categories">
+                    {CATEGORIES.map((c) => (
+                        <Link
+                            key={c.id}
+                            to={c.id === DEFAULT_CATEGORY ? '/systems' : `/systems?category=${c.id}`}
+                            className={`sd-cat${c.id === category.id ? ' is-active' : ''}`}
+                            aria-current={c.id === category.id ? 'page' : undefined}
+                        >
+                            {c.name} <span className="sd-cat-count">{systemsByCategory(c.id).length}</span>
+                        </Link>
                     ))}
-                </div>
-            </section>
+                </nav>
+                <section className="sd-category" aria-labelledby="sd-category-title">
+                    <h2 id="sd-category-title" className="sd-rule-label">
+                        <span>{category.name}</span>
+                        <span>
+                            {systems.length} {systems.length === 1 ? 'system' : 'systems'}
+                        </span>
+                    </h2>
+                    <div className="sd-unit-grid">
+                        {systems.map((s) => (
+                            <SystemCard key={s.id} system={s} />
+                        ))}
+                    </div>
+                </section>
+            </div>
         </div>
     );
 }

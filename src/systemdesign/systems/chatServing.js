@@ -20,9 +20,9 @@ export default defineSystem({
     category: 'fundamentals',
     name: 'Chat serving, end to end',
     kicker: 'Worked design',
-    summary: 'A public chat API for an LLM, designed with the four mental models. The request path from client to KV cache, plus the stores beside it.',
-    intro: 'The prompt: serve chat for a public LLM API. The consumer is a person watching tokens appear, so time to first token is the requirement everything else serves. Walk the request down the layers, then fail each one.',
-    direction: { label: 'The request path', top: 'user', bottom: 'GPU memory' },
+    summary: 'A public LLM chat API, from client to KV cache, with the stores beside it.',
+    intro: 'Chat for a public LLM API, where time to first token is the target every layer serves.',
+    direction: { label: 'Request path', top: 'user', bottom: 'GPU memory' },
     topicsLabel: 'Beside the request path',
     trace: {
         down: 'request',
@@ -61,7 +61,6 @@ export default defineSystem({
     },
     overview: {
         title: 'One design, five layers on the request path',
-        lede: 'Every box below is there for a stated reason. The rack on the left follows one request from the user down to GPU memory. The stores beside the path are listed underneath.',
         sections: [
             {
                 id: 'trace',
@@ -99,7 +98,7 @@ export default defineSystem({
             name: 'Clients',
             products: 'web app, SDKs, agents',
             title: 'People waiting on a screen',
-            lede: 'The consumer question comes first, because it sets the target. A person in a chat window feels the first token and the steady stream after it. Total time matters less.',
+            lede: 'A person in a chat window feels the first token and the steady stream after it, more than total time.',
             sections: [
                 {
                     id: 'consumer',
@@ -107,7 +106,7 @@ export default defineSystem({
                     provenance: 'pedagogical',
                     sourceRefs: [{ key: 'SDDD_MODELS' }],
                     blocks: [
-                        { kind: 'lab', lab: 'consumer-question', title: 'Same prompt, three consumers', sub: 'This design picks chat users. Switch consumers to see which boxes would change.' },
+                        { kind: 'lab', lab: 'consumer-question', title: 'One service, three consumers', sub: 'This design serves chat users. Switch consumers to see which boxes change.' },
                     ],
                 },
                 {
@@ -119,7 +118,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'The client opens one HTTP request and reads server-sent events: one small event per token, then a final event with usage counts. If the connection drops, the client retries with the same idempotency key, so the gateway can resume or restart without billing twice.',
+                                'The client opens one HTTP request and reads server-sent events: one per token, then a final usage event. A dropped connection retries with the same idempotency key, so nothing is billed twice.',
                             ],
                         },
                     ],
@@ -132,7 +131,7 @@ export default defineSystem({
             name: 'Gateway',
             products: 'auth, rate limits, streaming',
             title: 'Authenticate, limit, assemble, relay',
-            lede: 'Stateless instances behind a load balancer. Each request is checked, counted against its organization’s limit, given its history, and streamed back.',
+            lede: 'Stateless instances behind a load balancer check, count, assemble and stream every request.',
             sections: [
                 {
                     id: 'spec',
@@ -161,7 +160,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Each organization gets a token bucket: a capacity and a refill rate. A request takes tokens in proportion to the tokens it will use, so one long prompt counts more than one short one. The buckets live in a shared store, so every gateway instance sees the same count.',
+                                'Each organization gets a token bucket with a capacity and a refill rate. A request takes tokens in proportion to its size, from a shared store that every gateway instance reads.',
                             ],
                         },
                     ],
@@ -175,7 +174,7 @@ export default defineSystem({
             name: 'Router',
             products: 'KV-aware routing',
             title: 'Send each conversation back to its cache',
-            lede: 'A follow-up message repeats the whole history. If it lands on the replica that served the last turn, that history is already in KV cache and prefill only covers the new message.',
+            lede: 'A follow-up repeats the whole history, so sending it to the last replica turns most of its prefill into a cache hit.',
             sections: [
                 {
                     id: 'why',
@@ -186,8 +185,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Prefill is the expensive part of time to first token, and it grows with the prompt. A turn deep in a long conversation may carry thousands of history tokens. Routing to the replica that holds them turns that prefill into a cache lookup.',
-                                'The router keeps a map from conversation, or from prefix hash, to replica, rebuilt from what replicas report. It balances that against load, because sending every turn of a popular prefix to one replica overloads it.',
+                                'Prefill sets time to first token and grows with the prompt. Deep in a conversation, that means thousands of history tokens.',
+                                'The router maps each conversation or prefix hash to a replica, rebuilt from replica reports. It weighs that map against load, so one popular prefix cannot overload a replica.',
                             ],
                         },
                     ],
@@ -200,7 +199,7 @@ export default defineSystem({
                     blocks: [
                         {
                             kind: 'prose',
-                            paras: ['The router is load-bearing and specific to LLM serving. With an interviewer from an inference team, it sits in the middle of the depth budget.'],
+                            paras: ['The router is load-bearing and specific to LLM serving. For an inference team, it sits in the center of the depth budget.'],
                         },
                         { kind: 'lab', lab: 'depth-budget', title: 'Where the depth goes' },
                     ],
@@ -214,7 +213,7 @@ export default defineSystem({
             name: 'GPU replicas',
             products: 'continuous batching',
             title: 'Keep every GPU’s batch full',
-            lede: `Each replica runs Llama 3 8B on one H100. The batcher admits and retires requests between decode steps, so slots never sit idle waiting for the longest answer.`,
+            lede: 'Each replica runs Llama 3 8B on one H100, and the batcher swaps requests in and out between decode steps.',
             sections: [
                 {
                     id: 'batching',
@@ -235,7 +234,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                `At ${fmt(FLEET.peakRate)} requests per second, each spending about ${fmt(FLEET.timeInSystem, 1)} seconds in the system, Little’s law gives about **${fmt(FLEET.concurrency)}** streams in flight. One replica holds ${FLEET.perReplica} streams, limited by ${FLEET.limiter}. That is **${FLEET.replicas} replicas** on ${FLEET.gpus} GPUs, or ${FLEET.servers} eight-GPU servers, before headroom.`,
+                                `At ${fmt(FLEET.peakRate)} requests per second and about ${fmt(FLEET.timeInSystem, 1)} seconds each, Little’s law gives **${fmt(FLEET.concurrency)}** streams in flight. One replica holds ${FLEET.perReplica}, limited by ${FLEET.limiter}, so the fleet needs **${FLEET.replicas} replicas** on ${FLEET.gpus} GPUs (${FLEET.servers} eight-GPU servers) before headroom.`,
                             ],
                         },
                         { kind: 'lab', lab: 'capacity-estimator', title: 'From requirements to GPUs', sub: 'Change the answers and watch the fleet change.' },
@@ -255,7 +254,7 @@ export default defineSystem({
             name: 'KV cache',
             products: 'paged, 16-token blocks',
             title: 'GPU memory decides the batch',
-            lede: `Llama 3 8B keeps ${formatBytes(kvBytesPerToken(SERVING_MODELS.l8))} of keys and values per token. Paging that memory in 16-token blocks, and sharing the system prompt, is what lets one replica hold hundreds of streams.`,
+            lede: `At ${formatBytes(kvBytesPerToken(SERVING_MODELS.l8))} of keys and values per token, paging and a shared system prompt fit hundreds of streams on one replica.`,
             sections: [
                 {
                     id: 'layout',
@@ -278,7 +277,7 @@ export default defineSystem({
             name: 'Conversation store',
             products: 'sharded Postgres',
             title: 'History, one shard per conversation',
-            lede: 'Every request reads its conversation’s history and every answer appends to it. Sharding by conversation id puts both on one shard.',
+            lede: 'Every request reads its conversation’s history and appends to it, so sharding by conversation id keeps both on one shard.',
             sections: [
                 {
                     id: 'design',
@@ -289,8 +288,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Messages and conversations are distributed on `conversation_id` and co-located, so loading a conversation is one single-shard query. A separate table keyed by `user_id` lists each user’s conversations for the sidebar.',
-                                'Each shard has a synchronous standby in the same region. Losing a primary costs its users their history for the length of a failover, and nobody else notices.',
+                                'Messages and conversations are distributed on `conversation_id` and co-located, so loading a conversation is one single-shard query. A separate table keyed by `user_id` lists each user’s conversations.',
+                                'Each shard has a synchronous standby in the same region. A failed primary costs only its own users their history, for the length of a failover.',
                             ],
                         },
                         { kind: 'links', items: [{ to: '/systems/sharded-postgres', label: 'Sharded Postgres, five layers deep', text: 'Shard keys, routing, resharding and failover.' }] },
@@ -305,7 +304,7 @@ export default defineSystem({
             name: 'Usage log',
             products: 'Kafka',
             title: 'Every request, recorded once, read many times',
-            lede: 'Billing, analytics and abuse detection all need the same usage records. A replicated log gives each of them its own offset and lets a new consumer replay history.',
+            lede: 'Billing, analytics and abuse detection each read the same usage records from their own offset.',
             sections: [
                 {
                     id: 'design',
@@ -316,8 +315,8 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'The gateway writes one record per request, keyed by organization, with replication factor 3, `min.insync.replicas=2` and `acks=all`. Keying by organization keeps each customer’s records in order for billing.',
-                                'The write is asynchronous and buffered on the gateway. A slow broker delays billing by seconds and never delays a token.',
+                                'The gateway writes one record per request, keyed by organization so each customer’s records stay in order, with replication factor 3, `min.insync.replicas=2` and `acks=all`.',
+                                'The write is asynchronous and buffered, so a slow broker delays billing by seconds and never delays a token.',
                             ],
                         },
                         { kind: 'lab', lab: 'kafka-partitions', title: 'Keys, partitions and the hot partition', sub: 'Keying by organization means the largest customer sets the hottest partition.' },
@@ -332,21 +331,21 @@ export default defineSystem({
             code: 'F',
             name: 'Failure drill',
             title: 'Fail one box at a time',
-            lede: 'For each box: what do users see, which metric moves first, and what limits the damage? The answer that hurts most is the risk to name at the end.',
+            lede: 'For each box: what users see, which metric moves first, and what limits the damage.',
             sections: [
                 {
                     id: 'drill',
                     label: 'Every failure',
                     provenance: 'pedagogical',
                     sourceRefs: [{ key: 'KAFKA_DOCS' }, { key: 'KWON2023' }, { key: 'POSTGRES_HA' }],
-                    blocks: [{ kind: 'lab', lab: 'failure-drill', title: 'Failure drill: chat serving', sub: 'Tap a box, or pick a failure. The failed part turns red and everything that depends on it dims.' }],
+                    blocks: [{ kind: 'lab', lab: 'failure-drill', title: 'Failure drill: chat serving', sub: 'Tap a box or pick a failure. The failed part turns red and its dependents dim.' }],
                 },
                 {
-                    id: 'close',
-                    label: 'Close the round',
+                    id: 'summary',
+                    label: 'Design summary',
                     provenance: 'pedagogical',
                     sourceRefs: [{ key: 'SDDD_MODELS' }],
-                    blocks: [{ kind: 'lab', lab: 'end-strong', title: 'The last two minutes' }],
+                    blocks: [{ kind: 'lab', lab: 'design-summary', title: 'The design in four lines' }],
                 },
             ],
         },

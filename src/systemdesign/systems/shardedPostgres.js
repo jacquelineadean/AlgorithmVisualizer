@@ -14,12 +14,11 @@ export default defineSystem({
     category: 'fundamentals',
     name: 'Sharded Postgres',
     kicker: 'Component, five layers deep',
-    summary: 'Relational data split across many primaries by a shard key. Followed from when to shard down to moving data while it serves traffic.',
-    intro: 'Sharding buys write capacity and storage past one machine, and charges for it in every query that crosses shards. These five layers use Citus, the Postgres extension, as the worked example.',
+    summary: 'Relational rows split across primaries by a shard key, from choosing it to resharding online.',
+    intro: 'Sharding with Citus buys write capacity and storage past one machine, and every cross-shard query pays for it.',
     direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
     overview: {
         title: 'One database, many primaries',
-        lede: 'The shard key decides which primary owns a row. Almost every hard question about a sharded database comes back to that choice.',
         sections: [
             {
                 id: 'layers',
@@ -33,7 +32,7 @@ export default defineSystem({
                         lab: 'depth-strata',
                         props: { only: ['sharded-postgres'] },
                         title: 'Step through the layers',
-                        sub: 'Each layer in one paragraph. The link under each opens that layer here.',
+                        sub: 'Press a layer to read its one-paragraph summary, then follow the link to open it.',
                     },
                 ],
             },
@@ -62,6 +61,21 @@ export default defineSystem({
             lede: T[0],
             sections: [
                 {
+                    id: 'versus',
+                    label: 'Hash or range',
+                    provenance: 'pedagogical',
+                    sourceRefs: [{ key: 'CITUS2021' }],
+                    blocks: [
+                        {
+                            kind: 'lab',
+                            lab: 'tradeoffs',
+                            props: { only: ['hash-range'] },
+                            title: 'The first choice after the key',
+                            sub: 'Compare hash and range sharding for which queries stay on one shard.',
+                        },
+                    ],
+                },
+                {
                     id: 'spec',
                     label: 'Spec sheet',
                     provenance: 'modern',
@@ -76,21 +90,6 @@ export default defineSystem({
                             knobs: ['Shard key', 'Shard count (Citus defaults to 32)', 'Placement of shards on nodes', 'Synchronous or asynchronous replicas'],
                             failures: ['A hot shard from a skewed key', 'Slow fan-out queries that wait for the slowest shard', 'A shard key that no longer fits the queries'],
                             boundary: 'Shard when one primary cannot keep up with writes or hold the working set, after a bigger machine and read replicas. Before that, one primary is simpler in every way.',
-                        },
-                    ],
-                },
-                {
-                    id: 'versus',
-                    label: 'Hash or range',
-                    provenance: 'pedagogical',
-                    sourceRefs: [{ key: 'CITUS2021' }],
-                    blocks: [
-                        {
-                            kind: 'lab',
-                            lab: 'tradeoffs',
-                            props: { only: ['hash-range'] },
-                            title: 'The first choice after the key',
-                            sub: 'Both split rows by the shard key. They differ in which queries stay on one shard.',
                         },
                     ],
                 },
@@ -112,12 +111,12 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'A good shard key appears in the `WHERE` clause of the hot queries, has many distinct values, and spreads writes evenly. Tables that are joined should share it, so the join runs inside one shard.',
+                                'A good shard key appears in the `WHERE` clause of hot queries, has many distinct values, and spreads writes evenly. Joined tables should share it, so the join runs inside one shard.',
                             ],
                         },
                         {
                             kind: 'table',
-                            caption: 'Candidate keys for a chat product’s messages table',
+                            caption: 'Shard key options for a chat product’s messages table',
                             columns: ['Shard key', 'Hot queries', 'Risk'],
                             rows: [
                                 ['`conversation_id`', 'Load one conversation: one shard.', 'Listing a user’s conversations fans out, unless that list lives in its own table keyed by user.'],
@@ -138,7 +137,7 @@ export default defineSystem({
                             kind: 'code',
                             code: "SET citus.shard_count = 32;\n\nSELECT create_distributed_table('conversations', 'conversation_id');\nSELECT create_distributed_table('messages', 'conversation_id',\n                                colocate_with => 'conversations');\nSELECT create_reference_table('models');",
                             notes: [
-                                '`citus.shard_count` sets how many shards a new distributed table gets. 32 is the default.',
+                                '`citus.shard_count` sets how many shards a new distributed table gets, 32 by default.',
                                 '`create_distributed_table` splits a table by the named column.',
                                 '`colocate_with` puts matching shards of both tables on the same node, so a join on `conversation_id` stays local.',
                                 '`create_reference_table` copies a small table to every node, so any shard can join with it.',
@@ -165,7 +164,7 @@ export default defineSystem({
                             kind: 'prose',
                             paras: [
                                 'Citus hashes the shard key into a 32-bit range and gives each shard an equal slice of it. A coordinator node holds the map from slice to shard to node.',
-                                'A query that names one shard key value is routed whole to one shard and runs at single-node speed. A query without the key is split into one query per shard, run in parallel, and merged on the coordinator. It finishes when the slowest shard answers.',
+                                'A query with one shard key value runs whole on one shard at single-node speed. Without the key, every shard runs a piece in parallel, and the coordinator merges them after the slowest answers.',
                             ],
                         },
                         {
@@ -187,7 +186,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Each shard’s node is an ordinary Postgres primary. It streams its write-ahead log to one or more standbys. A standby named in `synchronous_standby_names` must confirm each commit before the primary reports it, so a failover to it loses nothing.',
+                                'Each shard’s node is an ordinary Postgres primary that streams its write-ahead log to one or more standbys. A standby named in `synchronous_standby_names` confirms each commit before the primary reports it, so failing over to it loses nothing.',
                                 'Postgres itself does not detect a failed primary or promote a standby. That job belongs to a separate tool or a managed service.',
                             ],
                         },
@@ -210,16 +209,20 @@ export default defineSystem({
                     blocks: [
                         {
                             kind: 'prose',
-                            paras: [
-                                `Going from 4 nodes to 5, at best ${pct(ADD.ideal)} of rows move, all onto the new node. Placing rows by hash modulo the node count moves **${pct(scheme('mod').moved)}**. A consistent-hash ring with 100 virtual nodes per server moves ${pct(scheme('ring').moved)}. A fixed set of 32 logical shards, moved whole, moves ${pct(scheme('logical').moved)}.`,
-                                'Fixed logical shards are why Citus asks for a shard count up front. Data moves in whole shards, and the routing map changes by one entry per moved shard.',
-                            ],
+                            paras: [`Ideally a fifth node takes ${pct(ADD.ideal)} of rows from the other four, but hash modulo moves **${pct(scheme('mod').moved)}**.`],
                         },
                         {
                             kind: 'lab',
                             lab: 'resharding',
-                            title: 'Add one node: how much data moves?',
-                            sub: `${RESHARD_ROWS.toLocaleString('en-US')} rows hashed with murmur2, placed three ways, before and after one node joins.`,
+                            title: 'Add one node: how much moves?',
+                            sub: `Drag the node count, pick 32 or 128 logical shards, and watch how many of ${RESHARD_ROWS.toLocaleString('en-US')} rows move.`,
+                        },
+                        {
+                            kind: 'prose',
+                            paras: [
+                                `A consistent-hash ring with 100 virtual nodes per server moves ${pct(scheme('ring').moved)}, and 32 logical shards move ${pct(scheme('logical').moved)}. Citus asks for a shard count up front because it moves data in whole logical shards.`,
+                                'Each moved shard changes one entry in the routing map.',
+                            ],
                         },
                     ],
                 },
@@ -232,7 +235,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'A transaction that writes to two shards on different nodes needs two-phase commit, which Citus runs for you. It costs extra round trips and holds locks longer.',
+                                'Citus runs two-phase commit for a transaction that writes to shards on different nodes. That adds round trips and holds locks longer.',
                                 'A join on a column other than the shard key must move rows between nodes. Design the key so the hot joins never need that.',
                             ],
                         },
@@ -247,7 +250,7 @@ export default defineSystem({
                         {
                             kind: 'prose',
                             paras: [
-                                'Hashing spreads keys evenly, but not traffic. One huge tenant, or one viral conversation, lands on one shard. Options, from least to most work: give that shard a node of its own, cache its reads, or move that tenant to a dedicated cluster.',
+                                'Hashing spreads keys evenly, yet one huge tenant or viral conversation still puts its traffic on one shard. Fixes in order of effort: its own node for that shard, cached reads, then a dedicated cluster for the tenant.',
                             ],
                         },
                     ],
@@ -262,24 +265,6 @@ export default defineSystem({
             lede: T[4],
             sections: [
                 {
-                    id: 'run',
-                    label: 'Runbook',
-                    provenance: 'modern',
-                    sourceRefs: [{ key: 'CITUS2021' }, { key: 'POSTGRES_HA' }],
-                    blocks: [
-                        {
-                            kind: 'list',
-                            style: 'cards',
-                            items: [
-                                { title: 'Rebalance online.', text: 'Citus’s shard rebalancer copies a shard to its new node with logical replication, then switches the routing map. Writes pause only for the switch.' },
-                                { title: 'Migrate shard by shard.', text: 'Schema changes run on every shard. Make them backward compatible so old and new code both work while they roll out.' },
-                                { title: 'Back up per shard.', text: 'A restore must bring every shard to the same point in time, or cross-shard data disagrees.' },
-                                { title: 'Drill failover.', text: 'Promote a standby on a schedule, so the first real failover is not the first one.' },
-                            ],
-                        },
-                    ],
-                },
-                {
                     id: 'sync',
                     label: 'Sync or async',
                     provenance: 'pedagogical',
@@ -290,11 +275,29 @@ export default defineSystem({
                             lab: 'tradeoffs',
                             props: { only: ['sync-async'] },
                             title: 'What a failover may lose',
-                            sub: 'Synchronous standbys lose nothing on failover and add a round trip to every commit.',
+                            sub: 'Compare synchronous and asynchronous standbys for what a failover loses and how long each commit waits.',
                         },
                         {
                             kind: 'quote',
-                            text: 'I would shard messages by conversation id with 32 logical shards, co-locate the tables that join on it, and keep one synchronous standby per shard in the same region.',
+                            text: 'Shard messages by conversation id into 32 logical shards, and co-locate the tables that join on it. Keep one synchronous standby per shard in the same region, so failover loses no acknowledged commit.',
+                        },
+                    ],
+                },
+                {
+                    id: 'run',
+                    label: 'Runbook',
+                    provenance: 'modern',
+                    sourceRefs: [{ key: 'CITUS2021' }, { key: 'POSTGRES_HA' }],
+                    blocks: [
+                        {
+                            kind: 'list',
+                            style: 'cards',
+                            items: [
+                                { title: 'Rebalance online.', text: 'Citus’s rebalancer copies a shard to its new node with logical replication, then pauses writes only for the routing switch.' },
+                                { title: 'Migrate shard by shard.', text: 'Schema changes run on every shard, so make them backward compatible for old and new code during the rollout.' },
+                                { title: 'Back up per shard.', text: 'A restore must bring every shard to the same point in time, or cross-shard data disagrees.' },
+                                { title: 'Drill failover.', text: 'Promote a standby on a schedule, so the first real failover is not the first one.' },
+                            ],
                         },
                     ],
                 },

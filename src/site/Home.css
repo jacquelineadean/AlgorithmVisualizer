@@ -239,3 +239,40 @@
     color: var(--ink-soft);
     font-size: 0.95rem;
 }
+
+/* A seven-tray rack in the System Design card, in the systems' palette
+   (theme.css). Its LEDs light top to bottom on hover. */
+.mini-rack {
+    display: grid;
+    gap: 3px;
+    margin: 12px 0 4px;
+    padding: 6px 10px 6px 8px;
+    border-radius: 7px;
+    background: var(--sd-rack-deep);
+}
+
+.mini-rack span {
+    position: relative;
+    height: 9px;
+    border-radius: 2px;
+    border-left: 4px solid var(--c);
+    background: linear-gradient(180deg, var(--sd-rack-3), var(--sd-rack-2));
+}
+
+.mini-rack span::after {
+    content: '';
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sd-led-off);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition-delay: calc(var(--i) * 60ms);
+}
+
+.component-card:hover .mini-rack span::after {
+    background: var(--c);
+    box-shadow: 0 0 6px var(--c);
+}

@@ -68,18 +68,6 @@ export function formatHumanScale(seconds) {
     return `${seconds.toFixed(1)} s`;
 }
 
-/* --- Breadth against depth --------------------------------------------------- */
-
-// A toy model of a 30-minute design block: each component named costs 1.5
-// minutes; each layer of depth past the first costs 3 more; what is left
-// goes to two deep dives.
-export function breadthClock(components, { minutes = 30, perComponent = 1.5, perLayer = 3 } = {}) {
-    const remaining = Math.max(0, minutes - perComponent * components);
-    const perDive = remaining / 2;
-    const depth = Math.min(5, 1 + Math.floor(perDive / perLayer));
-    return { remaining, perDive, depth };
-}
-
 /* --- PagedAttention memory layouts ------------------------------------------ */
 
 // One H100 serving Llama 3 8B under the serving model's assumptions. Every

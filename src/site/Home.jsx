@@ -83,11 +83,15 @@ export default function Home() {
                     </Link>
                     <Link to="/systems" className="card component-card accent-vermilion">
                         <div className="eyebrow">System Design Visualizer</div>
+                        <div className="mini-rack" aria-hidden="true">
+                            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                                <span key={n} style={{ '--c': `var(--sd-c${n})`, '--i': n }} />
+                            ))}
+                        </div>
                         <h3>Walk a system, layer by layer</h3>
                         <p>
-                            The AI inference stack from SDK call to GPU, and the fundamentals
-                            behind any design: what each layer owns, how it fails, and the
-                            numbers that bound it.
+                            Labs, calculators and failure drills for the AI inference stack
+                            and the fundamentals of any design.
                         </p>
                         <span className="domain-count">
                             {CATEGORIES.length} categories · {CATEGORIES.map((c) => c.name).join(' and ')}
