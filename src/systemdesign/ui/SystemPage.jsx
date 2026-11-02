@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Caveat, EvidenceRow, EvidenceSection } from '../../visualizations/evidence/Evidence';
-import { getCategory, getSystem } from '..';
+import { getSystem } from '..';
 import { citedSources, findTray, neighborsOf, trayPath, traysOf } from '../model';
 import { SOURCES } from '../sources';
 import { Block } from './Blocks';
@@ -12,11 +12,16 @@ import '../../visualizations/evidence/Evidence.css';
 import './SystemDesign.css';
 
 // One page per tray: /systems/:systemId is the overview, /systems/:id/:layer
-// a layer or topic, and ?tab=<section> the open tab. The rack on the left
-// is the whole system drawn as a server rack: a plate with the system's
-// name, one tray per layer in the cabinet, and the cross-cutting topics as
-// jacks on a patch panel. An amber token on the cabinet wire marks the open
-// layer. ← and → walk the trays in order.
+// a layer or topic, and ?tab=<section> the open tab. The frame has a top
+// bar (the system's name plate, which opens the overview, then the
+// cross-cutting topics as patch-panel jacks) and, below it, the layers as
+// trays in a rack cabinet on the left. An amber token on the cabinet wire
+// marks the open layer. ← and → walk the trays in order.
+
+// A caveat that carries the tab's own provenance and citations stands in
+// for the tab's evidence row, so the chips are not drawn twice.
+const refKeys = (item) => (item?.sourceRefs ?? []).map((r) => `${r.key} ${r.detail ?? ''}`).join('|');
+const sameEvidence = (section, caveat) => !!caveat && caveat.provenance === section.provenance && refKeys(caveat) === refKeys(section);
 
 const isTyping = (el) =>
     el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
@@ -64,7 +69,57 @@ function Jack({ system, tray, current, done }) {
     );
 }
 
-function Rack({ system, category, current, visited, onReset }) {
+// The top bar: the system's name plate (its overview), the cross-cutting
+// topics as patch-panel jacks, and the progress meter.
+function TopBar({ system, current, visited, onReset }) {
+    const bar = useRef(null);
+    const trays = traysOf(system);
+    const seen = trays.filter((t) => visited.has(t.id)).length;
+    const onOverview = current.id === system.overview.id;
+
+    useLayoutEffect(() => {
+        bar.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }, [current.id]);
+
+    return (
+        <nav className="sd-topbar" aria-label="System" ref={bar}>
+            <Link
+                to={trayPath(system.id, system.overview.id)}
+                className={`sd-plate${onOverview ? ' is-current' : ''}${visited.has(system.overview.id) ? ' is-done' : ''}`}
+                aria-current={onOverview ? 'page' : undefined}
+            >
+                <h1 className="sd-plate-name">{system.name}</h1>
+                <span className="sd-sr"> overview</span>
+            </Link>
+            {system.topics.length > 0 && (
+                <ul className="sd-patch" aria-label={system.topicsLabel ?? 'Across the layers'}>
+                    {system.topics.map((tray) => (
+                        <Jack key={tray.id} system={system} tray={tray} current={current} done={visited.has(tray.id)} />
+                    ))}
+                </ul>
+            )}
+            <div className="sd-rack-progress" title={`${seen} of ${trays.length} explored`}>
+                <div className="sd-meter" aria-hidden="true">
+                    <i style={{ width: `${(100 * seen) / trays.length}%` }} />
+                </div>
+                <span>
+                    <b>
+                        {seen}/{trays.length}
+                    </b>
+                    <span className="sd-sr"> explored</span>
+                    {seen > 1 && (
+                        <button type="button" className="sd-rack-reset" onClick={onReset}>
+                            Reset
+                        </button>
+                    )}
+                </span>
+            </div>
+        </nav>
+    );
+}
+
+// The layers as trays in a rack cabinet, stacked top to bottom.
+function Rack({ system, current, visited }) {
     const rack = useRef(null);
     const cabinet = useRef(null);
     const [tokenY, setTokenY] = useState(null);
@@ -83,28 +138,8 @@ function Rack({ system, category, current, visited, onReset }) {
         rack.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     }, [current.id]);
 
-    const trays = traysOf(system);
-    const seen = trays.filter((t) => visited.has(t.id)).length;
-
     return (
         <nav className="sd-rack" aria-label="Layers" ref={rack}>
-            <div className="sd-plate">
-                <span className="sd-plate-kicker">
-                    {category.name} · {system.kicker}
-                </span>
-                <h1 className="sd-plate-name">{system.name}</h1>
-            </div>
-            <ol className="sd-rack-list">
-                <TrayLink system={system} tray={system.overview} current={current} done={visited.has(system.overview.id)} />
-            </ol>
-            {system.direction && (
-                <div className="sd-rack-label">
-                    <span>{system.direction.label}</span>
-                    <span>
-                        {system.direction.top} <span aria-hidden="true">↓</span> {system.direction.bottom}
-                    </span>
-                </div>
-            )}
             <div className="sd-cabinet" ref={cabinet}>
                 <span className="sd-rack-wire" aria-hidden="true" />
                 <span
@@ -117,34 +152,6 @@ function Rack({ system, category, current, visited, onReset }) {
                         <TrayLink key={tray.id} system={system} tray={tray} current={current} done={visited.has(tray.id)} peek={peek} index={i} />
                     ))}
                 </ol>
-            </div>
-            {system.topics.length > 0 && (
-                <>
-                    <div className="sd-rack-label">
-                        <span>{system.topicsLabel ?? 'Across the layers'}</span>
-                    </div>
-                    <ul className="sd-patch">
-                        {system.topics.map((tray) => (
-                            <Jack key={tray.id} system={system} tray={tray} current={current} done={visited.has(tray.id)} />
-                        ))}
-                    </ul>
-                </>
-            )}
-            <div className="sd-rack-progress">
-                <div className="sd-meter" aria-hidden="true">
-                    <i style={{ width: `${(100 * seen) / trays.length}%` }} />
-                </div>
-                <span>
-                    <b>
-                        {seen} of {trays.length}
-                    </b>{' '}
-                    trays explored
-                    {seen > 1 && (
-                        <button type="button" className="sd-rack-reset" onClick={onReset}>
-                            Reset
-                        </button>
-                    )}
-                </span>
             </div>
         </nav>
     );
@@ -242,15 +249,10 @@ export default function SystemPage() {
 
     if (!system || !tray) return <NotFound systemId={layerId ? `${systemId}/${layerId}` : systemId} />;
 
-    const category = getCategory(system.category);
     const sections = tray.sections ?? [];
     const section = sections.find((s) => s.id === params.get('tab')) ?? sections[0];
     const sources = citedSources(system, SOURCES);
     const isOverview = tray.kind === 'overview';
-    const eyebrow = isOverview
-        ? `${category.name} · ${system.kicker}`
-        : `${tray.kind === 'topic' ? `${system.topicsLabel ?? 'Across the layers'} · ` : ''}${tray.name}${tray.products ? ` · ${tray.products}` : ''}`;
-    const dek = isOverview ? system.intro : tray.lede;
 
     const selectTab = (id) => {
         const nextParams = new URLSearchParams(params);
@@ -262,69 +264,78 @@ export default function SystemPage() {
     return (
         <RackSignal.Provider value={signal}>
             <div className="sd-page">
-                <div className="sd-frame sd-layout">
-                    <Rack system={system} category={category} current={tray} visited={visited} onReset={resetVisited} />
+                <div className="sd-frame sd-system">
+                    <TopBar system={system} current={tray} visited={visited} onReset={resetVisited} />
+                    <div className="sd-layout">
+                        <Rack system={system} current={tray} visited={visited} />
 
-                    <article className={`sd-panel c${tray.color}`} aria-labelledby="sd-tray-title" key={tray.id}>
-                        <header className="sd-ph">
-                            <div className="sd-ph-eyebrow">
-                                <span className="sd-ph-chip">{tray.code}</span>
-                                <span>{eyebrow}</span>
-                            </div>
-                            <h2 id="sd-tray-title" className="sd-ph-title">
-                                {tray.title}
-                            </h2>
-                            {dek && (
-                                <p className="sd-ph-dek">
-                                    <Rich text={dek} />
-                                </p>
+                        <article className={`sd-panel c${tray.color}`} aria-labelledby="sd-tray-title" key={tray.id}>
+                            {/* The overview's name is on the plate, so its title is for screen readers only. */}
+                            <header className={`sd-ph${isOverview ? ' sd-sr' : ''}`}>
+                                <h2 id="sd-tray-title" className="sd-ph-title">
+                                    {!isOverview && (
+                                        <span className="sd-ph-chip" aria-hidden="true">
+                                            {tray.code}
+                                        </span>
+                                    )}
+                                    {tray.title}
+                                </h2>
+                                {!isOverview && tray.lede && (
+                                    <p className="sd-ph-dek">
+                                        <Rich text={tray.lede} />
+                                    </p>
+                                )}
+                            </header>
+
+                            {sections.length > 1 && <Tabs tray={tray} sections={sections} current={section} onSelect={selectTab} />}
+
+                            {section && (
+                                <section
+                                    className="sd-section"
+                                    role={sections.length > 1 ? 'tabpanel' : undefined}
+                                    id={`panel-${section.id}`}
+                                    aria-labelledby={sections.length > 1 ? `tab-${section.id}` : 'sd-tray-title'}
+                                    key={`${tray.id}-${section.id}`}
+                                >
+                                    {section.heading && <h3 className="sd-section-title">{section.heading}</h3>}
+                                    {section.blocks.map((block, i) => (
+                                        <Block key={i} block={block} system={system} tray={tray} solo={section.blocks.length === 1} />
+                                    ))}
+                                    <Caveat caveat={section.caveat} sources={SOURCES} />
+                                    {!sameEvidence(section, section.caveat) && (
+                                        <div className="sd-cite">
+                                            <EvidenceRow provenance={section.provenance} refs={section.sourceRefs} sources={SOURCES} />
+                                        </div>
+                                    )}
+                                </section>
                             )}
-                        </header>
 
-                        {sections.length > 1 && <Tabs tray={tray} sections={sections} current={section} onSelect={selectTab} />}
-
-                        {section && (
-                            <section
-                                className="sd-section"
-                                role={sections.length > 1 ? 'tabpanel' : undefined}
-                                id={`panel-${section.id}`}
-                                aria-labelledby={sections.length > 1 ? `tab-${section.id}` : 'sd-tray-title'}
-                                key={`${tray.id}-${section.id}`}
-                            >
-                                <EvidenceRow provenance={section.provenance} refs={section.sourceRefs} sources={SOURCES} />
-                                {section.heading && <h3 className="sd-section-title">{section.heading}</h3>}
-                                {section.blocks.map((block, i) => (
-                                    <Block key={i} block={block} system={system} tray={tray} />
-                                ))}
-                                <Caveat caveat={section.caveat} sources={SOURCES} />
-                            </section>
-                        )}
-
-                        <nav className="sd-nextbar" aria-label="Previous and next layer">
-                            {prev ? (
-                                <Link to={trayPath(system.id, prev.id)} className={`sd-nb prev c${prev.color}`}>
-                                    <small>← Previous</small>
-                                    <span>
-                                        <b>{prev.code}</b> {prev.name}
-                                    </span>
-                                </Link>
-                            ) : (
-                                <span />
-                            )}
-                            {next && (
-                                <Link to={trayPath(system.id, next.id)} className={`sd-nb next c${next.color}`}>
-                                    <small>Next →</small>
-                                    <span>
-                                        <b>{next.code}</b> {next.name}
-                                    </span>
-                                </Link>
-                            )}
-                        </nav>
-                    </article>
+                            <nav className="sd-nextbar" aria-label="Previous and next">
+                                {prev ? (
+                                    <Link to={trayPath(system.id, prev.id)} className={`sd-nb prev c${prev.color}`}>
+                                        <small>← Previous</small>
+                                        <span>
+                                            <b>{prev.code}</b> {prev.kind === 'overview' ? system.name : prev.name}
+                                        </span>
+                                    </Link>
+                                ) : (
+                                    <span />
+                                )}
+                                {next && (
+                                    <Link to={trayPath(system.id, next.id)} className={`sd-nb next c${next.color}`}>
+                                        <small>Next →</small>
+                                        <span>
+                                            <b>{next.code}</b> {next.name}
+                                        </span>
+                                    </Link>
+                                )}
+                            </nav>
+                        </article>
+                    </div>
                 </div>
 
                 <div className="sd-frame sd-evidence">
-                    <EvidenceSection sources={sources} />
+                    <EvidenceSection sources={sources} collapsible />
                 </div>
             </div>
         </RackSignal.Provider>

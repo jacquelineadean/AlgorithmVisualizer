@@ -48,8 +48,10 @@ describe('system page', () => {
     it('shows the rack, the overview and the cited sources', async () => {
         await renderAt('/systems/ai-inference-stack');
         expect(screen.getByRole('heading', { level: 1, name: /the ai inference stack/i })).toBeInTheDocument();
+        const top = within(screen.getByRole('navigation', { name: /^system$/i }));
+        expect(top.getByRole('link', { name: /the ai inference stack overview/i })).toHaveAttribute('aria-current', 'page');
+        expect(top.getByRole('link', { name: /caching/i })).toBeInTheDocument();
         const rack = within(screen.getByRole('navigation', { name: /^layers$/i }));
-        expect(rack.getByRole('link', { name: /overview/i })).toHaveAttribute('aria-current', 'page');
         for (const name of ['Your app', 'AI gateway', 'Inference platform', 'Inference engine', 'Framework', 'Kernels', 'GPU']) {
             expect(rack.getByRole('link', { name: new RegExp(name) })).toBeInTheDocument();
         }

@@ -23,7 +23,6 @@ export default defineSystem({
     kicker: 'Component, five layers deep',
     summary: 'The GPU memory for every live conversation, and how paging fits more of them.',
     intro: 'Five layers of vLLM’s design show why the KV cache limits how many users one GPU serves.',
-    direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
     overview: {
         title: 'Memory that becomes throughput',
         sections: [

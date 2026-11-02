@@ -64,14 +64,12 @@ export default defineSystem({
     kicker: 'Seven layers, call to GPU',
     summary: 'Every LLM request crosses seven software layers before a GPU multiplies anything.',
     intro: 'Each layer has a lab that runs its mechanism and a spec sheet with the numbers that limit it.',
-    direction: { label: 'Request path', top: 'call', bottom: 'GPU' },
     topicsLabel: 'Across the layers',
     trace: {
         down: 'request',
         up: 'tokens',
         goingLabel: 'request going down',
         returningLabel: 'tokens coming back',
-        intro: 'Press Play to send one SDK call down the seven layers and stream the answer back up.',
         outro: 'Prefill ran once and built the KV cache. Decode adds one token per step, and each token travels back up every layer to your app.',
         steps: {
             l1: { head: 'Build the prompt, open the stream', does: 'Your code assembles tools, the system prompt, documents and the conversation, then calls the SDK. The order of those parts decides how much of the prompt a cache can reuse.', owner: 'you' },

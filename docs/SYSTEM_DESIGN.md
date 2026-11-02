@@ -56,9 +56,8 @@ defineSystem({
     name: 'Kafka as a durable log',
     kicker: 'Component, five layers deep',
     summary: 'One line for the index card.',
-    intro: 'One sentence under the page title.',
-    direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
-    topicsLabel: 'Beside the request path', // optional heading over topic trays
+    intro: 'One sentence for the system.',
+    topicsLabel: 'Beside the request path', // optional accessible name for the topic jacks
     trace: { steps: [...] },          // optional: the request-trace lab's steps
     overview: { title, sections },   // lede optional
     layers: [tray, ...],              // read top to bottom; colors 1–7 in order
@@ -68,7 +67,8 @@ defineSystem({
 
 A **tray** is `{ id, code, name, products?, title, lede, sections }`. The rack
 and the `layers` block show `code`, `name` and `products`; the panel shows
-`title`, `lede` and one tab per section.
+`title`, `lede` and one tab per section. The overview's title is for screen
+readers only, since the name plate already names the system.
 
 A **section** is `{ id, label, provenance, sourceRefs, heading?, blocks, caveat? }`.
 `provenance` is one of `paper`, `theorem`, `modern`, `pedagogical`.
@@ -125,23 +125,31 @@ real router and checks the heading and that no lab is missing.
 
 ## The page
 
-`ui/SystemPage.jsx` draws each system as a server rack beside a stage.
+`ui/SystemPage.jsx` draws each system as a frame with a top bar over a
+rack and a stage.
 
-- The rack (left, sticky) holds a plate with the category, kicker and
-  system name (the page's h1), the overview tray, the direction label, a
-  cabinet with one tray per layer, a patch panel with the topics as jacks,
-  and a meter of trays opened. Opened trays live in `localStorage` under
+- The top bar (sticky) holds the name plate, which is the page's h1 and the
+  link to the overview, then the topics as patch-panel jacks in a row, then
+  a meter of trays opened. Opened trays live in `localStorage` under
   `sd-visited:<systemId>` (`ui/progress.js`).
+- The rack (left, sticky) is a cabinet with one tray per layer, stacked top
+  to bottom.
 - An amber token rides the cabinet's cable beside the open layer.
   `ui/rackSignal.js` lets a lab point it at another layer: the request
   trace moves it tray by tray while the request travels.
-- The stage shows a chip and eyebrow, the tray title in Big Shoulders
-  Display, the lede as an italic dek, tabs with a sliding bar, the section,
-  and previous and next buttons.
+- The stage shows the layer chip and tray title, the lede as a short italic
+  dek, tabs with a sliding bar, the section, the tab's provenance and
+  citation chips at its foot, and previous and next buttons.
+- A lab alone in its tab drops its title, since the tab names it.
+- The request trace's text card stays closed until a layer is active, then
+  opens beside the diagram at about a quarter of the width.
+- The Evidence section below the frame is collapsed until opened; a
+  citation chip opens it and scrolls to the source.
 - A `stats` block renders as rack front panels on an overview tray and as
   cards elsewhere. A `spec` block renders as a datasheet under a dark band
   in the layer's color. The `layers` block draws the trays as rack units.
-- Below 900px the rack becomes a sticky strip of tray codes and jacks.
+- Below 900px the top bar scrolls with the page and the rack becomes a
+  sticky strip of tray codes.
 
 ## Theme
 

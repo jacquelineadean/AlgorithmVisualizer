@@ -16,7 +16,6 @@ export default defineSystem({
     kicker: 'Component, five layers deep',
     summary: 'Relational rows split across primaries by a shard key, from choosing it to resharding online.',
     intro: 'Sharding with Citus buys write capacity and storage past one machine, and every cross-shard query pays for it.',
-    direction: { label: 'Depth', top: 'what it is for', bottom: 'how it runs' },
     overview: {
         title: 'One database, many primaries',
         sections: [

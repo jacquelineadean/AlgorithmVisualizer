@@ -19,6 +19,9 @@ export function SourceChips({ refs, sources }) {
     const jump = (key) => {
         const el = document.getElementById(`ref-${key}`);
         if (!el) return;
+        // A collapsed evidence section opens before scrolling to the source.
+        const details = el.closest('details');
+        if (details) details.open = true;
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         el.classList.remove('flash');
         // Restart the highlight animation on repeat clicks.
@@ -66,10 +69,10 @@ export function Caveat({ caveat, sources }) {
     );
 }
 
-export function EvidenceSection({ sources, intro, showLegend = true }) {
-    return (
-        <section className="references">
-            <h2>Evidence</h2>
+export function EvidenceSection({ sources, intro, showLegend = true, collapsible = false }) {
+    const count = Object.keys(sources).length;
+    const body = (
+        <>
             {intro && <p className="references-sub">{intro}</p>}
             {showLegend && (
                 <div className="legend">
@@ -95,6 +98,25 @@ export function EvidenceSection({ sources, intro, showLegend = true }) {
                     </li>
                 ))}
             </ol>
+        </>
+    );
+    if (collapsible) {
+        return (
+            <details className="references collapsible">
+                <summary>
+                    <h2>Evidence</h2>
+                    <span className="references-count">
+                        {count} source{count === 1 ? '' : 's'}
+                    </span>
+                </summary>
+                {body}
+            </details>
+        );
+    }
+    return (
+        <section className="references">
+            <h2>Evidence</h2>
+            {body}
         </section>
     );
 }

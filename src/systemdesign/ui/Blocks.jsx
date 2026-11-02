@@ -487,12 +487,13 @@ function LayerIndex({ system }) {
     );
 }
 
-function Lab({ block, system, tray }) {
+// A lab alone in its tab drops its title, since the tab already names it.
+function Lab({ block, system, tray, solo }) {
     const Component = LABS[block.lab];
     if (!Component) return <p className="sd-fig-note">Missing lab “{block.lab}”.</p>;
     return (
         <figure className="sd-lab" aria-label={block.title ?? undefined}>
-            {block.title && <figcaption className="sd-fig-title">{block.title}</figcaption>}
+            {block.title && !solo && <figcaption className="sd-fig-title">{block.title}</figcaption>}
             {block.sub && (
                 <p className="sd-fig-sub">
                     <Rich text={block.sub} />
@@ -531,8 +532,8 @@ export const BLOCKS = {
     note: Note,
 };
 
-export function Block({ block, system, tray }) {
+export function Block({ block, system, tray, solo = false }) {
     const Component = BLOCKS[block.kind];
     if (!Component) return null;
-    return <Component block={block} system={system} tray={tray} />;
+    return <Component block={block} system={system} tray={tray} solo={solo} />;
 }
