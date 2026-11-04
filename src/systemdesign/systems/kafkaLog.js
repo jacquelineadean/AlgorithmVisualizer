@@ -8,7 +8,6 @@ const HOT = partitionLoad({ partitions: 12, skew: 1.1 });
 const GROW = addPartition({ partitions: 12, skew: 1.1 });
 const T = DEPTH_TEXT['kafka-log'];
 
-const DEPTH = { label: 'Depth', top: 'what it is for', bottom: 'how it runs' };
 
 export default defineSystem({
     id: 'kafka-log',
@@ -17,7 +16,6 @@ export default defineSystem({
     kicker: 'Component, five layers deep',
     summary: 'A partitioned, replicated, append-only log, and how to choose its partition count, key and acks.',
     intro: 'The log a design adds for replay and fan-out, from its role down to broker settings.',
-    direction: DEPTH,
     overview: {
         title: 'One box, five layers down',
         sections: [

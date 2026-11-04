@@ -171,3 +171,44 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* A collapsible references section: the heading is the toggle. */
+.references.collapsible > summary {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0;
+    list-style: none;
+    cursor: pointer;
+}
+
+.references.collapsible > summary::-webkit-details-marker {
+    display: none;
+}
+
+.references.collapsible > summary::before {
+    content: '▸';
+    font-size: 1rem;
+    color: var(--ink-faint);
+    transition: transform 0.2s ease;
+}
+
+.references.collapsible[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.references.collapsible > summary:hover h2 {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+}
+
+.references-count {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+}
+
+.references.collapsible[open] > summary {
+    margin-bottom: 4px;
+}

@@ -62,7 +62,7 @@ export function RequestTrace({ system }) {
     const H = 30 + N * ROW + 10;
     return (
         <div className="sd-trace">
-            <div className="sd-trace-grid">
+            <div className={`sd-trace-grid${layer ? ' open' : ''}`}>
                 <svg viewBox={`0 0 520 ${H}`} className="sd-svg" role="img" aria-label="A request travels down the layers, then tokens stream back up">
                     <line x1="494" x2="494" y1="14" y2={H - 8} className="sd-trace-down" />
                     <line x1="22" x2="22" y1="14" y2={H - 8} className="sd-trace-up" />
@@ -98,7 +98,7 @@ export function RequestTrace({ system }) {
                     {at >= 0 && <circle cx={down ? 494 : 22} cy={26 + at * ROW + (ROW - 10) / 2} r="8" className="sd-token" />}
                 </svg>
                 <div className="sd-trace-card" aria-live="polite">
-                    {layer ? (
+                    {layer && (
                         <>
                             <div className="sd-k">
                                 {layer.code} · {down ? system.trace.goingLabel : system.trace.returningLabel}
@@ -109,10 +109,6 @@ export function RequestTrace({ system }) {
                             </p>
                             {system.trace.steps[layer.id].owner && <p className="sd-muted">Owned by {system.trace.steps[layer.id].owner}.</p>}
                         </>
-                    ) : (
-                        <p>
-                            <Rich text={system.trace.intro} />
-                        </p>
                     )}
                     {up && at === 0 && (
                         <p className="sd-muted">

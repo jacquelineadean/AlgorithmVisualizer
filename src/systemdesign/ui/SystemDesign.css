@@ -462,25 +462,54 @@
     transform: translateX(3px);
 }
 
-/* --- System page: rack beside stage ------------------------------------------- */
+/* --- System page: top bar over rack and stage ----------------------------------- */
+
+.sd-system {
+    --sd-topbar-h: 58px;
+    display: grid;
+    gap: 16px;
+}
 
 .sd-layout {
     display: grid;
-    grid-template-columns: 276px minmax(0, 1fr);
-    gap: clamp(20px, 3.2vw, 48px);
+    grid-template-columns: 272px minmax(0, 1fr);
+    gap: clamp(20px, 3.2vw, 44px);
     align-items: start;
+}
+
+/* The top bar: the name plate (overview), the topic jacks, progress. */
+.sd-topbar {
+    position: sticky;
+    top: calc(var(--nav-height) + 28px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--sd-topbar-h);
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--sd-rack);
+    color: var(--sd-rack-ink);
+    border: 1px solid var(--sd-rack-3);
+    box-shadow: 0 22px 44px -28px rgba(0, 0, 0, 0.7);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.sd-topbar::-webkit-scrollbar {
+    display: none;
 }
 
 .sd-rack {
     position: sticky;
-    top: calc(var(--nav-height) + 28px);
-    max-height: calc(100vh - var(--nav-height) - 44px);
+    top: calc(var(--nav-height) + 28px + var(--sd-topbar-h) + 16px);
+    max-height: calc(100vh - var(--nav-height) - var(--sd-topbar-h) - 60px);
     overflow-y: auto;
     overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 14px;
+    padding: 10px;
     border-radius: 12px;
     background: var(--sd-rack);
     color: var(--sd-rack-ink);
@@ -491,41 +520,46 @@
 }
 
 .sd-plate {
-    display: grid;
-    gap: 3px;
-    padding: 10px 12px 11px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
     border-radius: 7px;
     background: linear-gradient(180deg, var(--sd-rack-3), var(--sd-rack-2));
     border: 1px solid var(--sd-rack-deep);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    color: var(--sd-rack-bright);
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
-.sd-plate-kicker {
-    font: 500 0.66rem/1.3 var(--sd-ui);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sd-rack-muted);
+.sd-plate:hover {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sd-rack-3) 80%, white), var(--sd-rack-3));
+}
+
+.sd-plate:focus-visible {
+    outline: 2px solid var(--sd-token);
+    outline-offset: 2px;
+}
+
+.sd-plate.is-current {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--sd-token) 30%, var(--sd-rack-3)), color-mix(in srgb, var(--sd-token) 14%, var(--sd-rack-2)));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sd-token) 60%, transparent), 0 0 14px -4px var(--sd-token);
 }
 
 .sd-plate-name {
-    font: 800 1.5rem/0.98 var(--sd-display);
+    font: 800 1.2rem/1 var(--sd-display);
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--sd-rack-bright);
+    white-space: nowrap;
+    color: inherit;
 }
 
-.sd-rack-label {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 4px 0;
-    font: 600 0.64rem/1.2 var(--sd-ui);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--sd-rack-muted);
+.sd-plate.is-done .sd-plate-name::after {
+    content: ' ✓';
+    color: var(--sd-token);
 }
 
-.sd-rack-list,
 .sd-trays {
     list-style: none;
     margin: 0;
@@ -728,31 +762,28 @@
     transform: translateY(10px);
 }
 
-/* Cross-cutting topics as patch-panel jacks. */
+/* Cross-cutting topics as patch-panel jacks, in a row. */
 .sd-patch {
     list-style: none;
     margin: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    padding: 0;
+    display: flex;
+    flex: none;
     gap: 6px;
-    padding: 10px;
-    border-radius: 7px;
-    background: var(--sd-rack-2);
-    border: 1px solid var(--sd-rack-deep);
 }
 
 .sd-jack {
     display: grid;
-    grid-template-columns: 16px minmax(0, 1fr);
+    grid-template-columns: 16px auto;
     align-items: center;
     gap: 7px;
-    height: 100%;
-    padding: 8px;
+    padding: 9px 12px 9px 9px;
     border-radius: 5px;
     background: color-mix(in srgb, var(--sd-rack) 55%, var(--sd-rack-deep));
     border: 1px solid rgba(0, 0, 0, 0.45);
-    font: 500 0.8rem/1.15 var(--sd-ui);
+    font: 500 0.82rem/1.15 var(--sd-ui);
     color: var(--sd-rack-ink);
+    white-space: nowrap;
     text-decoration: none;
     transition: background 0.2s;
 }
@@ -784,10 +815,12 @@
 }
 
 .sd-rack-progress {
-    margin-top: auto;
-    display: grid;
-    gap: 6px;
-    padding: 6px 4px 0;
+    margin-left: auto;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 6px;
     font: 400 0.72rem/1.4 var(--sd-ui);
     color: var(--sd-rack-muted);
 }
@@ -798,6 +831,7 @@
 }
 
 .sd-meter {
+    width: 56px;
     height: 6px;
     border-radius: 3px;
     background: var(--sd-rack-3);
@@ -868,20 +902,9 @@
 
 .sd-ph {
     display: grid;
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: 6px;
+    margin-bottom: 14px;
     max-width: 86ch;
-}
-
-.sd-ph-eyebrow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    font: 600 0.76rem/1.3 var(--sd-ui);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
 }
 
 .sd-ph-chip {
@@ -895,10 +918,12 @@
     color: var(--sd-on);
     font: 700 0.8rem/1 var(--font-mono);
     letter-spacing: 0;
+    vertical-align: 0.3em;
+    margin-right: 10px;
 }
 
 .sd-ph-title {
-    font: 800 clamp(2rem, 3.6vw, 3rem) / 0.98 var(--sd-display);
+    font: 800 clamp(1.5rem, 2.4vw, 2rem) / 1.05 var(--sd-display);
     letter-spacing: 0.005em;
     text-transform: uppercase;
     color: var(--ink);
@@ -906,7 +931,7 @@
 
 .sd-ph-dek {
     max-width: 76ch;
-    font: italic 400 1.08rem/1.5 var(--font-serif);
+    font: italic 400 1rem/1.45 var(--font-serif);
     color: var(--ink-soft);
 }
 
@@ -982,6 +1007,12 @@
 
 .sd-section-title {
     font: 700 1.2rem/1.25 var(--sd-ui);
+}
+
+/* The tab's provenance and citations, at its foot. */
+.sd-cite {
+    padding-top: 12px;
+    border-top: 1px dashed var(--hairline);
 }
 
 .sd-nextbar {
@@ -2964,11 +2995,23 @@
 }
 
 /* Request trace */
+/* The diagram fills the frame until a layer is active; then the card
+   opens beside it at about a quarter of the width. */
 .sd-trace-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(220px, 1fr);
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 0fr;
+    gap: 0;
     align-items: start;
+    transition: grid-template-columns 0.35s ease, gap 0.35s ease;
+}
+
+.sd-trace-grid.open {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+.sd-trace-grid > .sd-svg {
+    max-height: 520px;
 }
 
 .sd-trace-tray .body {
@@ -3036,17 +3079,22 @@ a:hover > .sd-trace-tray .body {
 }
 
 .sd-trace-card {
-    padding: 14px 16px;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.86rem;
+}
+
+.sd-trace-grid.open .sd-trace-card {
+    padding: 12px 14px;
     border: 1px solid var(--hairline);
     border-radius: 10px;
     background: var(--paper-raised);
-    font-size: 0.92rem;
 }
 
 .sd-trace-card h4 {
     margin: 0 0 6px;
     font-family: var(--font-serif);
-    font-size: 1.15rem;
+    font-size: 1.02rem;
     font-weight: 500;
 }
 
@@ -3528,12 +3576,20 @@ a:hover > .sd-trace-tray .body {
 
 /* --- Small screens --------------------------------------------------------------- */
 
-/* Below 900px the rack becomes a strip under the nav: the plate, then each
-   tray as its code, then the jacks. Names stay readable to screen readers. */
+/* Below 900px the top bar scrolls with the page and the rack becomes a
+   sticky strip of tray codes. Names stay readable to screen readers. */
 @media (max-width: 900px) {
+    .sd-system {
+        gap: 10px;
+    }
+
     .sd-layout {
         grid-template-columns: 1fr;
         gap: 18px;
+    }
+
+    .sd-topbar {
+        position: static;
     }
 
     .sd-rack {
@@ -3554,25 +3610,16 @@ a:hover > .sd-trace-tray .body {
         display: none;
     }
 
-    .sd-plate {
-        flex: none;
-        padding: 6px 10px;
-    }
-
     .sd-plate-name {
         font-size: 1.05rem;
-        white-space: nowrap;
     }
 
-    .sd-plate-kicker,
-    .sd-rack-label,
     .sd-rack-progress,
     .sd-rack-token,
     .sd-rack-wire {
         display: none;
     }
 
-    .sd-rack-list,
     .sd-trays {
         display: flex;
         flex: none;
@@ -3624,20 +3671,6 @@ a:hover > .sd-trace-tray .body {
 
     .sd-tray.is-current {
         transform: none;
-    }
-
-    .sd-patch {
-        display: flex;
-        flex: none;
-        gap: 6px;
-        padding: 0;
-        background: none;
-        border: 0;
-    }
-
-    .sd-jack {
-        white-space: nowrap;
-        padding: 8px 10px;
     }
 
     .sd-spec {

@@ -22,14 +22,12 @@ export default defineSystem({
     kicker: 'Worked design',
     summary: 'A public LLM chat API, from client to KV cache, with the stores beside it.',
     intro: 'Chat for a public LLM API, where time to first token is the target every layer serves.',
-    direction: { label: 'Request path', top: 'user', bottom: 'GPU memory' },
     topicsLabel: 'Beside the request path',
     trace: {
         down: 'request',
         up: 'tokens',
         goingLabel: 'request going down',
         returningLabel: 'tokens coming back',
-        intro: 'Press Play to send one chat message down the stack and stream the answer back. Tap any layer to open it.',
         outro: 'On the way out, the gateway appends one usage record to Kafka and the new messages to the conversation store. Neither write holds up the stream.',
         steps: {
             clients: {
