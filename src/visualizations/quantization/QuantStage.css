@@ -1,0 +1,276 @@
+/* Shared styles for the quantization stages (GPTQ, AWQ, SmoothQuant). One
+   fixed-size SVG per page, scaled to the card width like PlotStage. Tones
+   map onto the theme accents, matching the rest of the stage kit. */
+
+/* Two fixed-size halves; the fr units match their viewBox widths (440 and
+   300) so both render at one scale. Narrow screens stack them. */
+.quant-stage {
+    display: grid;
+    grid-template-columns: 440fr 300fr;
+    align-items: start;
+}
+
+.quant-half {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 640px) {
+    .quant-stage {
+        grid-template-columns: 1fr;
+        row-gap: 12px;
+    }
+}
+
+/* --- Tones ---------------------------------------------------------------- */
+
+.qsf-cobalt {
+    fill: var(--cobalt);
+}
+.qsf-green {
+    fill: var(--green);
+}
+.qsf-vermilion {
+    fill: var(--vermilion);
+}
+.qsf-gold {
+    fill: var(--gold);
+}
+.qsf-ink {
+    fill: var(--ink);
+}
+.qsf-faint {
+    fill: var(--ink-faint);
+}
+
+.qst-cobalt {
+    color: var(--cobalt);
+    fill: var(--cobalt);
+}
+.qst-green {
+    color: var(--green);
+    fill: var(--green);
+}
+.qst-vermilion {
+    color: var(--vermilion);
+    fill: var(--vermilion);
+}
+.qst-gold {
+    color: var(--gold);
+    fill: var(--gold);
+}
+.qst-ink {
+    color: var(--ink);
+    fill: var(--ink);
+}
+.qst-faint {
+    color: var(--ink-faint);
+    fill: var(--ink-faint);
+}
+
+/* --- Type ----------------------------------------------------------------- */
+
+.qs-caption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--ink-soft);
+}
+
+.qs-note,
+.qs-tick,
+.qs-axis-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-faint);
+}
+
+.qs-note.qst-cobalt,
+.qs-note.qst-vermilion,
+.qs-note.qst-green,
+.qs-note.qst-gold {
+    fill: currentColor;
+}
+
+.qs-head {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink-soft);
+}
+
+.qs-head.lit {
+    fill: var(--ink);
+    font-weight: 600;
+}
+
+/* --- Grid ----------------------------------------------------------------- */
+
+.qs-cell {
+    transition: opacity 0.3s ease, fill 0.3s ease;
+}
+
+.qs-cell-ring {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+}
+
+.qs-value {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink);
+}
+
+.qs-value.small {
+    font-size: 8.5px;
+}
+
+.qs-value.inverted {
+    fill: var(--paper-raised);
+}
+
+.qs-divider {
+    stroke: var(--ink-soft);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+}
+
+.qs-bracket {
+    stroke: var(--ink-faint);
+    stroke-width: 1.2;
+    fill: none;
+}
+
+.qs-bracket.lit {
+    stroke: var(--ink);
+}
+
+/* --- Bars, curves, ledger ------------------------------------------------- */
+
+.qs-baseline,
+.qs-axis {
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+}
+
+.qs-gridline {
+    stroke: var(--hairline);
+    stroke-width: 1;
+}
+
+.qs-bar {
+    opacity: 0.8;
+    transition: height 0.35s ease, y 0.35s ease, width 0.35s ease;
+}
+
+.qs-bar-value {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    fill: var(--ink-soft);
+}
+
+.qs-bar.lit {
+    opacity: 1;
+    stroke: var(--ink);
+    stroke-width: 1.2;
+}
+
+.qs-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.qs-line.dashed {
+    stroke-dasharray: 5 4;
+}
+
+.qs-dot {
+    fill: currentColor;
+}
+
+.qs-marker circle {
+    fill: var(--paper-raised);
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.qs-marker text {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: currentColor;
+    /* A paper-coloured halo keeps labels legible where they cross a line. */
+    paint-order: stroke;
+    stroke: var(--paper-raised);
+    stroke-width: 3px;
+}
+
+.qs-ledger g {
+    transition: opacity 0.35s ease;
+}
+
+.qs-ledger-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink-soft);
+}
+
+.qs-ledger-label.lit {
+    fill: var(--ink);
+    font-weight: 600;
+}
+
+.qs-ledger-track {
+    fill: var(--paper-sunken);
+}
+
+.qs-ledger-value {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink);
+}
+
+/* --- GPTQ ruler ----------------------------------------------------------- */
+
+.qs-lane {
+    stroke: var(--hairline);
+    stroke-width: 1.5;
+}
+
+.qs-level {
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+}
+
+.qs-drift {
+    stroke: var(--cobalt);
+    stroke-width: 1.2;
+    stroke-dasharray: 2 2;
+    opacity: 0.6;
+}
+
+.qs-weight {
+    transition: cx 0.35s ease;
+}
+
+.qs-weight.original {
+    fill: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1;
+}
+
+.qs-weight.current {
+    stroke: var(--ink);
+    stroke-width: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qs-cell,
+    .qs-bar,
+    .qs-weight,
+    .qs-ledger g {
+        transition: none;
+    }
+}

@@ -18,13 +18,14 @@
     "@mdx-js/rollup": "^3.1.1",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
-    "katex": "^0.18.7",
+    "katex": "^0.19.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.4",
-    "three": "^0.186.0"
+    "three": "^0.186.1"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

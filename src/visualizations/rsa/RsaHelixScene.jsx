@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Line } from '@react-three/drei';
 import Scene3D from '../scene3d/Scene3D';
 import { helixGeometry } from '../scene3d/helix';
+import { themeVar, useTheme } from '../../site/theme';
 import './RsaHelixScene.css';
 
 // The mod-n helix (Phase 3): the current square-and-multiply table drawn
@@ -10,29 +11,25 @@ import './RsaHelixScene.css';
 //   cobalt     = paper       (the square-and-multiply hops, RSA78 §VII / Knuth §4.6.3)
 //   vermilion  = pedagogical (the clock ring itself — a rendering device)
 
-const APPEARANCE = {
-    ring: '#c9c5ba',
-    hop: '#2647c9',
-    point: '#1c1b18',
-    result: '#35916a',
-};
-const PROVENANCE_COLORS = {
-    ring: '#dd5533',
-    hop: '#2647c9',
-    point: '#2647c9',
-    result: '#2647c9',
-};
+// WebGL cannot read CSS, so the palette reads the theme tokens at render
+// time and the scene re-renders when the theme changes.
+function palette(overlay) {
+    const cobalt = themeVar('--cobalt', '#2647c9');
+    if (overlay) return { ring: themeVar('--vermilion', '#dd5533'), hop: cobalt, point: cobalt, result: cobalt };
+    return { ring: themeVar('--ink-faint', '#8d897d'), hop: cobalt, point: themeVar('--ink', '#1c1b18'), result: themeVar('--green', '#35916a') };
+}
 
 function Helix({ rows, mod, overlay }) {
+    useTheme();
     const { points, ring } = useMemo(
         () => helixGeometry({ rows, mod }),
         [rows, mod]
     );
-    const palette = overlay ? PROVENANCE_COLORS : APPEARANCE;
+    const colors = palette(overlay);
 
     return (
         <group>
-            <Line points={ring} color={palette.ring} lineWidth={1.4} dashed dashSize={0.12} gapSize={0.08} />
+            <Line points={ring} color={colors.ring} lineWidth={1.4} dashed dashSize={0.12} gapSize={0.08} />
             {points.map((point, i) => (
                 <group key={i}>
                     {i > 0 && (
@@ -41,14 +38,14 @@ function Helix({ rows, mod, overlay }) {
                                 [points[i - 1].x, points[i - 1].y, points[i - 1].z],
                                 [point.x, point.y, point.z],
                             ]}
-                            color={palette.hop}
+                            color={colors.hop}
                             lineWidth={2.2}
                         />
                     )}
                     <mesh position={[point.x, point.y, point.z]}>
                         <sphereGeometry args={[i === points.length - 1 ? 0.13 : 0.09, 20, 20]} />
                         <meshStandardMaterial
-                            color={i === points.length - 1 ? palette.result : palette.point}
+                            color={i === points.length - 1 ? colors.result : colors.point}
                         />
                     </mesh>
                 </group>
@@ -85,22 +82,22 @@ export default function RsaHelixScene({ step, artifacts }) {
                 {overlay ? (
                     <>
                         <span className="hl-key">
-                            <span className="hl-swatch" style={{ background: '#2647c9' }} /> paper —
+                            <span className="hl-swatch" style={{ background: 'var(--cobalt)' }} /> paper —
                             square-and-multiply values (RSA78, Knuth §4.6.3)
                         </span>
                         <span className="hl-key">
-                            <span className="hl-swatch" style={{ background: '#dd5533' }} />{' '}
+                            <span className="hl-swatch" style={{ background: 'var(--vermilion)' }} />{' '}
                             pedagogical — the clock ring is a rendering device
                         </span>
                     </>
                 ) : (
                     <>
                         <span className="hl-key">
-                            <span className="hl-swatch" style={{ background: '#2647c9' }} /> hop:
+                            <span className="hl-swatch" style={{ background: 'var(--cobalt)' }} /> hop:
                             square (and multiply) mod n
                         </span>
                         <span className="hl-key">
-                            <span className="hl-swatch" style={{ background: '#35916a' }} /> final
+                            <span className="hl-swatch" style={{ background: 'var(--green)' }} /> final
                             value
                         </span>
                         <span className="hl-key">drag to orbit · scroll to zoom</span>

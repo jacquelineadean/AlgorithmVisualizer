@@ -1,5 +1,8 @@
 # Visualization contracts
 
+These contracts cover the Algorithm Visualizer (`src/visualizations/`). The
+System Design Visualizer has its own, in [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md).
+
 How a visualization plugs into the atlas. Established in Phase 2a; the
 reference implementations are `src/visualizations/rsa/` (acts, custom detail
 kind, protocol stage) and `src/visualizations/dh/` (the first entry built
@@ -149,6 +152,16 @@ and never scroll the page yourself — the instrument is the fixed point.
 Shared stages: `protocol/ProtocolStage.jsx` (two actors, public channel,
 optional eavesdropper, positioned tokens) — used by RSA and DH; Raft is its
 expected third consumer (multi-node variant, Phase 4).
+
+`quantization/` serves GPTQ, AWQ, and SmoothQuant: `model.js` holds the
+quantizers each reference implementation uses (min–max zero-point grids,
+group-wise and absmax per-tensor/row/column), a Cholesky factor and SPD
+inverse, and the error measures; `QuantParts.jsx` holds SVG *groups* —
+`HeatGrid`, `ChannelBars`, `MiniCurve`, `Ledger` — sharing one column
+geometry, so channel j of a bar chart sits above column j of a weight grid.
+They are groups rather than whole stages because each page composes several
+of them inside one fixed-size SVG; two `PlotStage`s side by side would scale
+their type below legibility.
 
 ## Drill-down maps (Phase 4a)
 

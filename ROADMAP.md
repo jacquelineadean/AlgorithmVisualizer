@@ -66,6 +66,7 @@ visualizations/
   drilldown/              Shared DrilldownInstrument + pure node model (Phase 4a)
   stages/                 Shared PlotStage · GraphStage · MatrixStage (Phase 4)
   protocol/ · sorting/    Shared stages (multi-actor lane; bar arrays)
+  quantization/           Shared quantizers + SVG parts (GPTQ, AWQ, SmoothQuant)
   scene3d/                Phase 3 shell + pure scene geometry (lazy-loaded with three.js)
   registry.js · index.js  defineVisualization + central registration
 ```
@@ -415,6 +416,20 @@ with citations.
 >   card beneath. The transformer, inference, training-loop, and MapReduce maps all moved
 >   over with no content changes; deep links (`?node=`) and the per-node gate are unchanged.
 
+> **LLM quantization (2026-09-30).** Three entries join AI & ML — **GPTQ**, **AWQ**, and
+> **SmoothQuant** — taking the atlas to **31** live. Each runs its reference implementation's
+> algorithm (IST-DASLab/gptq `fasterquant()`, llm-awq `auto_scale`, smoothquant
+> `smooth_ln_fcs()` and its fake-quantizers) on one small layer, and the tests assert the
+> property each page teaches rather than a golden output: blocked GPTQ equals the explicit
+> OBS elimination to the bit, the rows of H⁻¹'s Cholesky factor are exactly the rows the
+> sweep reads, decorrelated inputs reduce GPTQ to round-to-nearest; AWQ's α = 0 is exactly
+> RTN and a scaled weight's error stays under Δ′/2s; smoothing leaves XW unchanged and meets
+> at α = 0.5. The three share `quantization/` — the quantizers, a Cholesky, and SVG parts
+> that compose inside one fixed-size stage (three consumers, so the extraction bar holds).
+> Two lessons: toy layers make greedy methods visibly greedy (GPTQ occasionally loses to
+> rounding on eight columns, and the page says so), and SmoothQuant's damage only shows when
+> scored per channel — with two loud channels in eight, any summed error hides the other six.
+
 **What Phase 4 taught us (inputs to Phase 5):**
 - Twenty-eight entries is past the point where a flat catalog page works. Phase 5a's search
   and filters moved from nice-to-have to the next thing that matters.
@@ -496,7 +511,7 @@ Phase tags mark where each entry is scheduled; unmarked "later" items are unsche
 | Sorting & order | Quicksort, merge sort | — | Heapsort, radix, sorting networks (P3) |
 | Numbers & primes | Sieve of Eratosthenes, Euclid | — | Miller–Rabin, Karatsuba, FFT multiply |
 | Statistics & probability | Bayes' rule, CLT, Monte Carlo π, Markov chains, regression | — | Hypothesis testing, bootstrap |
-| AI & machine learning | k-means, perceptron, backprop, attention, transformer map, inference pipeline, training loop | — | Decision trees, gradient descent (P3), tokenizer internals |
+| AI & machine learning | k-means, perceptron, backprop, attention, transformer map, inference pipeline, training loop, GPTQ, AWQ, SmoothQuant | — | Decision trees, gradient descent (P3), tokenizer internals, LLM.int8() |
 | Distributed & architectures | Raft, consistent hashing, MapReduce, CAP | — | Vector clocks, load balancing, Paxos |
 | Methodologies | Huffman, Fourier epicycles | — | Simplex, RSA signatures, arithmetic coding |
 
