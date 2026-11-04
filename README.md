@@ -1,7 +1,22 @@
 # Algorithm Visualizer
 
-Interactive, **evidence-cited** visualizations of famous algorithms — built with
-[React](https://react.dev/) and [Vite](https://vitejs.dev/).
+Interactive, **evidence-cited** visualizations of famous algorithms, and layer-by-layer
+walkthroughs of whole systems — built with [React](https://react.dev/) and
+[Vite](https://vitejs.dev/).
+
+The site has two components:
+
+- **Algorithm Visualizer** (`#/visualizer`): one algorithm per page, stepped through with
+  your own inputs.
+- **System Design Visualizer** (`#/systems`): one system per page, explored one layer at a
+  time from the top of the stack to the bottom. Systems are grouped by category:
+  **Fundamentals** (the default: a design method, Kafka as a durable log, a paged KV cache,
+  sharded Postgres, and a worked chat-serving design that uses all three) and **AI** (the
+  seven-layer AI inference stack, from the SDK call to the GPU). Every layer has labs you
+  can run, calculators, a spec sheet and design scenarios. See [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).
+
+Light and dark themes follow the system setting; the sun and moon button in the nav
+overrides it and remembers the choice.
 
 Pick a domain, then an algorithm, feed it your own inputs, and step through a rendering
 in which **every step cites its source** — the original paper, the underlying theorem, or
@@ -79,6 +94,8 @@ src/
 ├── routes.jsx             # Route table (hash routing for GitHub Pages)
 ├── App.jsx                # Layout shell: floating nav + outlet + footer
 ├── site/                  # Home, Blog, FloatingNav, Footer
+├── systemdesign/          # System Design Visualizer: categories, systems, labs, pure
+│                          # models, its own content gate — see docs/SYSTEM_DESIGN.md
 ├── catalog/               # Site-level registry of visualizations by domain
 ├── pages/                 # Catalog index + the generic /visualizer/:id page
 ├── visualizations/
@@ -94,6 +111,7 @@ src/
 │   └── <id>/              # One directory per visualization: math|model, sources,
 │                          # trace (or map), Visualizer, tests — see docs/CONTRACTS.md
 └── docs/CONTRACTS.md      # The visualization contracts (steps, streams, maps, 3D rules)
+    docs/SYSTEM_DESIGN.md  # The system design contracts (trays, sections, blocks, labs)
 ```
 
 ### The evidence gate
@@ -110,8 +128,18 @@ Where a page states a number — a parameter count, a KV-cache size, a mistake b
 compression ratio — that number is computed by a pure module and pinned by a test against the
 published value, not typed into prose.
 
+The System Design Visualizer runs the same rule over its own content:
+`src/systemdesign/content.test.js` fails the suite when a section or caveat cites nothing,
+or when a link, lab or layer reference does not resolve. Numbers in its prose come from the
+pure models in `src/systemdesign/models/`, pinned by `models.test.js`.
+
 ### Adding a visualization
 
 One directory under `src/visualizations/<id>/` (math, sources, trace *or* map, Visualizer,
 tests), one `defineVisualization` registration, one catalog card — the full checklist lives in
 [docs/CONTRACTS.md](docs/CONTRACTS.md). The central evidence gate refuses anything uncited.
+
+### Adding a system design
+
+One file under `src/systemdesign/systems/`, any new citations in `sources.js`, one line in
+`src/systemdesign/index.js`. The checklist is in [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md).

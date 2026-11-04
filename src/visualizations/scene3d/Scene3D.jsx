@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import { themeVar, useTheme } from '../../site/theme';
 
 // Phase 3a scene shell: paper-world canvas, soft lighting, orbit camera.
 // Imported only from lazy-loaded scene modules so three.js stays out of
@@ -29,11 +30,14 @@ class SceneErrorBoundary extends Component {
 }
 
 export default function Scene3D({ children, cameraPosition = [4.6, 3.6, 4.6], height = 380 }) {
+    // Re-render on a theme change so the background follows --paper.
+    useTheme();
+    const background = themeVar('--paper', '#faf9f5');
     return (
         <SceneErrorBoundary>
             <div className="scene3d-canvas" style={{ height }}>
                 <Canvas camera={{ position: cameraPosition, fov: 45 }} dpr={[1, 2]}>
-                    <color attach="background" args={['#faf9f5']} />
+                    <color attach="background" args={[background]} />
                     <ambientLight intensity={0.85} />
                     <directionalLight position={[5, 7, 4]} intensity={0.7} />
                     <OrbitControls enableDamping makeDefault />

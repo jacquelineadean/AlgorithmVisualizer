@@ -7,13 +7,14 @@ export default function Footer() {
         <footer className="site-footer">
             <div className="content footer-inner">
                 <div>
-                    <div className="eyebrow">Algorithm Visualizer</div>
+                    <div className="eyebrow">Visualizer</div>
                     <p className="footer-tagline">
                         Built in the open. Every step cites its source.
                     </p>
                 </div>
                 <div className="footer-links">
-                    <Link to="/visualizer">Visualizer</Link>
+                    <Link to="/visualizer">Algorithms</Link>
+                    <Link to="/systems">System Design</Link>
                     <Link to="/blog">Blog</Link>
                     <a href={GITHUB_URL} target="_blank" rel="noreferrer">
                         GitHub

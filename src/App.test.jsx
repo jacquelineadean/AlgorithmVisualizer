@@ -12,7 +12,8 @@ describe('site shell', () => {
         renderAt('/');
         expect(screen.getByRole('heading', { name: /see how the classics compute/i })).toBeInTheDocument();
         const nav = within(screen.getByRole('navigation', { name: /primary/i }));
-        expect(nav.getByRole('link', { name: /^visualizer$/i })).toBeInTheDocument();
+        expect(nav.getByRole('link', { name: /^algorithms$/i })).toBeInTheDocument();
+        expect(nav.getByRole('link', { name: /^system design$/i })).toBeInTheDocument();
         expect(nav.getByRole('link', { name: /blog/i })).toBeInTheDocument();
         expect(nav.getByRole('link', { name: /github/i })).toBeInTheDocument();
     });
